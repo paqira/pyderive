@@ -1,4 +1,3 @@
-workspace = { members = ["a"] }
 [package]
 name = "derive-pysp"
 version = "0.1.0"
