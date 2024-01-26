@@ -1,0 +1,33 @@
+workspace = { members = ["a"] }
+[package]
+name = "derive-pysp"
+version = "0.1.0"
+edition = "2021"
+authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "Derive macro of Python special methods and a class attribute for pyo3"
+readme = "README.md"
+categories = ["api-bindings"]
+keywords = [
+    "python",
+    "pyo3",
+]
+
+repository = "https://github.com/paqira/derive-pysp"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+proc-macro = true
+
+[[test]]
+name = "tests"
+path = "test/test.rs"
+
+[dependencies]
+heck = "0.4.1"
+proc-macro2 = "1.0.78"
+quote = "1.0.35"
+syn = {version = "2.0.48", features = ["derive", "extra-traits"]}
+
+[dev-dependencies]
+pyo3 = {version = "0.20.2", features = ["multiple-pymethods"]}
