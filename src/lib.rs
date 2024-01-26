@@ -41,9 +41,9 @@
 //! It requires to enable `multiple-pymethods` feature of pyo3 because this may derive multiple `#[pymethods]`.
 //!
 //! *Note that implementing any of `__eq__`, `__lt__`, `__le__`, `__gt__` and `__ge__` methods will cause Python not to generate a default `__hash__` implementation, so consider also implementing `__hash__`.*
-use syn::{parse_macro_input, DeriveInput};
-
 extern crate proc_macro;
+
+use syn::{parse_macro_input, DeriveInput};
 
 mod attr;
 mod common;

@@ -1,4 +1,3 @@
-extern crate proc_macro;
 use syn::{Attribute, Ident, Path, Type, TypePath};
 
 use crate::attr::pyclass::{FieldPyO3Options, PyClassPyO3Options};
