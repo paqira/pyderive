@@ -21,7 +21,7 @@
 //!
 //! # Derives __init__ (technically __new__)
 //! m = MyClass("a", 1, None)
-//! 
+//!
 //! # Derives __match_args__ (supports positional attributes)
 //! match m:
 //!     case MyClass(a, b, c):
@@ -30,13 +30,13 @@
 //!         assert c is None
 //!     case _:
 //!         raise AssertionError
-//! 
+//!
 //! # Derives __repr__
 //! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
-//! 
+//!
 //! # Derives __eq__ based on PartialEq/Eq trait
 //! assert m == m
-//! 
+//!
 //! # Derives __hash__ based on Hash trait
 //! assert hash(m) == 3289857268557676066
 //! ```
@@ -92,7 +92,7 @@ mod internal;
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyRepr)]
+#[proc_macro_derive(PyRepr, attributes(pyderive))]
 pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::repr::implementation(input) {
@@ -139,7 +139,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyStr)]
+#[proc_macro_derive(PyStr, attributes(pyderive))]
 pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::str::implementation(input) {
@@ -185,7 +185,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyLen)]
+#[proc_macro_derive(PyLen, attributes(pyderive))]
 pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::len::implementation(input) {
@@ -231,7 +231,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyIter)]
+#[proc_macro_derive(PyIter, attributes(pyderive))]
 pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::iter::implementation(input) {
@@ -290,7 +290,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     .is_ok()
 /// );
 /// ```
-#[proc_macro_derive(PyInit)]
+#[proc_macro_derive(PyInit, attributes(pyderive))]
 pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::new::implementation(input) {
@@ -346,7 +346,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyEq)]
+#[proc_macro_derive(PyEq, attributes(pyderive))]
 pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::eq::implementation(input) {
@@ -424,7 +424,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyOrder)]
+#[proc_macro_derive(PyOrder, attributes(pyderive))]
 pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::ord::implementation(input) {
@@ -476,7 +476,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyHash)]
+#[proc_macro_derive(PyHash, attributes(pyderive))]
 pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::hash::implementation(input) {
@@ -547,7 +547,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     .is_ok()
 /// )
 /// ```
-#[proc_macro_derive(PyMatchArgs)]
+#[proc_macro_derive(PyMatchArgs, attributes(pyderive))]
 pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::match_args::implementation(input) {

@@ -2,30 +2,66 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::DeriveInput;
 
-use crate::{attr::StructOption, common::FieldData};
+use crate::common::FieldData;
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
+    // #[pyderive]                          -> __init__(field):     ...
+    // #[pyderive(default=xxx)]             -> __init__(field=xxx): ...
+    // #[pyderive(init=true)]               -> __init__(field):     ...
+    // #[pyderive(init=false)]              -> __init__():          field=default()
+    // #[pyderive(init=true, default=xxx)]  -> __init__(field=xxx): ...
+    // #[pyderive(init=false, default=xxx)] -> __init__():          field=xxx
     let struct_name = input.ident.clone();
-    let struct_option = StructOption::try_from(&input.attrs)?;
-    let field_data = FieldData::try_from_data(input, &struct_option)?;
+    let data = FieldData::try_from_input(&input)?;
 
-    let init_args = field_data
+    let mut iter = data.iter();
+    let mut signature = Vec::new();
+    signature.extend(
+        iter.by_ref()
+            .take_while(|d| !d.kw_only.unwrap_or(false))
+            .filter(|d| d.init.unwrap_or(true))
+            .map(|d| {
+                let pyident = d.pyident.to_owned();
+                match &d.default {
+                    Some(default) => quote! { #pyident=#default },
+                    None => quote! { #pyident },
+                }
+            }),
+    );
+    signature.push(quote! { * });
+    signature.extend(iter.clone().filter(|d| d.init.unwrap_or(true)).map(|d| {
+        let pyident = d.pyident.to_owned();
+        match &d.default {
+            Some(default) => quote! { #pyident=#default },
+            None => quote! { #pyident },
+        }
+    }));
+
+    let init_args = data
         .iter()
+        .filter(|d| d.init.unwrap_or(true))
         .map(|d| {
-            let ty = d.ty();
-            let pyident = d.pyident();
+            let ty = d.field.ty.to_owned();
+            let pyident = d.pyident.to_owned();
 
             quote! { #pyident: #ty }
         })
         .collect::<Vec<_>>();
 
-    let self_args = field_data
+    let self_args = data
         .iter()
         .map(|d| {
-            let ident = d.ident();
-            let pyident = d.pyident();
+            let ty = d.field.ty.to_owned();
+            let ident = d.field.ident.as_ref().unwrap();
+            let pyident = d.pyident.to_owned();
 
-            quote! { #ident: #pyident }
+            match &d.init {
+                Some(false) => match &d.default {
+                    Some(default) => quote! { #ident: #default },
+                    None => quote! { #ident: #ty::default() },
+                },
+                _ => quote! { #ident: #pyident },
+            }
         })
         .collect::<Vec<_>>();
 
@@ -33,7 +69,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pymethods]
         impl #struct_name {
             #[new]
-            pub fn __generated_python_new(
+            #[pyo3(signature = ( #( #signature ),* ))]
+            pub fn __pyderive_new(
                 #(#init_args),*
             ) -> Self {
                 Self { #(#self_args),* }

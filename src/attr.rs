@@ -1,12 +1,13 @@
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    Attribute, ExprAssign, Ident, LitStr, Meta, MetaList, Result, Token,
+    Attribute, ExprAssign, Ident, Lit, LitBool, LitStr, Meta, MetaList, Result, Token,
 };
 
 use self::{
-    fd::Pyo3FieldAttr,
-    st::{Pyo3StructAttr, RenamingRule},
+    pyderive_field::PyderiveFieldAttr,
+    pyo3_field::Pyo3FieldAttr,
+    pyo3_struct::{Pyo3StructAttr, RenamingRule},
 };
 
 fn is_pyo3_struct_attr<'a>(a: &'a &Attribute) -> bool {
@@ -17,6 +18,10 @@ fn is_pyo3_field_attr<'a>(a: &'a &Attribute) -> bool {
     a.path().is_ident("pyo3")
 }
 
+fn is_pyderive_field_attr<'a>(a: &'a &Attribute) -> bool {
+    a.path().is_ident("pyderive")
+}
+
 fn take_meta_list(a: &Attribute) -> Option<&MetaList> {
     match &a.meta {
         Meta::List(m) => Some(m),
@@ -25,14 +30,14 @@ fn take_meta_list(a: &Attribute) -> Option<&MetaList> {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct StructOption {
+pub struct Pyo3StructOption {
     pub get: bool,
     pub set: bool,
     pub name: Option<String>,
     pub rename: RenamingRule,
 }
 
-impl FromIterator<Pyo3StructAttr> for StructOption {
+impl FromIterator<Pyo3StructAttr> for Pyo3StructOption {
     fn from_iter<T: IntoIterator<Item = Pyo3StructAttr>>(iter: T) -> Self {
         let mut new = Self::default();
         for opt in iter {
@@ -56,30 +61,30 @@ impl FromIterator<Pyo3StructAttr> for StructOption {
     }
 }
 
-impl TryFrom<&Vec<Attribute>> for StructOption {
+impl TryFrom<&Vec<Attribute>> for Pyo3StructOption {
     type Error = syn::Error;
 
     fn try_from(value: &Vec<Attribute>) -> syn::Result<Self> {
-        type StructAttrList = Punctuated<Pyo3StructAttr, Token![,]>;
+        type AttrList = Punctuated<Pyo3StructAttr, Token![,]>;
 
         value
             .iter()
             .filter(is_pyo3_struct_attr)
             .filter_map(take_meta_list)
-            .map(|m| m.parse_args_with(StructAttrList::parse_terminated))
+            .map(|m| m.parse_args_with(AttrList::parse_terminated))
             .collect::<syn::Result<Vec<_>>>()
-            .map(|v| v.into_iter().flatten().collect::<StructOption>())
+            .map(|v| v.into_iter().flatten().collect::<Self>())
     }
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct FieldOption {
+pub struct Pyo3FieldOption {
     pub get: bool,
     pub set: bool,
     pub name: Option<String>,
 }
 
-impl FromIterator<Pyo3FieldAttr> for FieldOption {
+impl FromIterator<Pyo3FieldAttr> for Pyo3FieldOption {
     fn from_iter<T: IntoIterator<Item = Pyo3FieldAttr>>(iter: T) -> Self {
         let mut new = Self::default();
 
@@ -101,24 +106,88 @@ impl FromIterator<Pyo3FieldAttr> for FieldOption {
     }
 }
 
-impl TryFrom<&Vec<Attribute>> for FieldOption {
+impl TryFrom<&Vec<Attribute>> for Pyo3FieldOption {
     type Error = syn::Error;
 
     fn try_from(value: &Vec<Attribute>) -> syn::Result<Self> {
-        type FieldAttrList = Punctuated<Pyo3FieldAttr, Token![,]>;
+        type AttrList = Punctuated<Pyo3FieldAttr, Token![,]>;
 
         value
             .iter()
             .filter(is_pyo3_field_attr)
             .filter_map(take_meta_list)
-            .map(|m| m.parse_args_with(FieldAttrList::parse_terminated))
+            .map(|m| m.parse_args_with(AttrList::parse_terminated))
             .collect::<syn::Result<Vec<_>>>()
-            .map(|v| v.into_iter().flatten().collect::<FieldOption>())
+            .map(|v| v.into_iter().flatten().collect::<Self>())
     }
 }
 
-// struct
-pub mod st {
+#[derive(Debug, Default, Clone)]
+pub struct PyderiveFieldOption {
+    pub init: Option<bool>,
+    pub match_args: Option<bool>,
+    pub repr: Option<bool>,
+    pub str: Option<bool>,
+    pub iter: Option<bool>,
+    pub len: Option<bool>,
+    pub kw_only: Option<bool>,
+    pub default: Option<Lit>,
+}
+
+impl FromIterator<PyderiveFieldAttr> for PyderiveFieldOption {
+    fn from_iter<T: IntoIterator<Item = PyderiveFieldAttr>>(iter: T) -> Self {
+        let mut new = Self::default();
+
+        for opt in iter {
+            match opt {
+                PyderiveFieldAttr::Init(v) => {
+                    new.init = Some(v);
+                }
+                PyderiveFieldAttr::MatchArgs(v) => {
+                    new.match_args = Some(v);
+                }
+                PyderiveFieldAttr::Repr(v) => {
+                    new.repr = Some(v);
+                }
+                PyderiveFieldAttr::Str(v) => {
+                    new.str = Some(v);
+                }
+                PyderiveFieldAttr::Iter(v) => {
+                    new.iter = Some(v);
+                }
+                PyderiveFieldAttr::Len(v) => {
+                    new.len = Some(v);
+                }
+                PyderiveFieldAttr::KwOnly(v) => {
+                    new.kw_only = Some(v);
+                }
+                PyderiveFieldAttr::Default(v) => {
+                    new.default = Some(v);
+                }
+            }
+        }
+        new
+    }
+}
+
+impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
+    type Error = syn::Error;
+
+    fn try_from(value: &Vec<Attribute>) -> syn::Result<Self> {
+        type AttrList = Punctuated<PyderiveFieldAttr, Token![,]>;
+
+        value
+            .iter()
+            .filter(is_pyderive_field_attr)
+            .filter_map(take_meta_list)
+            .map(|m| m.parse_args_with(AttrList::parse_terminated))
+            .collect::<syn::Result<Vec<_>>>()
+            .map(|v| v.into_iter().flatten().collect::<Self>())
+    }
+}
+
+// pyo3 struct
+pub mod pyo3_struct {
 
     use super::*;
 
@@ -233,8 +302,8 @@ pub mod st {
     }
 }
 
-// field
-pub mod fd {
+// pyo3 field
+pub mod pyo3_field {
     use super::*;
 
     pub mod kw {
@@ -278,6 +347,119 @@ pub mod fd {
                 // key only
                 let _ = input.parse::<Ident>()?;
                 Ok(Self::Other)
+            }
+        }
+    }
+}
+
+// pyderive field
+pub mod pyderive_field {
+    use super::*;
+
+    mod kw {
+        syn::custom_keyword!(init);
+        syn::custom_keyword!(match_args);
+        syn::custom_keyword!(repr);
+        syn::custom_keyword!(str);
+        syn::custom_keyword!(iter);
+        syn::custom_keyword!(len);
+        syn::custom_keyword!(kw_only);
+        syn::custom_keyword!(default);
+    }
+
+    #[derive(Debug)]
+    pub struct ExprAssignLitBool {
+        pub left: Ident,
+        pub eq_token: Token![=],
+        pub right: LitBool,
+    }
+
+    impl Parse for ExprAssignLitBool {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let left = input.parse()?;
+            let eq_token: Token![=] = input.parse()?;
+            let right: LitBool = input.parse()?;
+            Ok(Self {
+                left,
+                eq_token,
+                right,
+            })
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct ExprAssignLit {
+        pub left: Ident,
+        pub eq_token: Token![=],
+        pub right: Lit,
+    }
+
+    impl Parse for ExprAssignLit {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let left = input.parse()?;
+            let eq_token: Token![=] = input.parse()?;
+            let right: Lit = input.parse()?;
+            Ok(Self {
+                left,
+                eq_token,
+                right,
+            })
+        }
+    }
+
+    #[derive(Debug, Clone)]
+    pub enum PyderiveFieldAttr {
+        Init(bool),
+        MatchArgs(bool),
+        Repr(bool),
+        Str(bool),
+        Iter(bool),
+        Len(bool),
+        KwOnly(bool),
+        Default(Lit),
+    }
+
+    impl Parse for PyderiveFieldAttr {
+        fn parse(input: ParseStream) -> Result<Self> {
+            macro_rules! parse_assign_bool {
+            ($input:ident, $ident_ty:ty) => {
+                if $input.peek2(Token![=]) {
+                    let parsed: ExprAssignLitBool = $input.parse()?;
+                    parsed.right.value
+                } else {
+                    let _: $ident_ty = $input.parse()?;
+                    true
+                }
+            };
+        }
+
+            let lookahead = input.lookahead1();
+            if lookahead.peek(kw::init) {
+                let value = parse_assign_bool!(input, kw::init);
+                Ok(Self::Init(value))
+            } else if lookahead.peek(kw::match_args) {
+                let value = parse_assign_bool!(input, kw::match_args);
+                Ok(Self::MatchArgs(value))
+            } else if lookahead.peek(kw::repr) {
+                let value = parse_assign_bool!(input, kw::repr);
+                Ok(Self::Repr(value))
+            } else if lookahead.peek(kw::str) {
+                let value = parse_assign_bool!(input, kw::str);
+                Ok(Self::Str(value))
+            } else if lookahead.peek(kw::iter) {
+                let value = parse_assign_bool!(input, kw::iter);
+                Ok(Self::Iter(value))
+            } else if lookahead.peek(kw::len) {
+                let value = parse_assign_bool!(input, kw::len);
+                Ok(Self::Len(value))
+            } else if lookahead.peek(kw::kw_only) {
+                let value = parse_assign_bool!(input, kw::kw_only);
+                Ok(Self::KwOnly(value))
+            } else if lookahead.peek(kw::default) {
+                let parsed: ExprAssignLit = input.parse()?;
+                Ok(Self::Default(parsed.right))
+            } else {
+                Err(lookahead.error())
             }
         }
     }

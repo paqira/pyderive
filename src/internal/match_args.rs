@@ -4,17 +4,16 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::DeriveInput;
 
-use crate::{attr::StructOption, common::FieldData};
+use crate::common::FieldData;
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = input.ident.clone();
-    let struct_option = StructOption::try_from(&input.attrs)?;
-    let field_data = FieldData::try_from_data(input, &struct_option)?;
+    let data = FieldData::try_from_input(&input)?;
 
-    let names = field_data
+    let names = data
         .iter()
-        .filter(|d| d.get())
-        .map(|d| d.pyname())
+        .filter(|d| d.len.unwrap_or(d.get))
+        .map(|d| d.pyname.to_owned())
         .collect::<Vec<_>>();
 
     let types = iter::repeat(quote! { &'static str }).take(names.len());
@@ -26,6 +25,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             #[pymethods]
                 impl #struct_name {
                     #[classattr]
+                    #[allow(non_upper_case_globals)]
                     const __match_args__: (#(#types),* ,) = (#(#names),* ,);
                 }
         }

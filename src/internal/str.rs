@@ -4,25 +4,21 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::DeriveInput;
 
-use crate::{
-    attr::StructOption,
-    common::{is_py, FieldData},
-};
+use crate::common::{is_py, FieldData};
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = input.ident.clone();
-    let struct_option = StructOption::try_from(&input.attrs)?;
-    let field_data = FieldData::try_from_data(input, &struct_option)?;
+    let data = FieldData::try_from_input(&input)?;
 
     // args of foramt!(..)
-    let args = field_data
+    let args = data
         .iter()
-        .filter(|d| d.get() || d.set())
+        .filter(|d| d.str.unwrap_or(d.get || d.set))
         .map(|d| {
-            let ident = d.ident();
-            let name = d.pyname();
+            let ident = d.field.ident.to_owned().unwrap();
+            let name = d.pyname.to_owned();
 
-            if is_py(&d.ty()) {
+            if is_py(&d.field.ty) {
                 quote! { #name, py_ref.#ident.as_ref(py).repr()? }
             } else {
                 quote! { #name, py_ref.#ident.to_object(py).as_ref(py).repr()? }

@@ -446,10 +446,10 @@ mod test_init {
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let py_c = py.get_type::<PyClass>();
-            assert_eq!("PyClass", py_c.name().unwrap().to_string());
-            pyo3::py_run!(py, py_c, "py_c(0, '')");
-            pyo3::py_run!(py, py_c, "py_c(field_name_b='', field_name_a=0)");
+            let py_class = py.get_type::<PyClass>();
+            assert_eq!("PyClass", py_class.name().unwrap().to_string());
+            pyo3::py_run!(py, py_class, "py_class(0, '')");
+            pyo3::py_run!(py, py_class, "py_class(field_name_b='', field_name_a=0)");
         });
     }
 
@@ -467,9 +467,9 @@ mod test_init {
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let py_c = py.get_type::<PyClass>();
-            assert_eq!("PyClass", py_c.name().unwrap().to_string());
-            pyo3::py_run!(py, py_c, "assert py_c(0, '').field_name_a == 0")
+            let py_class = py.get_type::<PyClass>();
+            assert_eq!("PyClass", py_class.name().unwrap().to_string());
+            pyo3::py_run!(py, py_class, "assert py_class(0, '').field_name_a == 0")
         })
     }
 
@@ -486,19 +486,19 @@ mod test_init {
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let py_c = py.get_type::<PyClass>();
-            assert_eq!("renamedClass", py_c.name().unwrap().to_string());
-            pyo3::py_run!(py, py_c, "assert py_c(0, '').new_name == 0");
-            pyo3::py_run!(py, py_c, "assert py_c(0, '').fieldNameB == ''");
+            let py_class = py.get_type::<PyClass>();
+            assert_eq!("renamedClass", py_class.name().unwrap().to_string());
+            pyo3::py_run!(py, py_class, "assert py_class(0, '').new_name == 0");
+            pyo3::py_run!(py, py_class, "assert py_class(0, '').fieldNameB == ''");
             pyo3::py_run!(
                 py,
-                py_c,
-                "assert py_c(fieldNameB='', new_name=0).new_name == 0"
+                py_class,
+                "assert py_class(fieldNameB='', new_name=0).new_name == 0"
             );
             pyo3::py_run!(
                 py,
-                py_c,
-                "assert py_c(fieldNameB='', new_name=0).fieldNameB == ''"
+                py_class,
+                "assert py_class(fieldNameB='', new_name=0).fieldNameB == ''"
             );
         });
     }
@@ -740,14 +740,14 @@ mod test_match_args {
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let py_c = py.get_type::<PyClass>();
-            assert_eq!("PyClass", py_c.name().unwrap().to_string());
+            let py_class = py.get_type::<PyClass>();
+            assert_eq!("PyClass", py_class.name().unwrap().to_string());
             pyo3::py_run!(
                 py,
-                py_c,
+                py_class,
                 "
-match py_c(0, ''):
-    case py_c(): pass
+match py_class(0, ''):
+    case py_class(): pass
     case _: raise AssertionError
 "
             );
@@ -778,19 +778,19 @@ match py_c(0, ''):
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let py_c = py.get_type::<PyClass>();
-            assert_eq!("PyClass", py_c.name().unwrap().to_string());
+            let py_class = py.get_type::<PyClass>();
+            assert_eq!("PyClass", py_class.name().unwrap().to_string());
             pyo3::py_run!(
                 py,
-                py_c,
-                "assert py_c(0, '').__match_args__ == ('field_name_a', )"
+                py_class,
+                "assert py_class(0, '').__match_args__ == ('field_name_a', )"
             );
             pyo3::py_run!(
                 py,
-                py_c,
+                py_class,
                 "
-match py_c(0, ''):
-    case py_c(a) if a == 0: pass
+match py_class(0, ''):
+    case py_class(a) if a == 0: pass
     case _: raise AssertionError"
             );
         })
@@ -820,29 +820,29 @@ match py_c(0, ''):
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let py_c = py.get_type::<PyClass>();
-            assert_eq!("renamedClass", py_c.name().unwrap().to_string());
+            let py_class = py.get_type::<PyClass>();
+            assert_eq!("renamedClass", py_class.name().unwrap().to_string());
             pyo3::py_run!(
                 py,
-                py_c,
-                "assert py_c(0, '').__match_args__ == ('new_name', 'fieldNameB')"
+                py_class,
+                "assert py_class(0, '').__match_args__ == ('new_name', 'fieldNameB')"
             );
 
             pyo3::py_run!(
                 py,
-                py_c,
+                py_class,
                 "
-match py_c(0, ''):
-    case py_c(a, b) if a == 0 and b == '': pass
+match py_class(0, ''):
+    case py_class(a, b) if a == 0 and b == '': pass
     case _: raise AssertionError"
             );
 
             pyo3::py_run!(
                 py,
-                py_c,
+                py_class,
                 "
-match py_c(field_name_b='', field_name_a=0):
-    case py_c(new_name=a, fieldNameB=b) if a == 0 and b == '': pass
+match py_class(field_name_b='', field_name_a=0):
+    case py_class(new_name=a, fieldNameB=b) if a == 0 and b == '': pass
     case _: raise AssertionError"
             );
         });
