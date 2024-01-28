@@ -427,7 +427,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 #[proc_macro_derive(PyOrder, attributes(pyderive))]
 pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    match internal::ord::implementation(input) {
+    match internal::order::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }
