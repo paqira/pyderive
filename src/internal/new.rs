@@ -1,49 +1,33 @@
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::{spanned::Spanned, Data, DeriveInput, Fields};
+use quote::quote;
+use syn::DeriveInput;
 
-use crate::common::{ClassAttrOption, FieldAttrOption};
+use crate::{attr::StructOption, common::FieldData};
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
-    let class_opt = ClassAttrOption::try_from_attrs(&input.attrs)?;
+    let struct_name = input.ident.clone();
+    let struct_option = StructOption::try_from(&input.attrs)?;
+    let field_data = FieldData::try_from_data(input, &struct_option)?;
 
-    let struct_name = &input.ident;
-
-    let fields = match input.data {
-        Data::Struct(ref data) => match data.fields {
-            Fields::Named(ref fields) => fields,
-            ref e => return Err(syn::Error::new(e.span(), "unnamed field is not supported")),
-        },
-        _ => {
-            return Err(syn::Error::new(
-                input.span(),
-                "#[derive(__init__)] supports struct, not enum and union",
-            ))
-        }
-    };
-
-    let init_args = fields
-        .named
+    let init_args = field_data
         .iter()
-        .map(|f| {
-            let i = f.ident.as_ref().unwrap();
-            let ty = &f.ty;
-            let name = FieldAttrOption::parse_field_attr(&f.attrs)?.py_name(&i, &class_opt);
-            let name = format_ident!("{}", name);
-            Ok(quote! { #name: #ty })
-        })
-        .collect::<Result<Vec<_>, syn::Error>>()?;
+        .map(|d| {
+            let ty = d.ty();
+            let pyident = d.pyident();
 
-    let self_args = fields
-        .named
-        .iter()
-        .map(|f| {
-            let i = f.ident.as_ref().unwrap();
-            let name = FieldAttrOption::parse_field_attr(&f.attrs)?.py_name(&i, &class_opt);
-            let name = format_ident!("{}", name);
-            Ok(quote! { #i: #name })
+            quote! { #pyident: #ty }
         })
-        .collect::<Result<Vec<_>, syn::Error>>()?;
+        .collect::<Vec<_>>();
+
+    let self_args = field_data
+        .iter()
+        .map(|d| {
+            let ident = d.ident();
+            let pyident = d.pyident();
+
+            quote! { #ident: #pyident }
+        })
+        .collect::<Vec<_>>();
 
     let expanded = quote! {
         #[pymethods]

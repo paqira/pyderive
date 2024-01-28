@@ -2,57 +2,37 @@ use std::iter;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{spanned::Spanned, Data, DeriveInput, Fields};
+use syn::DeriveInput;
 
-use crate::common::{is_py, ClassAttrOption, FieldAttrOption};
+use crate::{
+    attr::StructOption,
+    common::{is_py, FieldData},
+};
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
-    let class_opt = ClassAttrOption::try_from_attrs(&input.attrs)?;
-
-    let fields = match input.data {
-        Data::Struct(ref data) => match data.fields {
-            Fields::Named(ref fields) => fields,
-            ref e => return Err(syn::Error::new(e.span(), "unnamed field is not supported")),
-        },
-        _ => {
-            return Err(syn::Error::new(
-                input.span(),
-                "#[derive(__repr__)] supports struct, not enum and union",
-            ))
-        }
-    };
-
-    let struct_name = input.ident;
+    let struct_name = input.ident.clone();
+    let struct_option = StructOption::try_from(&input.attrs)?;
+    let field_data = FieldData::try_from_data(input, &struct_option)?;
 
     // args of foramt!(..)
-    let tokens = fields
-        .named
+    let args = field_data
         .iter()
-        .map(|f| {
-            let i = f.ident.as_ref().unwrap();
-            let ty = &f.ty;
-            let opt = FieldAttrOption::parse_field_attr(&f.attrs)?;
-            Ok((i, ty, opt))
+        .filter(|d| d.get() || d.set())
+        .map(|d| {
+            let ident = d.ident();
+            let name = d.pyname();
+
+            if is_py(&d.ty()) {
+                quote! { #name, py_ref.#ident.as_ref(py).repr()? }
+            } else {
+                quote! { #name, py_ref.#ident.to_object(py).as_ref(py).repr()? }
+            }
         })
-        .filter(|r| {
-            r.as_ref()
-                .map_or(true, |(.., opt)| opt.is_visible(&class_opt))
-        })
-        .map(|r| {
-            r.map(|(i, ty, opt)| {
-                let name = opt.py_name(&i, &class_opt);
-                if is_py(&ty) {
-                    quote! { #name, py_ref.#i.as_ref(py).repr()? }
-                } else {
-                    quote! { #name, py_ref.#i.to_object(py).as_ref(py).repr()? }
-                }
-            })
-        })
-        .collect::<Result<Vec<_>, syn::Error>>()?;
+        .collect::<Vec<_>>();
 
     // fmt of fotmat!(..)
     let fmt = iter::repeat("{}={}")
-        .take(tokens.len())
+        .take(args.len())
         .collect::<Vec<_>>()
         .join(", ");
     let fmt = "{}(".to_string() + &fmt + ")";
@@ -64,7 +44,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let py = slf.py();
                 let name: &str = slf.get_type().name()?;
                 let py_ref = slf.borrow();
-                let s = format!(#fmt, name, #(#tokens),*);
+                let s = format!(#fmt, name, #(#args),*);
                 pyo3::PyResult::Ok(s)
             }
         }

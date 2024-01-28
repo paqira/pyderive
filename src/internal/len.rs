@@ -1,39 +1,18 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{spanned::Spanned, Data, DeriveInput, Fields};
+use syn::DeriveInput;
 
-use crate::common::{ClassAttrOption, FieldAttrOption};
+use crate::{attr::StructOption, common::FieldData};
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
-    let class_opt = ClassAttrOption::try_from_attrs(&input.attrs)?;
-    let struct_name = &input.ident;
+    let struct_name = input.ident.clone();
+    let struct_option = StructOption::try_from(&input.attrs)?;
+    let field_data = FieldData::try_from_data(input, &struct_option)?;
 
-    let fields = match input.data {
-        Data::Struct(ref data) => match data.fields {
-            Fields::Named(ref fields) => fields,
-            ref e => return Err(syn::Error::new(e.span(), "unnamed field is not supported")),
-        },
-        _ => {
-            return Err(syn::Error::new(
-                input.span(),
-                "#[derive(__len__)] supports struct, not enum and union",
-            ))
-        }
-    };
-
-    let length = fields
-        .named
+    let length = field_data
         .iter()
-        .map(|f| {
-            let r = FieldAttrOption::parse_field_attr(&f.attrs)?.is_gettable(&class_opt);
-            Ok(r)
-        })
-        // drop Ok(None)
-        .filter(|r| match r {
-            Ok(false) => false,
-            _ => true,
-        })
-        .collect::<Result<Vec<_>, syn::Error>>()?
+        .filter(|d| d.get())
+        .collect::<Vec<_>>()
         .len();
 
     let expanded = quote! {

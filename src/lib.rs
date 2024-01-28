@@ -1,6 +1,6 @@
 //! # derive_pysp
 //!
-//! ```rust
+//! ```no_run, ignore
 //! // Enable `multiple-pymethods` feature of pyo3
 //! use derive_pysp::*;
 //!

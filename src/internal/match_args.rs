@@ -2,42 +2,21 @@ use std::iter;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{spanned::Spanned, Data, DeriveInput, Fields};
+use syn::DeriveInput;
 
-use crate::common::{ClassAttrOption, FieldAttrOption};
+use crate::{attr::StructOption, common::FieldData};
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
-    let class_opt = ClassAttrOption::try_from_attrs(&input.attrs)?;
+    let struct_name = input.ident.clone();
+    let struct_option = StructOption::try_from(&input.attrs)?;
+    let field_data = FieldData::try_from_data(input, &struct_option)?;
 
-    let struct_name = &input.ident;
-
-    let fields = match input.data {
-        Data::Struct(ref data) => match data.fields {
-            Fields::Named(ref fields) => fields,
-            ref e => return Err(syn::Error::new(e.span(), "unnamed field is not supported")),
-        },
-        _ => {
-            return Err(syn::Error::new(
-                input.span(),
-                "#[derive(__match_args__)] supports struct, not enum and union",
-            ))
-        }
-    };
-
-    let names = fields
-        .named
+    let names = field_data
         .iter()
-        .map(|f| {
-            let i = f.ident.as_ref().unwrap();
-            let opt = FieldAttrOption::parse_field_attr(&f.attrs)?;
-            Ok((i, opt))
-        })
-        .filter(|r| {
-            r.as_ref()
-                .map_or(true, |(.., opt)| opt.is_gettable(&class_opt))
-        })
-        .map(|r| r.map(|(i, opt)| opt.py_name(&i, &class_opt)))
-        .collect::<Result<Vec<_>, syn::Error>>()?;
+        .filter(|d| d.get())
+        .map(|d| d.pyname())
+        .collect::<Vec<_>>();
+
     let types = iter::repeat(quote! { &'static str }).take(names.len());
 
     let expanded = if names.is_empty() {
@@ -47,7 +26,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             #[pymethods]
                 impl #struct_name {
                     #[classattr]
-                    #[allow(non_upper_case_globals)]
                     const __match_args__: (#(#types),* ,) = (#(#names),* ,);
                 }
         }

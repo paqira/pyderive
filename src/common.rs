@@ -1,6 +1,27 @@
-use syn::{Attribute, Ident, Path, Type, TypePath};
+use quote::format_ident;
+use syn::{spanned::Spanned, Field, Ident, Path, Type, TypePath};
 
-use crate::attr::pyclass::{FieldPyO3Options, PyClassPyO3Options};
+use crate::attr::{st::RenamingRule, FieldOption, StructOption};
+
+macro_rules! fields_named {
+    ($n:ident) => {
+        syn::Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Named(syn::FieldsNamed { named: $n, .. }),
+            ..
+        })
+    };
+}
+pub(crate) use fields_named;
+
+macro_rules! fields_unnamed {
+    ($n:ident) => {
+        syn::Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Unnamed(syn::FieldsUnnamed { unnamed: $n, .. }),
+            ..
+        })
+    };
+}
+pub(crate) use fields_unnamed;
 
 pub fn is_py(ty: &Type) -> bool {
     match &ty {
@@ -28,109 +49,87 @@ pub fn is_string(ty: &Type) -> bool {
     .map_or(false, |seg| seg.ident.eq("String"))
 }
 
-pub struct ClassAttrOption {
-    pub options: Option<PyClassPyO3Options>,
+#[derive(Debug)]
+pub struct StructData {
+    pub ident: Ident,
+    option: StructOption,
 }
 
-impl ClassAttrOption {
-    pub fn try_from_attrs(attrs: &[Attribute]) -> syn::Result<Self> {
-        let options = attrs
-            .iter()
-            .map(|attr| match &attr.meta {
-                syn::Meta::List(l) => Some(l),
-                _ => None,
-            })
-            .filter(Option::is_some)
-            .map(Option::unwrap)
-            .filter(|l| l.path.segments.iter().any(|seg| seg.ident.eq(&"pyclass")))
-            .map(|l| syn::parse2::<PyClassPyO3Options>(l.tokens.to_owned()))
-            .next()
-            .map_or(Ok(None), |v| v.map(Some))?;
-
-        Ok(Self { options })
+impl StructData {
+    pub fn new(ident: Ident, option: StructOption) -> Self {
+        Self { ident, option }
+    }
+    pub fn name(&self) -> String {
+        self.ident.to_string()
+    }
+    pub fn pyname(&self) -> String {
+        match &self.option.name {
+            Some(name) => name.to_owned(),
+            None => self.name(),
+        }
     }
 }
 
-pub struct FieldAttrOption {
-    field: Option<FieldPyO3Options>,
+#[derive(Debug)]
+pub struct FieldData {
+    field: Field,
+    struct_option: StructOption,
+    field_option: FieldOption,
 }
 
-impl FieldAttrOption {
-    pub fn parse_field_attr(attrs: &[Attribute]) -> syn::Result<Self> {
-        let options = attrs
-            .iter()
-            .map(|attr| match &attr.meta {
-                syn::Meta::List(l) => Some(l),
-                _ => None,
-            })
-            .filter(Option::is_some)
-            .map(Option::unwrap)
-            .filter(|l| l.path.segments.iter().any(|seg| seg.ident.eq(&"pyo3")))
-            .map(|l| syn::parse2::<FieldPyO3Options>(l.tokens.to_owned()))
-            .next()
-            .map_or(Ok(None), |v| v.map(Some))?;
-
-        Ok(Self { field: options })
+impl FieldData {
+    pub fn try_from_data(
+        input: syn::DeriveInput,
+        struct_option: &StructOption,
+    ) -> syn::Result<Vec<Self>> {
+        match &input.data {
+            fields_named!(n) => n,
+            // fields_unnamed!(n) => n,
+            _ => return Err(syn::Error::new(input.span(), "support struct with field only")),
+        }
+        .iter()
+        .map(|field| {
+            Ok(FieldData::new(
+                field.clone(),
+                struct_option.clone(),
+                FieldOption::try_from(&field.attrs)?,
+            ))
+        })
+        .collect::<syn::Result<Vec<_>>>()
     }
 
-    // Returns `true` if one of get_all, set_all, get, set exists.
-    pub fn is_visible(&self, opt: &ClassAttrOption) -> bool {
-        match &opt.options {
-            Some(PyClassPyO3Options {
-                get_all: Some(_), ..
-            })
-            | Some(PyClassPyO3Options {
-                set_all: Some(_), ..
-            }) => true,
-            _ => match &self.field {
-                Some(_) => true,
-                None => false,
+    pub fn new(field: Field, struct_option: StructOption, field_option: FieldOption) -> Self {
+        Self {
+            field,
+            struct_option,
+            field_option,
+        }
+    }
+    pub fn ident(&self) -> Ident {
+        self.field.ident.to_owned().unwrap()
+    }
+    pub fn pyident(&self) -> Ident {
+        format_ident!("{}", self.pyname())
+    }
+    pub fn ty(&self) -> Type {
+        self.field.ty.to_owned()
+    }
+    pub fn name(&self) -> String {
+        self.field.ident.as_ref().unwrap().to_string()
+    }
+    pub fn pyname(&self) -> String {
+        match &self.field_option.name {
+            Some(name) => name.to_owned(),
+            None => match &self.struct_option.rename {
+                RenamingRule::Other => self.name(),
+                rule => rule.rename(&self.name()),
             },
         }
     }
-
-    pub fn is_gettable(&self, opt: &ClassAttrOption) -> bool {
-        match &opt.options {
-            Some(PyClassPyO3Options {
-                get_all: Some(_), ..
-            }) => true,
-            _ => match &self.field {
-                Some(FieldPyO3Options { get: Some(_), .. }) => true,
-                _ => false,
-            },
-        }
+    pub fn get(&self) -> bool {
+        self.field_option.get || self.struct_option.get
     }
-
-    #[allow(dead_code)]
-    fn is_settable(&self, opt: &ClassAttrOption) -> bool {
-        match &opt.options {
-            Some(PyClassPyO3Options {
-                set_all: Some(_), ..
-            }) => true,
-            _ => match &self.field {
-                Some(FieldPyO3Options { set: Some(_), .. }) => true,
-                _ => false,
-            },
-        }
-    }
-
-    // Returns python name
-    pub fn py_name(&self, ident: &Ident, opt: &ClassAttrOption) -> String {
-        match &self.field {
-            // priotize #[pyo3(name="...")]
-            Some(FieldPyO3Options {
-                name: Some(name), ..
-            }) => name.value.0.to_string(),
-            _ => match &opt.options {
-                // renaming
-                Some(PyClassPyO3Options {
-                    rename_all: Some(o),
-                    ..
-                }) => o.value.rule.apply_renaming_rule(&ident.to_string()),
-                // otherwise
-                _ => ident.to_string(),
-            },
-        }
-        .into()
+    pub fn set(&self) -> bool {
+        self.field_option.set || self.struct_option.set
     }
 }
