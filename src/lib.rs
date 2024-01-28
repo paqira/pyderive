@@ -1,11 +1,12 @@
 //! # pyderive
 //!
-//! ```no_run, ignore
+//! ```
+//! # use pyo3::prelude::*;
 //! // Enable `multiple-pymethods` feature of pyo3
 //! use pyderive::*;
 //!
-//! // Put #[derive(init, ...)] before #[pyclass] to read its attr.
-//! #[derive(init, match_args, repr, eq, hash)]
+//! // Put #[derive(PyInit, ...)] before #[pyclass] to read its attr.
+//! #[derive(PyInit, PyMatchArgs, PyRepr, PyEq, PyHash)]
 //! #[pyclass(get_all)]
 //! #[derive(PartialEq, Hash)]
 //! struct MyClass {
@@ -15,11 +16,12 @@
 //! }
 //! ```
 //! ```python
-//! # In Python
+//! # Python script
 //! from rust_module import MyClass
 //!
 //! # Derives __init__ (technically __new__)
 //! m = MyClass("a", 1, None)
+//! 
 //! # Derives __match_args__ (supports positional attributes)
 //! match m:
 //!     case MyClass(a, b, c):
@@ -28,10 +30,13 @@
 //!         assert c is None
 //!     case _:
 //!         raise AssertionError
+//! 
 //! # Derives __repr__
 //! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
+//! 
 //! # Derives __eq__ based on PartialEq/Eq trait
 //! assert m == m
+//! 
 //! # Derives __hash__ based on Hash trait
 //! assert hash(m) == 3289857268557676066
 //! ```
@@ -49,7 +54,7 @@ mod attr;
 mod common;
 mod internal;
 
-/// Derive [`__repr__`][__repr__] Python method prints `get` and `set` fileds.
+/// Derive [`__repr__`][__repr__] that prints `get` and `set` fileds.
 ///
 /// Place `#[derive(__repr__)]` before `#[pyclass]` to read its attributes.
 ///
@@ -96,7 +101,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__str__`][__str__] Python method prints `get` and `set` fileds.
+/// Derive [`__str__`][__str__] that prints `get` and `set` fileds.
 ///
 /// Place `#[derive(__str__)]` before `#[pyclass]` to read its attributes.
 ///
@@ -143,7 +148,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__len__`][__len__] Python method returns number of `get` fields.
+/// Derive [`__len__`][__len__] that returns number of `get` fields.
 ///
 /// Place `#[derive(__len__)]` before `#[pyclass]` to read its attributes.
 ///
@@ -189,7 +194,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__iter__`][__iter__] python method return iterator of `get` fields.
+/// Derive [`__iter__`][__iter__] that return iterator of `get` fields.
 ///
 /// Place `#[derive(__iter__)]` before `#[pyclass]` to read its attributes.
 ///
@@ -235,7 +240,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__init__`][__init__] (technically [`__new__`][__new__]) Python method with all fields.
+/// Derive [`__init__`][__init__] (technically [`__new__`][__new__]) with all fields.
 ///
 /// Place `#[derive(__init__)]` before `#[pyclass]` to read its attributes.
 ///
@@ -294,7 +299,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__eq__`][__eq__] Python method based on [`PartialEq`]/[`Eq`] trait.
+/// Derive [`__eq__`][__eq__] based on [`PartialEq`]/[`Eq`] trait.
 ///
 /// *Note that implementing any of `__eq__` method will cause
 /// Python not to generate a default `__hash__` implementation,
@@ -350,7 +355,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__lt__`][__lt__], [`__le__`][__le__], [`__gt__`][__gt__] and [`__ge__`][__ge__] Python methods based on [`PartialOrd`]/[`Ord`] trait.
+/// Derive [`__lt__`][__lt__], [`__le__`][__le__], [`__gt__`][__gt__] and [`__ge__`][__ge__] based on [`PartialOrd`]/[`Ord`] trait.
 ///
 /// This throws [`TypeError`][TypeError] on incompatible comparision,
 /// and returns `false` when [`PartialOrd::partial_cmp`] returns [`None`].
@@ -428,7 +433,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__hash__`][__hash__] Python method based on [`Hash`] trait.
+/// Derive [`__hash__`][__hash__] based on [`Hash`] trait.
 ///
 /// We note that this implements:
 ///
@@ -480,7 +485,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__match_args__`][__match_args__] Python class variable with `get` fields.
+/// Derive [`__match_args__`][__match_args__] with `get` fields.
 ///
 /// It contains all `get` field names in declaration order, but not the other fileds.
 ///

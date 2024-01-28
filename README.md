@@ -19,6 +19,7 @@ from rust_module import MyClass
 
 # Derives __init__ (technically __new__)
 m = MyClass("a", 1, None)
+
 # Derives __match_args__
 match m:
     case MyClass(a, b, c):
@@ -27,10 +28,13 @@ match m:
         assert c is None
     case _:
         raise AssertionError
+
 # Derives __repr__
 assert repr(m) == "MyClass(string='a', integer=1, option=None)"
+
 # Derives __eq__ based on PartialEq/Eq trait
 assert m == m
+
 # Derives __hash__ based on Hash trait
 assert hash(m) == 3289857268557676066
 ```
@@ -42,15 +46,16 @@ It requires to enable `multiple-pymethods` feature of pyo3 because this derives 
 
 This provides deriving following special methods and attribute;
 
-1. `PyRepr`/`PyStr`: prints all `get` and `set` fileds.
-2. `PyIter`: returns iterator of all `get` fields
-3. `PyLen`: returns number of `get` fields (compile-time constant)
-4. `PyInit`: a constructor with all fields (technically `__new__`)
-5. `PyMatchArgs`: supports pattern matching by positional attr. with all `get` fields
-6. `PyEq`: besed on `PartialEq`/`Eq` trait
-7. `PyOrder` for `__lt__`, `__le__`, `__gt__` and `__ge__`: besed on `PartialOrd`/`Ord` trait
-8. `PyHash`: based on `Hash` trait
-   - *Note that implementing any of `__eq__`, `__lt__`, `__le__`, `__gt__` and `__ge__` methods will cause Python not to generate a default `__hash__` implementation, so consider also implementing `__hash__`.*
+1. `PyInit`: derives `__init__` (technically `__new__`) with all fields
+2. `PyMatchArgs`: derives `__match_args__` with `get` fields
+3. `PyRepr`/`PyStr`: derives `__repr__`/`__str__` that prints `get` and `set` fileds
+4. `PyIter`: derive `__iter__` that return iterator of `get` fields
+5. `PyLen`: derives `__len__` that returns number of `get` fields
+6.  `PyEq`: derives `__eq__` based on `PartialEq`/`Eq` trait
+7. `PyOrder`: derive `__lt__`, `__le__`, `__gt__` and `__ge__` based on `PartialOrd`/`Ord` trait
+8. `PyHash`: derives `__hash__` based on `Hash` trait
+
+*Note that implementing any of `__eq__`, `__lt__`, `__le__`, `__gt__` and `__ge__` methods will cause Python not to generate a default `__hash__` implementation, so consider also implementing `__hash__`.*
 
 For example,
 
