@@ -1,7 +1,7 @@
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    Attribute, ExprAssign, Ident, Lit, LitBool, LitStr, Meta, MetaList, Result, Token,
+    Attribute, Ident, Lit, LitBool, LitStr, Meta, MetaList, Result, Token,
 };
 
 use self::{
@@ -9,18 +9,6 @@ use self::{
     pyo3_field::Pyo3FieldAttr,
     pyo3_struct::{Pyo3StructAttr, RenamingRule},
 };
-
-fn is_pyo3_struct_attr<'a>(a: &'a &Attribute) -> bool {
-    a.path().is_ident("pyclass") || a.path().is_ident("pyo3")
-}
-
-fn is_pyo3_field_attr<'a>(a: &'a &Attribute) -> bool {
-    a.path().is_ident("pyo3")
-}
-
-fn is_pyderive_field_attr<'a>(a: &'a &Attribute) -> bool {
-    a.path().is_ident("pyderive")
-}
 
 fn take_meta_list(a: &Attribute) -> Option<&MetaList> {
     match &a.meta {
@@ -64,15 +52,15 @@ impl FromIterator<Pyo3StructAttr> for Pyo3StructOption {
 impl TryFrom<&Vec<Attribute>> for Pyo3StructOption {
     type Error = syn::Error;
 
-    fn try_from(value: &Vec<Attribute>) -> syn::Result<Self> {
-        type AttrList = Punctuated<Pyo3StructAttr, Token![,]>;
+    fn try_from(value: &Vec<Attribute>) -> Result<Self> {
+        type Attr = Punctuated<Pyo3StructAttr, Token![,]>;
 
         value
             .iter()
-            .filter(is_pyo3_struct_attr)
+            .filter(|a| a.path().is_ident("pyclass") || a.path().is_ident("pyo3"))
             .filter_map(take_meta_list)
-            .map(|m| m.parse_args_with(AttrList::parse_terminated))
-            .collect::<syn::Result<Vec<_>>>()
+            .map(|m| m.parse_args_with(Attr::parse_terminated))
+            .collect::<Result<Vec<_>>>()
             .map(|v| v.into_iter().flatten().collect::<Self>())
     }
 }
@@ -109,15 +97,15 @@ impl FromIterator<Pyo3FieldAttr> for Pyo3FieldOption {
 impl TryFrom<&Vec<Attribute>> for Pyo3FieldOption {
     type Error = syn::Error;
 
-    fn try_from(value: &Vec<Attribute>) -> syn::Result<Self> {
-        type AttrList = Punctuated<Pyo3FieldAttr, Token![,]>;
+    fn try_from(value: &Vec<Attribute>) -> Result<Self> {
+        type Attr = Punctuated<Pyo3FieldAttr, Token![,]>;
 
         value
             .iter()
-            .filter(is_pyo3_field_attr)
+            .filter(|a| a.path().is_ident("pyo3"))
             .filter_map(take_meta_list)
-            .map(|m| m.parse_args_with(AttrList::parse_terminated))
-            .collect::<syn::Result<Vec<_>>>()
+            .map(|m| m.parse_args_with(Attr::parse_terminated))
+            .collect::<Result<Vec<_>>>()
             .map(|v| v.into_iter().flatten().collect::<Self>())
     }
 }
@@ -173,15 +161,15 @@ impl FromIterator<PyderiveFieldAttr> for PyderiveFieldOption {
 impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
     type Error = syn::Error;
 
-    fn try_from(value: &Vec<Attribute>) -> syn::Result<Self> {
-        type AttrList = Punctuated<PyderiveFieldAttr, Token![,]>;
+    fn try_from(value: &Vec<Attribute>) -> Result<Self> {
+        type Attr = Punctuated<PyderiveFieldAttr, Token![,]>;
 
         value
             .iter()
-            .filter(is_pyderive_field_attr)
+            .filter(|a| a.path().is_ident("pyderive"))
             .filter_map(take_meta_list)
-            .map(|m| m.parse_args_with(AttrList::parse_terminated))
-            .collect::<syn::Result<Vec<_>>>()
+            .map(|m| m.parse_args_with(Attr::parse_terminated))
+            .collect::<Result<Vec<_>>>()
             .map(|v| v.into_iter().flatten().collect::<Self>())
     }
 }
@@ -191,7 +179,7 @@ pub mod pyo3_struct {
 
     use super::*;
 
-    pub mod kw {
+    mod kw {
         // all of supporting option
         syn::custom_keyword!(get_all);
         syn::custom_keyword!(set_all);
@@ -273,28 +261,31 @@ pub mod pyo3_struct {
 
     impl Parse for Pyo3StructAttr {
         fn parse(input: ParseStream) -> Result<Self> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(kw::get_all) {
+            if input.peek(kw::get_all) {
                 Ok(Self::Get(input.parse()?))
-            } else if lookahead.peek(kw::set_all) {
+            } else if input.peek(kw::set_all) {
                 Ok(Self::Set(input.parse()?))
-            } else if lookahead.peek(kw::name) {
+            } else if input.peek(kw::name) {
                 Ok(Self::Name {
                     path: input.parse()?,
                     eq_token: input.parse()?,
                     value: input.parse()?,
                 })
-            } else if lookahead.peek(kw::rename_all) {
+            } else if input.peek(kw::rename_all) {
                 Ok(Self::Rename {
                     path: input.parse()?,
                     eq_token: input.parse()?,
                     value: input.parse()?,
                 })
-            // drop others
+            // ommit others
             } else if input.peek2(Token![=]) {
-                let _ = input.parse::<ExprAssign>()?;
+                // assigment
+                let _: Ident = input.parse()?;
+                let _: Token![=] = input.parse()?;
+                let _: Lit = input.parse()?;
                 Ok(Self::Other)
             } else {
+                // key only
                 let _ = input.parse::<Ident>()?;
                 Ok(Self::Other)
             }
@@ -306,7 +297,7 @@ pub mod pyo3_struct {
 pub mod pyo3_field {
     use super::*;
 
-    pub mod kw {
+    mod kw {
         // all of supporting option
         syn::custom_keyword!(get);
         syn::custom_keyword!(set);
@@ -327,12 +318,11 @@ pub mod pyo3_field {
 
     impl Parse for Pyo3FieldAttr {
         fn parse(input: ParseStream) -> Result<Self> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(kw::get) {
+            if input.peek(kw::get) {
                 Ok(Self::Get(input.parse()?))
-            } else if lookahead.peek(kw::set) {
+            } else if input.peek(kw::set) {
                 Ok(Self::Set(input.parse()?))
-            } else if lookahead.peek(kw::name) {
+            } else if input.peek(kw::name) {
                 Ok(Self::Name {
                     path: input.parse()?,
                     eq_token: input.parse()?,
@@ -340,8 +330,10 @@ pub mod pyo3_field {
                 })
             // ommit others
             } else if input.peek2(Token![=]) {
-                // assignment
-                let _ = input.parse::<ExprAssign>()?;
+                // assigment
+                let _: Ident = input.parse()?;
+                let _: Token![=] = input.parse()?;
+                let _: Lit = input.parse()?;
                 Ok(Self::Other)
             } else {
                 // key only
@@ -368,41 +360,31 @@ pub mod pyderive_field {
     }
 
     #[derive(Debug)]
-    pub struct ExprAssignLitBool {
-        pub left: Ident,
-        pub eq_token: Token![=],
-        pub right: LitBool,
+    struct ExprAssignLitBool {
+        pub value: LitBool,
     }
 
     impl Parse for ExprAssignLitBool {
         fn parse(input: ParseStream) -> Result<Self> {
-            let left = input.parse()?;
-            let eq_token: Token![=] = input.parse()?;
-            let right: LitBool = input.parse()?;
+            let _: Ident = input.parse()?;
+            let _: Token![=] = input.parse()?;
             Ok(Self {
-                left,
-                eq_token,
-                right,
+                value: input.parse()?,
             })
         }
     }
 
     #[derive(Debug)]
-    pub struct ExprAssignLit {
-        pub left: Ident,
-        pub eq_token: Token![=],
-        pub right: Lit,
+    struct ExprAssignLit {
+        pub value: Lit,
     }
 
     impl Parse for ExprAssignLit {
         fn parse(input: ParseStream) -> Result<Self> {
-            let left = input.parse()?;
-            let eq_token: Token![=] = input.parse()?;
-            let right: Lit = input.parse()?;
+            let _: Ident = input.parse()?;
+            let _: Token![=] = input.parse()?;
             Ok(Self {
-                left,
-                eq_token,
-                right,
+                value: input.parse()?,
             })
         }
     }
@@ -421,11 +403,11 @@ pub mod pyderive_field {
 
     impl Parse for PyderiveFieldAttr {
         fn parse(input: ParseStream) -> Result<Self> {
-            macro_rules! parse_assign_bool {
+            macro_rules! parse_assign_or_ident {
             ($input:ident, $ident_ty:ty) => {
                 if $input.peek2(Token![=]) {
                     let parsed: ExprAssignLitBool = $input.parse()?;
-                    parsed.right.value
+                    parsed.value.value
                 } else {
                     let _: $ident_ty = $input.parse()?;
                     true
@@ -435,29 +417,29 @@ pub mod pyderive_field {
 
             let lookahead = input.lookahead1();
             if lookahead.peek(kw::init) {
-                let value = parse_assign_bool!(input, kw::init);
+                let value = parse_assign_or_ident!(input, kw::init);
                 Ok(Self::Init(value))
             } else if lookahead.peek(kw::match_args) {
-                let value = parse_assign_bool!(input, kw::match_args);
+                let value = parse_assign_or_ident!(input, kw::match_args);
                 Ok(Self::MatchArgs(value))
             } else if lookahead.peek(kw::repr) {
-                let value = parse_assign_bool!(input, kw::repr);
+                let value = parse_assign_or_ident!(input, kw::repr);
                 Ok(Self::Repr(value))
             } else if lookahead.peek(kw::str) {
-                let value = parse_assign_bool!(input, kw::str);
+                let value = parse_assign_or_ident!(input, kw::str);
                 Ok(Self::Str(value))
             } else if lookahead.peek(kw::iter) {
-                let value = parse_assign_bool!(input, kw::iter);
+                let value = parse_assign_or_ident!(input, kw::iter);
                 Ok(Self::Iter(value))
             } else if lookahead.peek(kw::len) {
-                let value = parse_assign_bool!(input, kw::len);
+                let value = parse_assign_or_ident!(input, kw::len);
                 Ok(Self::Len(value))
             } else if lookahead.peek(kw::kw_only) {
-                let value = parse_assign_bool!(input, kw::kw_only);
+                let value = parse_assign_or_ident!(input, kw::kw_only);
                 Ok(Self::KwOnly(value))
             } else if lookahead.peek(kw::default) {
                 let parsed: ExprAssignLit = input.parse()?;
-                Ok(Self::Default(parsed.right))
+                Ok(Self::Default(parsed.value))
             } else {
                 Err(lookahead.error())
             }
