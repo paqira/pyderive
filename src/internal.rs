@@ -3,7 +3,7 @@ pub mod hash;
 pub mod iter;
 pub mod len;
 pub mod match_args;
-pub mod new;
+pub mod init;
 pub mod order;
 pub mod repr;
 pub mod str;

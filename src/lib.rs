@@ -293,7 +293,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 #[proc_macro_derive(PyInit, attributes(pyderive))]
 pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    match internal::new::implementation(input) {
+    match internal::init::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }
