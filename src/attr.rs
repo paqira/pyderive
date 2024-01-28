@@ -1,11 +1,12 @@
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
+    spanned::Spanned,
     Attribute, Ident, Lit, LitBool, LitStr, Meta, MetaList, Result, Token,
 };
 
 use self::{
-    pyderive_field::PyderiveFieldAttr,
+    pyderive_field::{ExprAssignLit, OptionFieldAttr, PyderiveFieldAttr},
     pyo3_field::Pyo3FieldAttr,
     pyo3_struct::{Pyo3StructAttr, RenamingRule},
 };
@@ -122,39 +123,107 @@ pub struct PyderiveFieldOption {
     pub default: Option<Lit>,
 }
 
-impl FromIterator<PyderiveFieldAttr> for PyderiveFieldOption {
+impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
     fn from_iter<T: IntoIterator<Item = PyderiveFieldAttr>>(iter: T) -> Self {
-        let mut new = Self::default();
+        let mut new = PyderiveFieldOption::default();
+
+        macro_rules! extract_ident {
+            ($value:ident) => {
+                match $value {
+                    OptionFieldAttr::Ident { ident } => ident,
+                    OptionFieldAttr::ExprAssign(ExprAssignLit { ident, .. }) => ident,
+                }
+            };
+        }
+
+        macro_rules! is_true {
+            ($value:ident) => {
+                match $value {
+                    OptionFieldAttr::Ident { .. } => true,
+                    OptionFieldAttr::ExprAssign(ExprAssignLit {
+                        value: LitBool { value, .. },
+                        ..
+                    }) => value,
+                }
+            };
+        }
 
         for opt in iter {
             match opt {
-                PyderiveFieldAttr::Init(v) => {
-                    new.init = Some(v);
-                }
-                PyderiveFieldAttr::MatchArgs(v) => {
-                    new.match_args = Some(v);
-                }
-                PyderiveFieldAttr::Repr(v) => {
-                    new.repr = Some(v);
-                }
-                PyderiveFieldAttr::Str(v) => {
-                    new.str = Some(v);
-                }
-                PyderiveFieldAttr::Iter(v) => {
-                    new.iter = Some(v);
-                }
-                PyderiveFieldAttr::Len(v) => {
-                    new.len = Some(v);
-                }
-                PyderiveFieldAttr::KwOnly(v) => {
-                    new.kw_only = Some(v);
-                }
-                PyderiveFieldAttr::Default(v) => {
-                    new.default = Some(v);
-                }
+                PyderiveFieldAttr::Init(v) => match new.init {
+                    Some(_) => {
+                        return Err(syn::Error::new(extract_ident!(v).span(), "duplicated init"));
+                    }
+                    None => {
+                        new.init = Some(is_true!(v));
+                    }
+                },
+                PyderiveFieldAttr::MatchArgs(v) => match new.match_args {
+                    Some(_) => {
+                        return Err(syn::Error::new(
+                            extract_ident!(v).span(),
+                            "duplicated match_args",
+                        ));
+                    }
+                    None => {
+                        new.match_args = Some(is_true!(v));
+                    }
+                },
+                PyderiveFieldAttr::Repr(v) => match new.repr {
+                    Some(_) => {
+                        return Err(syn::Error::new(extract_ident!(v).span(), "duplicated repr"));
+                    }
+                    None => {
+                        new.repr = Some(is_true!(v));
+                    }
+                },
+                PyderiveFieldAttr::Str(v) => match new.str {
+                    Some(_) => {
+                        return Err(syn::Error::new(extract_ident!(v).span(), "duplicated str"));
+                    }
+                    None => {
+                        new.str = Some(is_true!(v));
+                    }
+                },
+                PyderiveFieldAttr::Iter(v) => match new.iter {
+                    Some(_) => {
+                        return Err(syn::Error::new(extract_ident!(v).span(), "duplicated iter"));
+                    }
+                    None => {
+                        new.iter = Some(is_true!(v));
+                    }
+                },
+                PyderiveFieldAttr::Len(v) => match new.len {
+                    Some(_) => {
+                        return Err(syn::Error::new(extract_ident!(v).span(), "duplicated len"));
+                    }
+                    None => {
+                        new.len = Some(is_true!(v));
+                    }
+                },
+                PyderiveFieldAttr::KwOnly(v) => match new.kw_only {
+                    Some(_) => {
+                        return Err(syn::Error::new(
+                            extract_ident!(v).span(),
+                            "duplicated kw_only",
+                        ));
+                    }
+                    None => {
+                        new.kw_only = Some(is_true!(v));
+                    }
+                },
+                PyderiveFieldAttr::Default(v) => match new.default {
+                    Some(_) => {
+                        return Err(syn::Error::new(v.ident.span(), "duplicated default"));
+                    }
+                    None => {
+                        new.default = Some(v.value);
+                    }
+                },
             }
         }
-        new
+
+        Ok(new)
     }
 }
 
@@ -169,8 +238,10 @@ impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
             .filter(|a| a.path().is_ident("pyderive"))
             .filter_map(take_meta_list)
             .map(|m| m.parse_args_with(Attr::parse_terminated))
-            .collect::<Result<Vec<_>>>()
-            .map(|v| v.into_iter().flatten().collect::<Self>())
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .flatten()
+            .collect::<Result<Self>>()
     }
 }
 
@@ -179,7 +250,7 @@ pub mod pyo3_struct {
 
     use super::*;
 
-    mod kw {
+    pub mod kw {
         // all of supporting option
         syn::custom_keyword!(get_all);
         syn::custom_keyword!(set_all);
@@ -297,7 +368,7 @@ pub mod pyo3_struct {
 pub mod pyo3_field {
     use super::*;
 
-    mod kw {
+    pub mod kw {
         // all of supporting option
         syn::custom_keyword!(get);
         syn::custom_keyword!(set);
@@ -360,89 +431,87 @@ pub mod pyderive_field {
     }
 
     #[derive(Debug)]
-    struct ExprAssignLitBool {
-        pub value: LitBool,
+    pub struct ExprAssignLit<T, K> {
+        pub ident: T,
+        pub value: K,
     }
 
-    impl Parse for ExprAssignLitBool {
+    impl<T: Parse, K: Parse> Parse for ExprAssignLit<T, K> {
         fn parse(input: ParseStream) -> Result<Self> {
-            let _: Ident = input.parse()?;
+            let ident: T = input.parse()?;
             let _: Token![=] = input.parse()?;
-            Ok(Self {
-                value: input.parse()?,
-            })
+            let value: K = input.parse()?;
+            Ok(Self { ident, value })
         }
     }
 
     #[derive(Debug)]
-    struct ExprAssignLit {
-        pub value: Lit,
+    pub enum OptionFieldAttr<T: Parse, K: Parse> {
+        Ident { ident: T },
+        ExprAssign(ExprAssignLit<T, K>),
     }
 
-    impl Parse for ExprAssignLit {
+    impl<T: Parse, K: Parse> Parse for OptionFieldAttr<T, K> {
         fn parse(input: ParseStream) -> Result<Self> {
-            let _: Ident = input.parse()?;
-            let _: Token![=] = input.parse()?;
-            Ok(Self {
-                value: input.parse()?,
-            })
+            if input.peek2(Token![=]) {
+                let ident: T = input.parse()?;
+                let _: Token![=] = input.parse()?;
+                let value: K = input.parse()?;
+                Ok(Self::ExprAssign(ExprAssignLit { ident, value }))
+            } else {
+                Ok(Self::Ident {
+                    ident: input.parse()?,
+                })
+            }
         }
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub enum PyderiveFieldAttr {
-        Init(bool),
-        MatchArgs(bool),
-        Repr(bool),
-        Str(bool),
-        Iter(bool),
-        Len(bool),
-        KwOnly(bool),
-        Default(Lit),
+        Init(OptionFieldAttr<kw::init, LitBool>),
+        MatchArgs(OptionFieldAttr<kw::match_args, LitBool>),
+        Repr(OptionFieldAttr<kw::repr, LitBool>),
+        Str(OptionFieldAttr<kw::str, LitBool>),
+        Iter(OptionFieldAttr<kw::iter, LitBool>),
+        Len(OptionFieldAttr<kw::len, LitBool>),
+        KwOnly(OptionFieldAttr<kw::kw_only, LitBool>),
+        Default(ExprAssignLit<kw::default, Lit>),
     }
 
     impl Parse for PyderiveFieldAttr {
         fn parse(input: ParseStream) -> Result<Self> {
-            macro_rules! parse_assign_or_ident {
-            ($input:ident, $ident_ty:ty) => {
-                if $input.peek2(Token![=]) {
-                    let parsed: ExprAssignLitBool = $input.parse()?;
-                    parsed.value.value
-                } else {
-                    let _: $ident_ty = $input.parse()?;
-                    true
-                }
-            };
-        }
-
             let lookahead = input.lookahead1();
             if lookahead.peek(kw::init) {
-                let value = parse_assign_or_ident!(input, kw::init);
-                Ok(Self::Init(value))
+                Ok(Self::Init(input.parse()?))
             } else if lookahead.peek(kw::match_args) {
-                let value = parse_assign_or_ident!(input, kw::match_args);
-                Ok(Self::MatchArgs(value))
+                Ok(Self::MatchArgs(input.parse()?))
             } else if lookahead.peek(kw::repr) {
-                let value = parse_assign_or_ident!(input, kw::repr);
-                Ok(Self::Repr(value))
+                Ok(Self::Repr(input.parse()?))
             } else if lookahead.peek(kw::str) {
-                let value = parse_assign_or_ident!(input, kw::str);
-                Ok(Self::Str(value))
+                Ok(Self::Str(input.parse()?))
             } else if lookahead.peek(kw::iter) {
-                let value = parse_assign_or_ident!(input, kw::iter);
-                Ok(Self::Iter(value))
+                Ok(Self::Iter(input.parse()?))
             } else if lookahead.peek(kw::len) {
-                let value = parse_assign_or_ident!(input, kw::len);
-                Ok(Self::Len(value))
+                Ok(Self::Len(input.parse()?))
             } else if lookahead.peek(kw::kw_only) {
-                let value = parse_assign_or_ident!(input, kw::kw_only);
-                Ok(Self::KwOnly(value))
+                Ok(Self::KwOnly(input.parse()?))
             } else if lookahead.peek(kw::default) {
-                let parsed: ExprAssignLit = input.parse()?;
-                Ok(Self::Default(parsed.value))
+                Ok(Self::Default(input.parse()?))
             } else {
                 Err(lookahead.error())
             }
         }
+    }
+
+    #[derive(Debug, Default)]
+    pub struct PyderiveFieldOption {
+        pub init: Option<OptionFieldAttr<kw::init, LitBool>>,
+        pub match_args: Option<OptionFieldAttr<kw::match_args, LitBool>>,
+        pub repr: Option<OptionFieldAttr<kw::repr, LitBool>>,
+        pub str: Option<OptionFieldAttr<kw::str, LitBool>>,
+        pub iter: Option<OptionFieldAttr<kw::iter, LitBool>>,
+        pub len: Option<OptionFieldAttr<kw::len, LitBool>>,
+        pub kw_only: Option<OptionFieldAttr<kw::kw_only, LitBool>>,
+        pub default: Option<OptionFieldAttr<kw::default, Lit>>,
     }
 }
