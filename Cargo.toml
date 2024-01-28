@@ -1,5 +1,5 @@
 [package]
-name = "derive-pysp"
+name = "pyderive"
 version = "0.1.1"
 edition = "2021"
 authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
@@ -12,7 +12,7 @@ keywords = [
     "pyo3",
 ]
 
-repository = "https://github.com/paqira/derive-pysp"
+repository = "https://github.com/paqira/pyderive"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]

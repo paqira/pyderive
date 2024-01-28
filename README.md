@@ -1,8 +1,8 @@
-# derive_pysp
+# pyderive
 
 ```rust
 // Enable `multiple-pymethods` feature of pyo3
-use derive_pysp::*;
+use pyderive::*;
 
 // Put #[derive(__init__, ...)] before #[pyclass] to read its attr.
 #[derive(__init__, __match_args__, __repr__, __eq__, __hash__)]
@@ -35,7 +35,7 @@ assert m == m
 assert hash(m) == 3289857268557676066
 ```
 
-`derive-pysp` provides derive macros of
+`pyderive` provides derive macros of
 Python special methods and a class attribute.
 
 It requires to enable `multiple-pymethods` feature of pyo3 because this derives multiple `#[pymethods]`.
@@ -55,7 +55,7 @@ This provides deriving following special methods and attribute;
 For example,
 
 ```rust
-use derive_pysp::*;
+use pyderive::*;
 
 #[derive(__init__, __match_args__, __repr__)]
 #[pyclass(name="RenamedClass", name="camelCase")]

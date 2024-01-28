@@ -1,8 +1,8 @@
-//! # derive_pysp
+//! # pyderive
 //!
 //! ```no_run, ignore
 //! // Enable `multiple-pymethods` feature of pyo3
-//! use derive_pysp::*;
+//! use pyderive::*;
 //!
 //! // Put #[derive(__init__, ...)] before #[pyclass] to read its attr.
 //! #[derive(__init__, __match_args__, __repr__, __eq__, __hash__)]
@@ -36,7 +36,7 @@
 //! assert hash(m) == 3289857268557676066
 //! ```
 //!
-//! `derive_pysp` provides derive macros of Python special methods and a class attribute.
+//! `pyderive` provides derive macros of Python special methods and a class attribute.
 //!
 //! It requires to enable `multiple-pymethods` feature of pyo3 because this may derive multiple `#[pymethods]`.
 //!
@@ -60,7 +60,7 @@ mod internal;
 ///
 /// ```
 /// # use std::error::Error;
-/// # use derive_pysp::__repr__;
+/// # use pyderive::__repr__;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
@@ -107,7 +107,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// ```
 /// # use std::error::Error;
-/// # use derive_pysp::__str__;
+/// # use pyderive::__str__;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
@@ -153,7 +153,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// ```
 /// # use std::error::Error;
-/// # use derive_pysp::*;
+/// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
@@ -201,7 +201,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use std::error::Error;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// # use derive_pysp::*;
+/// # use pyderive::*;
 /// // Put before `#[pyclass]` to read its attributes.
 /// #[derive(__iter__)]
 /// #[pyclass(get_all)]
@@ -246,7 +246,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// ```
 /// # use std::error::Error;
-/// # use derive_pysp::*;
+/// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
@@ -319,7 +319,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use std::error::Error;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// # use derive_pysp::*;
+/// # use pyderive::*;
 /// #[derive(__eq__)]
 /// #[pyclass]
 /// #[derive(PartialEq)]
@@ -382,7 +382,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use std::error::Error;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// # use derive_pysp::*;
+/// # use pyderive::*;
 /// #[derive(__ord__)]
 /// #[pyclass]
 /// #[derive(PartialOrd, PartialEq)]
@@ -451,7 +451,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use std::error::Error;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// # use derive_pysp::*;
+/// # use pyderive::*;
 /// #[derive(__hash__)]
 /// #[pyclass]
 /// #[derive(Hash)]
@@ -494,7 +494,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// ```
 /// # use std::error::Error;
-/// # use derive_pysp::*;
+/// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
@@ -549,4 +549,24 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }
+}
+
+#[proc_macro_attribute]
+pub fn pyderive(
+    attr: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    // #[derive(
+    //      init, repr, match_args, iter, len,
+    //      eq, order, hash,
+    // )]
+    // struct MyClass{
+    //     #[pyderive(
+    //          init=false, repr, match_args, iter, len, default=??
+    //      )]
+    //      #[noinit]#[repr]#[noiter]
+    //     field: i64,
+    // }
+    let item = dbg!(item);
+    item
 }

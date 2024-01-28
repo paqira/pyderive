@@ -1,4 +1,4 @@
-use derive_pysp::*;
+use pyderive::*;
 use pyo3::{prelude::*, py_run};
 
 #[cfg(test)]
