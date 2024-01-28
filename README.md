@@ -4,7 +4,7 @@
 // Enable `multiple-pymethods` feature of pyo3
 use pyderive::*;
 
-// Put #[derive(PyInit, ...)] before #[pyclass] to read its attr.
+// Place #[derive(PyInit, ...)] before #[pyclass] to read its attr.
 #[derive(PyInit, PyMatchArgs, PyRepr, PyEq, PyHash)]
 #[pyclass(get_all)]
 #[derive(PartialEq, Hash)]
@@ -20,7 +20,7 @@ from rust_module import MyClass
 # Derives __init__ (technically __new__)
 m = MyClass("a", 1, None)
 
-# Derives __match_args__
+# Derives __match_args__ (supports pattern matching by positional arg)
 match m:
     case MyClass(a, b, c):
         assert a == "a"
@@ -42,7 +42,7 @@ assert hash(m) == 3289857268557676066
 `pyderive` provides derive macros of
 Python special methods and a class attribute.
 
-It requires to enable `multiple-pymethods` feature of pyo3 because this derives multiple `#[pymethods]`.
+It requires to enable `multiple-pymethods` feature of pyo3 because this produces multiple `#[pymethods]`.
 
 This provides deriving following special methods and attribute;
 
@@ -51,9 +51,11 @@ This provides deriving following special methods and attribute;
 3. `PyRepr`/`PyStr`: derives `__repr__`/`__str__` that prints `get` and `set` fileds
 4. `PyIter`: derive `__iter__` that return iterator of `get` fields
 5. `PyLen`: derives `__len__` that returns number of `get` fields
-6.  `PyEq`: derives `__eq__` based on `PartialEq`/`Eq` trait
+6. `PyEq`: derives `__eq__` based on `PartialEq`/`Eq` trait
 7. `PyOrder`: derive `__lt__`, `__le__`, `__gt__` and `__ge__` based on `PartialOrd`/`Ord` trait
 8. `PyHash`: derives `__hash__` based on `Hash` trait
+
+The field attributes `#[pyderive]` is used to customize above behavior.
 
 *Note that implementing any of `__eq__`, `__lt__`, `__le__`, `__gt__` and `__ge__` methods will cause Python not to generate a default `__hash__` implementation, so consider also implementing `__hash__`.*
 
@@ -64,7 +66,6 @@ use pyderive::*;
 
 #[derive(PyInit, PyMatchArgs, PyRepr)]
 #[pyclass(name="RenamedClass", name="camelCase")]
-#[derive]
 struct MyClass {
     #[pyo3(get, name="renamed_field")]
     str_field: String,
@@ -76,17 +77,19 @@ struct MyClass {
 ```python
 from rust_module import RenamedClass
 
-# Renames arg names
+# Renames class and args
 m = RenamedClass(renamed_field="a", intField=1, opt_field=None)
-# Uses get field only
+
+# Produces __match_args__ == ("a", )
+# Matching RenamedClass(a, b) and RenamedClass(a, b, c) throw
+#   TypeError: RenamedClass() accepts 1 positional sub-patterns (2 (or 3) given)
 match m:
     case RenamedClass(a):
         assert a == "a"
-    # RenamedClass(a, b) and RenamedClass(a, b, c) throw
-    # TypeError: RenamedClass() accepts 1 positional sub-patterns (2 (or 3) given)
     case _:
         raise AssertionError
-# Prints get/set field only
+
+# Pritns renamed class name
 assert repr(m) == "RenamedClass(renamed_field='a', intField=1)"
 ```
 

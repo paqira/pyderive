@@ -1,11 +1,9 @@
-//! # pyderive
-//!
 //! ```
 //! # use pyo3::prelude::*;
 //! // Enable `multiple-pymethods` feature of pyo3
 //! use pyderive::*;
 //!
-//! // Put #[derive(PyInit, ...)] before #[pyclass] to read its attr.
+//! // Place #[derive(PyInit, ...)] before #[pyclass] to read its attr.
 //! #[derive(PyInit, PyMatchArgs, PyRepr, PyEq, PyHash)]
 //! #[pyclass(get_all)]
 //! #[derive(PartialEq, Hash)]
@@ -22,7 +20,7 @@
 //! # Derives __init__ (technically __new__)
 //! m = MyClass("a", 1, None)
 //!
-//! # Derives __match_args__ (supports positional attributes)
+//! # Derives __match_args__ (supports pattern matching by positional arg)
 //! match m:
 //!     case MyClass(a, b, c):
 //!         assert a == "a"
@@ -46,6 +44,95 @@
 //! It requires to enable `multiple-pymethods` feature of pyo3 because this may derive multiple `#[pymethods]`.
 //!
 //! *Note that implementing any of `__eq__`, `__lt__`, `__le__`, `__gt__` and `__ge__` methods will cause Python not to generate a default `__hash__` implementation, so consider also implementing `__hash__`.*
+//!
+//! # Customize Implementation
+//!
+//! The field attributes `#[pyderive]` is used to customize implementations produced by [pyderive](crate)'s derive.
+//!
+//! ```rust
+//! #[derive(PyInit, PyRepr)]
+//! #[pyclass]
+//! struct MyClass {
+//!     str_field: String,
+//!     #[pyderive(repr=false)]
+//!     #[pyo3(get)]
+//!     int_field: i64,
+//!     #[pyderive(default=10)]
+//!     opt_field: Option<String>
+//! }
+//! ```
+//!
+//! The `#[pyderive]` overwrites default behavior.
+//!
+//! - `#[pyderive(repr=true/false)]`
+//!
+//!    If `true`, the field is included in the string that the generated `__repr__` method returns.
+//!
+//!    Notes, `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
+//! - `#[pyderive(str=true/false)]`
+//!
+//!    If `true`, the field is included in the string that the generated `__str__` method returns.
+//!
+//!    Notes, `#[pyderive(str)]` is equivalent to `#[pyderive(str=true)]`.
+//! - `#[pyderive(init=true/false)]`
+//!
+//!    If `true`, the field is included as a parameter of generated `__init__` (`__new__` precisely) method.
+//!
+//!    Notes, `#[pyderive(init)]` is equivalent to `#[pyderive(init=true)]`.
+//!    
+//!    This supports default value with `#[pyderive(default)]` attribute.
+//!    We note that this internally produce `#[pyo3(signiture)]` field attribute.
+//!    We list the equivarent Python code of `init` and `default` specification:
+//!
+//!     1. `#[pyderive] field: i64` or just `field: i64` (no `#[pyderive]`)
+//!
+//!         ```python
+//!         def __init__(self, field): self.field = field
+//!         ```
+//!     2. `#[pyderive(init=false)] field: i64`
+//!       
+//!        The field is not included as the parameter,
+//!        and initialized by [`Default::default()`] in the `__init__` method.         
+//!
+//!         ```python
+//!         def __init__(self): self.field = field::default()  # call rust method
+//!         ```
+//!     3. `#[pyderive(default=<Literal>)] field: i64`
+//!
+//!        The field is included as the parameter with default value `<Literal>`.
+//!
+//!         ```python
+//!         def __init__(self, field=<Literal>): self.field = field
+//!         ```
+//!     4. `#[pyderive(init=false, default=<Literal>)] field: i64`
+//!
+//!        The field is not included as the parameter,
+//!        and initialized by `<Literal>` in the `__init__` method.     
+//!
+//!         ```python
+//!         def __init__(self): self.field = <Literal>
+//!         ```
+//! - `#[pyderive(kw_only=true/false)]`
+//!
+//!    If `true`, put `*,` in front of this field in the argument of generated `__init__` method,
+//!    hence, the following fields are keyword only argument.
+//!
+//!    Notes, `#[pyderive(kw_only)]` is equivalent to `#[pyderive(kw_only=true)]`
+//! - `#[pyderive(match_args=true/false)]`
+//!
+//!    If `true`, the field is included in the generated `__match_args__` class attribute.
+//!
+//!    Notes, `#[pyderive(match_args)]` is equivalent to `#[pyderive(match_args=true)]`
+//! - `#[pyderive(iter=true/false)]`
+//!
+//!    If `true`, the field is included in the iterator that generated `__iter__` method returs.
+//!
+//!    Notes, `#[pyderive(iter)]` is equivalent to `#[pyderive(iter=true)]`
+//! - `#[pyderive(len=true/false)]`
+//!
+//!    If `true`, `__len__` the field is counted in the generated `__len__` method.
+//!
+//!    Notes, `#[pyderive(len)]` is equivalent to `#[pyderive(len=true)]`
 extern crate proc_macro;
 
 use syn::{parse_macro_input, DeriveInput};
@@ -57,6 +144,8 @@ mod internal;
 /// Derive [`__repr__`][__repr__] that prints `get` and `set` fileds.
 ///
 /// Place `#[derive(__repr__)]` before `#[pyclass]` to read its attributes.
+///
+/// See the [Customize Implementation of crate doc](crate) to customize implementation.
 ///
 /// [__repr__]: https://docs.python.org/reference/datamodel.html#object.__repr__
 /// [repr]: https://docs.python.org/library/functions.html#repr
@@ -105,6 +194,8 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// Place `#[derive(__str__)]` before `#[pyclass]` to read its attributes.
 ///
+/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+///
 /// [__str__]: https://docs.python.org/reference/datamodel.html#object.__str__
 /// [str]: https://docs.python.org/library/functions.html#str
 ///
@@ -152,6 +243,8 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// Place `#[derive(__len__)]` before `#[pyclass]` to read its attributes.
 ///
+/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+///
 /// [__len__]: https://docs.python.org/reference/datamodel.html#object.__len__
 ///
 /// # Example
@@ -198,6 +291,8 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// Place `#[derive(__iter__)]` before `#[pyclass]` to read its attributes.
 ///
+/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+///
 /// [__iter__]: https://docs.python.org/reference/datamodel.html#object.__iter__
 ///
 /// # Example
@@ -240,9 +335,11 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__init__`][__init__] (technically [`__new__`][__new__]) with all fields.
+/// Derive [`__init__`][__init__] (technically [`__new__`][__new__]).
 ///
 /// Place `#[derive(__init__)]` before `#[pyclass]` to read its attributes.
+///
+/// See the [Customize Implementation of crate doc](crate) to customize implementation.
 ///
 /// [__init__]: https://docs.python.org/reference/datamodel.html#object.__init__
 /// [__new__]: https://docs.python.org/reference/datamodel.html#object.__new__
@@ -307,7 +404,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// We note that this implements:
 ///
-/// ```ignore
+/// ```no_run, ignore
 /// pub fn __eq__(&self, other: &Self) -> bool {
 ///     self.eq(other)
 /// }
@@ -346,7 +443,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyEq, attributes(pyderive))]
+#[proc_macro_derive(PyEq)]
 pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::eq::implementation(input) {
@@ -357,8 +454,8 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Derive [`__lt__`][__lt__], [`__le__`][__le__], [`__gt__`][__gt__] and [`__ge__`][__ge__] based on [`PartialOrd`]/[`Ord`] trait.
 ///
-/// This throws [`TypeError`][TypeError] on incompatible comparision,
-/// and returns `false` when [`PartialOrd::partial_cmp`] returns [`None`].
+/// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`],
+/// and throw [`TypeError`][TypeError] on incompatible comparision.
 ///
 /// *Note that implementing any of `__lt__`, `__le__`, `__gt__` and `__ge__` methods
 /// will cause Python not to generate a default `__hash__` implementation,
@@ -366,7 +463,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// We note that, for example, this implements:
 ///
-/// ```ignore
+/// ```no_run, ignore
 /// pub fn __lt__(&self, other: &Self) -> pyo3::PyResult<bool> {
 ///     match self.partial_cmp(other) {
 ///         Some(std::cmp::Ordering::Less) => Ok(true),
@@ -424,7 +521,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyOrder, attributes(pyderive))]
+#[proc_macro_derive(PyOrder)]
 pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::order::implementation(input) {
@@ -437,7 +534,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// We note that this implements:
 ///
-/// ```ignore
+/// ```no_run, ignore
 /// pub fn __hash__(&self) -> u64 {
 ///     use std::collections::hash_map::DefaultHasher;
 ///     use std::hash::{Hash, Hasher};
@@ -476,7 +573,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyHash, attributes(pyderive))]
+#[proc_macro_derive(PyHash)]
 pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::hash::implementation(input) {
@@ -492,6 +589,8 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Place `#[derive(__match_args__)]` before `#[pyclass]` to read its attributes.
 ///
 /// We note that it does not generates `__match_args__` if `get` field is not exists.
+///
+/// See the [Customize Implementation of crate doc](crate) to customize implementation.
 ///
 /// [__match_args__]: https://docs.python.org/reference/datamodel.html#object.__match_args__
 ///
