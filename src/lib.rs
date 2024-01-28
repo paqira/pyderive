@@ -550,23 +550,3 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
         Err(e) => e.into_compile_error().into(),
     }
 }
-
-#[proc_macro_attribute]
-pub fn pyderive(
-    attr: proc_macro::TokenStream,
-    item: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
-    // #[derive(
-    //      init, repr, match_args, iter, len,
-    //      eq, order, hash,
-    // )]
-    // struct MyClass{
-    //     #[pyderive(
-    //          init=false, repr, match_args, iter, len, default=??
-    //      )]
-    //      #[noinit]#[repr]#[noiter]
-    //     field: i64,
-    // }
-    let item = dbg!(item);
-    item
-}
