@@ -4,8 +4,8 @@
 //! // Enable `multiple-pymethods` feature of pyo3
 //! use pyderive::*;
 //!
-//! // Put #[derive(__init__, ...)] before #[pyclass] to read its attr.
-//! #[derive(__init__, __match_args__, __repr__, __eq__, __hash__)]
+//! // Put #[derive(init, ...)] before #[pyclass] to read its attr.
+//! #[derive(init, match_args, repr, eq, hash)]
 //! #[pyclass(get_all)]
 //! #[derive(PartialEq, Hash)]
 //! struct MyClass {
@@ -60,11 +60,11 @@ mod internal;
 ///
 /// ```
 /// # use std::error::Error;
-/// # use pyderive::__repr__;
+/// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
-/// #[derive(__repr__)]
+/// #[derive(PyRepr)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -87,7 +87,7 @@ mod internal;
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(__repr__)]
+#[proc_macro_derive(PyRepr)]
 pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::repr::implementation(input) {
@@ -107,11 +107,11 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// ```
 /// # use std::error::Error;
-/// # use pyderive::__str__;
+/// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
-/// #[derive(__str__)]
+/// #[derive(PyStr)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -134,7 +134,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(__str__)]
+#[proc_macro_derive(PyStr)]
 pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::str::implementation(input) {
@@ -157,7 +157,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
-/// #[derive(__len__)]
+/// #[derive(PyLen)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -180,7 +180,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(__len__)]
+#[proc_macro_derive(PyLen)]
 pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::len::implementation(input) {
@@ -203,7 +203,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::py_run;
 /// # use pyderive::*;
 /// // Put before `#[pyclass]` to read its attributes.
-/// #[derive(__iter__)]
+/// #[derive(PyIter)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -226,7 +226,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(__iter__)]
+#[proc_macro_derive(PyIter)]
 pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::iter::implementation(input) {
@@ -250,7 +250,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
-/// #[derive(__init__)]
+/// #[derive(PyInit)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -285,7 +285,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     .is_ok()
 /// );
 /// ```
-#[proc_macro_derive(__init__)]
+#[proc_macro_derive(PyInit)]
 pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::new::implementation(input) {
@@ -320,7 +320,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
-/// #[derive(__eq__)]
+/// #[derive(PyEq)]
 /// #[pyclass]
 /// #[derive(PartialEq)]
 /// struct PyClass {
@@ -341,7 +341,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(__eq__)]
+#[proc_macro_derive(PyEq)]
 pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::eq::implementation(input) {
@@ -383,7 +383,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
-/// #[derive(__ord__)]
+/// #[derive(PyOrder)]
 /// #[pyclass]
 /// #[derive(PartialOrd, PartialEq)]
 /// struct PyClass {
@@ -419,7 +419,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(__ord__)]
+#[proc_macro_derive(PyOrder)]
 pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::ord::implementation(input) {
@@ -452,7 +452,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
-/// #[derive(__hash__)]
+/// #[derive(PyHash)]
 /// #[pyclass]
 /// #[derive(Hash)]
 /// struct PyClass {
@@ -471,7 +471,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(__hash__)]
+#[proc_macro_derive(PyHash)]
 pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::hash::implementation(input) {
@@ -498,7 +498,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// // Put before `#[pyclass]` to read its attributes.
-/// #[derive(__init__, __match_args__)]
+/// #[derive(PyInit, PyMatchArgs)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -542,7 +542,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     .is_ok()
 /// )
 /// ```
-#[proc_macro_derive(__match_args__)]
+#[proc_macro_derive(PyMatchArgs)]
 pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::match_args::implementation(input) {

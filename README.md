@@ -4,8 +4,8 @@
 // Enable `multiple-pymethods` feature of pyo3
 use pyderive::*;
 
-// Put #[derive(__init__, ...)] before #[pyclass] to read its attr.
-#[derive(__init__, __match_args__, __repr__, __eq__, __hash__)]
+// Put #[derive(PyInit, ...)] before #[pyclass] to read its attr.
+#[derive(PyInit, PyMatchArgs, PyRepr, PyEq, PyHash)]
 #[pyclass(get_all)]
 #[derive(PartialEq, Hash)]
 struct MyClass {
@@ -42,14 +42,14 @@ It requires to enable `multiple-pymethods` feature of pyo3 because this derives 
 
 This provides deriving following special methods and attribute;
 
-1. `__repr__`/`__str__`: prints all `get` and `set` fileds.
-2. `__iter__`: returns iterator of all `get` fields
-3. `__len__`: returns number of `get` fields (compile-time constant)
-4. `__init__`: a constructor with all fields (technically `__new__`)
-5. `__match_args__`: supports pattern matching by positional attr. with all `get` fields
-6. `__eq__`: besed on `PartialEq`/`Eq` trait
-7. `__ord__` for `__lt__`, `__le__`, `__gt__` and `__ge__`: besed on `PartialOrd`/`Ord` trait
-8. `__hash__`: based on `Hash` trait
+1. `PyRepr`/`PyStr`: prints all `get` and `set` fileds.
+2. `PyIter`: returns iterator of all `get` fields
+3. `PyLen`: returns number of `get` fields (compile-time constant)
+4. `PyInit`: a constructor with all fields (technically `__new__`)
+5. `PyMatchArgs`: supports pattern matching by positional attr. with all `get` fields
+6. `PyEq`: besed on `PartialEq`/`Eq` trait
+7. `PyOrder` for `__lt__`, `__le__`, `__gt__` and `__ge__`: besed on `PartialOrd`/`Ord` trait
+8. `PyHash`: based on `Hash` trait
    - *Note that implementing any of `__eq__`, `__lt__`, `__le__`, `__gt__` and `__ge__` methods will cause Python not to generate a default `__hash__` implementation, so consider also implementing `__hash__`.*
 
 For example,
@@ -57,7 +57,7 @@ For example,
 ```rust
 use pyderive::*;
 
-#[derive(__init__, __match_args__, __repr__)]
+#[derive(PyInit, PyMatchArgs, PyRepr)]
 #[pyclass(name="RenamedClass", name="camelCase")]
 #[derive]
 struct MyClass {

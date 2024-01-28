@@ -7,7 +7,7 @@ mod test_repr {
 
     #[test]
     fn test_no_get_set() {
-        #[derive(__repr__)]
+        #[derive(PyRepr)]
         #[pyclass]
         #[derive(Default)]
         #[allow(dead_code)]
@@ -27,7 +27,7 @@ mod test_repr {
     fn test_get_set() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyRepr)]
         #[pyclass]
         #[derive(Default)]
         struct PyClass {
@@ -51,7 +51,7 @@ mod test_repr {
     fn test_get_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyRepr)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -73,7 +73,7 @@ mod test_repr {
     fn test_set_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyRepr)]
         #[pyclass(set_all)]
         #[derive(Default)]
         struct PyClass {
@@ -95,7 +95,7 @@ mod test_repr {
     fn test_name_rename_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyRepr)]
         #[pyclass(get_all, name = "PyClass", rename_all = "camelCase")]
         #[derive(Default)]
         struct PyClass {
@@ -123,7 +123,7 @@ mod test_str {
     fn test_no_get_set() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyStr)]
         #[pyclass]
         #[derive(Default)]
         #[allow(dead_code)]
@@ -142,7 +142,7 @@ mod test_str {
     fn test_get_set() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyStr)]
         #[pyclass]
         #[derive(Default)]
         struct PyClass {
@@ -166,7 +166,7 @@ mod test_str {
     fn test_get_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyStr)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -188,7 +188,7 @@ mod test_str {
     fn test_set_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyStr)]
         #[pyclass(set_all)]
         #[derive(Default)]
         struct PyClass {
@@ -210,7 +210,7 @@ mod test_str {
     fn test_name_rename_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__repr__)]
+        #[derive(PyStr)]
         #[pyclass(get_all, name = "PyClass", rename_all = "camelCase")]
         #[derive(Default)]
         struct PyClass {
@@ -238,7 +238,7 @@ mod test_iter {
     fn test_no_get_set() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__iter__)]
+        #[derive(PyIter)]
         #[pyclass]
         #[derive(Default)]
         #[allow(dead_code)]
@@ -257,7 +257,7 @@ mod test_iter {
     fn test_get_set() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__iter__)]
+        #[derive(PyIter)]
         #[pyclass]
         #[derive(Default)]
         struct PyClass {
@@ -277,7 +277,7 @@ mod test_iter {
     fn test_get_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__iter__)]
+        #[derive(PyIter)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -295,7 +295,7 @@ mod test_iter {
     fn test_set_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__iter__)]
+        #[derive(PyIter)]
         #[pyclass(set_all)]
         #[derive(Default)]
         struct PyClass {
@@ -314,7 +314,7 @@ mod test_iter {
     fn test_name_rename_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__iter__)]
+        #[derive(PyIter)]
         #[pyclass(get_all, name = "PyClass", rename_all = "camelCase")]
         #[derive(Default)]
         struct PyClass {
@@ -338,7 +338,7 @@ mod test_len {
     fn test_no_get_set() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__len__)]
+        #[derive(PyLen)]
         #[pyclass]
         #[derive(Default)]
         #[allow(dead_code)]
@@ -357,7 +357,7 @@ mod test_len {
     fn test_get_set() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__len__)]
+        #[derive(PyLen)]
         #[pyclass]
         #[derive(Default)]
         struct PyClass {
@@ -377,7 +377,7 @@ mod test_len {
     fn test_get_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__len__)]
+        #[derive(PyLen)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -395,7 +395,7 @@ mod test_len {
     fn test_set_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__len__)]
+        #[derive(PyLen)]
         #[pyclass(set_all)]
         #[derive(Default)]
         struct PyClass {
@@ -414,7 +414,7 @@ mod test_len {
     fn test_name_rename_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__len__)]
+        #[derive(PyLen)]
         #[pyclass(get_all, name = "PyClass", rename_all = "camelCase")]
         #[derive(Default)]
         struct PyClass {
@@ -436,7 +436,7 @@ mod test_init {
 
     #[test]
     fn test_no_get_set() {
-        #[derive(__init__)]
+        #[derive(PyInit)]
         #[pyclass]
         #[allow(dead_code)]
         struct PyClass {
@@ -455,7 +455,7 @@ mod test_init {
 
     #[test]
     fn test_get_set() {
-        #[derive(__init__)]
+        #[derive(PyInit)]
         #[pyclass]
         #[derive(Default)]
         struct PyClass {
@@ -475,7 +475,7 @@ mod test_init {
 
     #[test]
     fn test_name_rename_all() {
-        #[derive(__init__)]
+        #[derive(PyInit)]
         #[pyclass(get_all, name = "renamedClass", rename_all = "camelCase")]
         #[derive(Default)]
         struct PyClass {
@@ -512,7 +512,7 @@ mod test_hash {
     fn test() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__hash__)]
+        #[derive(PyHash)]
         #[pyclass]
         #[derive(Default, Hash)]
         #[allow(dead_code)]
@@ -531,7 +531,7 @@ mod test_hash {
     fn test_get_set() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__hash__)]
+        #[derive(PyHash)]
         #[pyclass]
         #[derive(Default, Hash)]
         struct PyClass {
@@ -551,7 +551,7 @@ mod test_hash {
     fn test_get_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__hash__)]
+        #[derive(PyHash)]
         #[pyclass(get_all)]
         #[derive(Default, Hash)]
         struct PyClass {
@@ -569,7 +569,7 @@ mod test_hash {
     fn test_set_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__hash__)]
+        #[derive(PyHash)]
         #[pyclass(set_all)]
         #[derive(Default, Hash)]
         struct PyClass {
@@ -588,7 +588,7 @@ mod test_hash {
     fn test_name_rename_all() {
         pyo3::prepare_freethreaded_python();
 
-        #[derive(__hash__)]
+        #[derive(PyHash)]
         #[pyclass(get_all, name = "PyClass", rename_all = "camelCase")]
         #[derive(Default, Hash)]
         struct PyClass {
@@ -610,7 +610,7 @@ mod test_eq {
 
     #[test]
     fn test_eq() {
-        #[derive(__eq__)]
+        #[derive(PyEq)]
         #[pyclass]
         #[derive(Default, PartialEq, Eq)]
         #[allow(dead_code)]
@@ -629,7 +629,7 @@ mod test_eq {
 
     #[test]
     fn test_patial_ord() {
-        #[derive(__eq__)]
+        #[derive(PyEq)]
         #[pyclass]
         #[derive(Default, PartialEq)]
         #[allow(dead_code)]
@@ -651,12 +651,12 @@ except TypeError: pass");
 }
 
 #[cfg(test)]
-mod test_lgte {
+mod test_order {
     use super::*;
 
     #[test]
     fn test_ord() {
-        #[derive(__ord__)]
+        #[derive(PyOrder)]
         #[pyclass]
         #[derive(Default, PartialOrd, PartialEq, Eq, Ord)]
         #[allow(dead_code)]
@@ -689,7 +689,7 @@ except TypeError: pass");
 
     #[test]
     fn test_patial_ord() {
-        #[derive(__ord__)]
+        #[derive(PyOrder)]
         #[pyclass]
         #[derive(Default, PartialOrd, PartialEq)]
         #[allow(dead_code)]
@@ -719,7 +719,7 @@ mod test_match_args {
 
     #[test]
     fn test_no_get_set() {
-        #[derive(__match_args__)]
+        #[derive(PyMatchArgs)]
         #[pyclass]
         #[allow(dead_code)]
         struct PyClass {
@@ -756,7 +756,7 @@ match py_c(0, ''):
 
     #[test]
     fn test_get_set() {
-        #[derive(__match_args__)]
+        #[derive(PyMatchArgs)]
         #[pyclass]
         struct PyClass {
             #[pyo3(get)]
@@ -798,7 +798,7 @@ match py_c(0, ''):
 
     #[test]
     fn test_name_rename_all() {
-        #[derive(__match_args__)]
+        #[derive(PyMatchArgs)]
         #[pyclass(get_all, name = "renamedClass", rename_all = "camelCase")]
         #[derive(Default)]
         struct PyClass {
