@@ -43,7 +43,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
         #[pymethods]
         impl #struct_name {
-            pub fn __iter__(slf: pyo3::PyRef<'_, Self>) -> pyo3::PyResult<Py<#iter_name>> {
+            pub fn __iter__(slf: pyo3::PyRef<'_, Self>) -> pyo3::PyResult<pyo3::Py<#iter_name>> {
                 let py = slf.py();
                 let iter = #iter_name {
                     inner: vec![ #(#args),* ].into_iter(),
