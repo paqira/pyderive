@@ -1,31 +1,12 @@
 use quote::format_ident;
-use syn::{spanned::Spanned, Field, Ident, Lit, Path, Type, TypePath};
+use syn::{
+    punctuated::Punctuated, spanned::Spanned, Data, DataEnum, DataStruct, DataUnion, DeriveInput,
+    Field, Fields, FieldsNamed, Ident, Lit, Path, Result, Token, Type, TypePath,
+};
 
 use crate::attr::{
     pyo3_struct::RenamingRule, PyderiveFieldOption, Pyo3FieldOption, Pyo3StructOption,
 };
-
-macro_rules! fields_named {
-    ($n:ident) => {
-        syn::Data::Struct(syn::DataStruct {
-            fields: syn::Fields::Named(syn::FieldsNamed { named: $n, .. }),
-            ..
-        })
-    };
-}
-pub(crate) use fields_named;
-
-#[allow(unused_macros)]
-macro_rules! fields_unnamed {
-    ($n:ident) => {
-        syn::Data::Struct(syn::DataStruct {
-            fields: syn::Fields::Unnamed(syn::FieldsUnnamed { unnamed: $n, .. }),
-            ..
-        })
-    };
-}
-#[allow(unused_imports)]
-pub(crate) use fields_unnamed;
 
 pub fn is_py(ty: &Type) -> bool {
     match &ty {
@@ -58,7 +39,9 @@ pub struct FieldData {
     pub field: Field,
     pub get: bool,
     pub set: bool,
+    // String -> Some(String) to support Tuple struct
     pub pyname: String,
+    // String -> Some(Ident) to support Tuple struct
     pub pyident: Ident,
     pub init: Option<bool>,
     pub match_args: Option<bool>,
@@ -71,15 +54,30 @@ pub struct FieldData {
 }
 
 impl FieldData {
-    pub fn try_from_input(input: &syn::DeriveInput) -> syn::Result<Vec<Self>> {
+    pub fn try_from_input(input: &DeriveInput) -> Result<Vec<Self>> {
         let pyo3_struct_op = Pyo3StructOption::try_from(&input.attrs)?;
 
+        let empty = Punctuated::<Field, Token![,]>::new();
         let fields = match &input.data {
-            fields_named!(n) => n,
-            // fields_unnamed!(n) => n,
-            _ => {
+            Data::Struct(DataStruct { fields, .. }) => match fields {
+                Fields::Named(FieldsNamed { named, .. }) => named,
+                Fields::Unit => &empty,
+                unnamed => {
+                    return Err(syn::Error::new(
+                        unnamed.span(),
+                        "support struct with field only",
+                    ))
+                }
+            },
+            Data::Enum(DataEnum { enum_token, .. }) => {
                 return Err(syn::Error::new(
-                    input.span(),
+                    enum_token.span(),
+                    "support struct with field only",
+                ))
+            }
+            Data::Union(DataUnion { union_token, .. }) => {
+                return Err(syn::Error::new(
+                    union_token.span(),
                     "support struct with field only",
                 ))
             }

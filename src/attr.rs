@@ -6,7 +6,7 @@ use syn::{
 };
 
 use self::{
-    pyderive_field::{ExprAssignLit, OptionFieldAttr, PyderiveFieldAttr},
+    pyderive_field::{ExprAssignGeneric, OptionFieldAttr, PyderiveFieldAttr},
     pyo3_field::Pyo3FieldAttr,
     pyo3_struct::{Pyo3StructAttr, RenamingRule},
 };
@@ -50,6 +50,8 @@ impl FromIterator<Pyo3StructAttr> for Pyo3StructOption {
     }
 }
 
+// NEVER returns Error on parsing Pyo3 attr args,
+// we just read them.
 impl TryFrom<&Vec<Attribute>> for Pyo3StructOption {
     type Error = syn::Error;
 
@@ -58,6 +60,18 @@ impl TryFrom<&Vec<Attribute>> for Pyo3StructOption {
 
         value
             .iter()
+            // FIXME:
+            // Replace error handling,
+            // here is parsing pyo3 attr arg
+            .map(|a| {
+                if a.path().is_ident("pyderive") {
+                    Err(syn::Error::new(a.meta.span(), "support field only"))
+                } else {
+                    Ok(a)
+                }
+            })
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
             .filter(|a| a.path().is_ident("pyclass") || a.path().is_ident("pyo3"))
             .filter_map(take_meta_list)
             .map(|m| m.parse_args_with(Attr::parse_terminated))
@@ -95,6 +109,8 @@ impl FromIterator<Pyo3FieldAttr> for Pyo3FieldOption {
     }
 }
 
+// NEVER returns Error on parsing Pyo3 attr args,
+// we just read them.
 impl TryFrom<&Vec<Attribute>> for Pyo3FieldOption {
     type Error = syn::Error;
 
@@ -130,8 +146,8 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
         macro_rules! extract_ident {
             ($value:ident) => {
                 match $value {
-                    OptionFieldAttr::Ident { ident } => ident,
-                    OptionFieldAttr::ExprAssign(ExprAssignLit { ident, .. }) => ident,
+                    OptionFieldAttr::Ident(ident) => ident,
+                    OptionFieldAttr::ExprAssign(ExprAssignGeneric { left, .. }) => left,
                 }
             };
         }
@@ -140,8 +156,8 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
             ($value:ident) => {
                 match $value {
                     OptionFieldAttr::Ident { .. } => true,
-                    OptionFieldAttr::ExprAssign(ExprAssignLit {
-                        value: LitBool { value, .. },
+                    OptionFieldAttr::ExprAssign(ExprAssignGeneric {
+                        right: LitBool { value, .. },
                         ..
                     }) => value,
                 }
@@ -214,10 +230,10 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                 },
                 PyderiveFieldAttr::Default(v) => match new.default {
                     Some(_) => {
-                        return Err(syn::Error::new(v.ident.span(), "duplicated default"));
+                        return Err(syn::Error::new(v.left.span(), "duplicated default"));
                     }
                     None => {
-                        new.default = Some(v.value);
+                        new.default = Some(v.right);
                     }
                 },
             }
@@ -236,8 +252,41 @@ impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
         value
             .iter()
             .filter(|a| a.path().is_ident("pyderive"))
-            .filter_map(take_meta_list)
-            .map(|m| m.parse_args_with(Attr::parse_terminated))
+            // FIXME:
+            // Shoud it raise Error when #[pyderive]?
+            // If not, uncomment the following filter_map.
+            // .filter_map(|a| match &a.meta {
+            //     Meta::List(_) => Some(a),
+            //     _ => None,
+            // })
+            // FIXME:
+            // Shoud it raise Error when #[pyderive]?
+            // If not, comment out the following filter_map.
+            .map(|a| match &a.meta {
+                Meta::List(m) => Ok(m),
+                _ => Err(syn::Error::new(
+                    a.meta.span(),
+                    "supports #[pyderive(..)] form only",
+                )),
+            })
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .map(|m| {
+                m.parse_args_with(Attr::parse_terminated)
+                    // FIXME:
+                    // Shoud it raise Error when #[pyderive()]?
+                    // If not, remove the following and_then.
+                    .and_then(|r| {
+                        if r.is_empty() {
+                            Err(syn::Error::new(
+                                m.span(),
+                                "effects nothing if argument is empty",
+                            ))
+                        } else {
+                            Ok(r)
+                        }
+                    })
+            })
             .collect::<Result<Vec<_>>>()?
             .into_iter()
             .flatten()
@@ -431,37 +480,34 @@ pub mod pyderive_field {
     }
 
     #[derive(Debug)]
-    pub struct ExprAssignLit<T, K> {
-        pub ident: T,
-        pub value: K,
+    pub struct ExprAssignGeneric<T, K> {
+        pub left: T,
+        pub eq_token: syn::token::Eq,
+        pub right: K,
     }
 
-    impl<T: Parse, K: Parse> Parse for ExprAssignLit<T, K> {
+    impl<T: Parse, K: Parse> Parse for ExprAssignGeneric<T, K> {
         fn parse(input: ParseStream) -> Result<Self> {
-            let ident: T = input.parse()?;
-            let _: Token![=] = input.parse()?;
-            let value: K = input.parse()?;
-            Ok(Self { ident, value })
+            Ok(Self {
+                left: input.parse()?,
+                eq_token: input.parse()?,
+                right: input.parse()?,
+            })
         }
     }
 
     #[derive(Debug)]
     pub enum OptionFieldAttr<T: Parse, K: Parse> {
-        Ident { ident: T },
-        ExprAssign(ExprAssignLit<T, K>),
+        Ident(T),
+        ExprAssign(ExprAssignGeneric<T, K>),
     }
 
     impl<T: Parse, K: Parse> Parse for OptionFieldAttr<T, K> {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek2(Token![=]) {
-                let ident: T = input.parse()?;
-                let _: Token![=] = input.parse()?;
-                let value: K = input.parse()?;
-                Ok(Self::ExprAssign(ExprAssignLit { ident, value }))
+                Ok(Self::ExprAssign(input.parse()?))
             } else {
-                Ok(Self::Ident {
-                    ident: input.parse()?,
-                })
+                Ok(Self::Ident(input.parse()?))
             }
         }
     }
@@ -475,7 +521,7 @@ pub mod pyderive_field {
         Iter(OptionFieldAttr<kw::iter, LitBool>),
         Len(OptionFieldAttr<kw::len, LitBool>),
         KwOnly(OptionFieldAttr<kw::kw_only, LitBool>),
-        Default(ExprAssignLit<kw::default, Lit>),
+        Default(ExprAssignGeneric<kw::default, Lit>),
     }
 
     impl Parse for PyderiveFieldAttr {
@@ -501,17 +547,5 @@ pub mod pyderive_field {
                 Err(lookahead.error())
             }
         }
-    }
-
-    #[derive(Debug, Default)]
-    pub struct PyderiveFieldOption {
-        pub init: Option<OptionFieldAttr<kw::init, LitBool>>,
-        pub match_args: Option<OptionFieldAttr<kw::match_args, LitBool>>,
-        pub repr: Option<OptionFieldAttr<kw::repr, LitBool>>,
-        pub str: Option<OptionFieldAttr<kw::str, LitBool>>,
-        pub iter: Option<OptionFieldAttr<kw::iter, LitBool>>,
-        pub len: Option<OptionFieldAttr<kw::len, LitBool>>,
-        pub kw_only: Option<OptionFieldAttr<kw::kw_only, LitBool>>,
-        pub default: Option<OptionFieldAttr<kw::default, Lit>>,
     }
 }
