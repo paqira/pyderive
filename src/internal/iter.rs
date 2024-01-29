@@ -8,7 +8,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = input.ident.clone();
     let data = FieldData::try_from_input(&input)?;
 
-    let iter_name = format_ident!("__{}IterableWrapper", struct_name);
+    let iter_name = format_ident!("__pyderive_{}IterableWrapper", struct_name);
 
     let args = data
         .iter()
