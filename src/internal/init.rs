@@ -69,7 +69,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pymethods]
         impl #struct_name {
             #[new]
-            #[pyo3(signature = ( #( #signature ),* ))]
+            #[pyo3(
+                signature = ( #( #signature ),* ),
+                text_signiture = ( #( #signature ),* )
+            )]
             pub fn __pyderive_new(
                 #(#init_args),*
             ) -> Self {
