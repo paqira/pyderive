@@ -78,8 +78,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         })
         .collect::<Vec<_>>();
 
-    dbg!(quote!(( #( #signature ),* )));
-
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
