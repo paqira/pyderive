@@ -12,7 +12,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let names = data
         .iter()
-        .filter(|d| d.len.unwrap_or(d.get))
+        .filter(|d| d.match_args.unwrap_or(d.get))
         .map(|d| d.pyname.to_owned())
         .collect::<Vec<_>>();
 
