@@ -16,6 +16,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = input.ident.clone();
     let data = FieldData::try_from_input(&input)?;
 
+    // signature
     let mut iter = data.iter();
     let mut signature = Vec::new();
     signature.extend(
@@ -30,14 +31,24 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 }
             }),
     );
-    signature.push(quote! { * });
-    signature.extend(iter.clone().filter(|d| d.init.unwrap_or(true)).map(|d| {
-        let pyident = d.pyident.to_owned();
-        match &d.default {
-            Some(default) => quote! { #pyident=#default },
-            None => quote! { #pyident },
-        }
-    }));
+
+    let rest = iter
+        .clone()
+        .filter(|d| d.init.unwrap_or(true))
+        .map(|d| {
+            let pyident = d.pyident.to_owned();
+            match &d.default {
+                Some(default) => quote! { #pyident=#default },
+                None => quote! { #pyident },
+            }
+        })
+        .collect::<Vec<_>>();
+    if !rest.is_empty() {
+        signature.push(quote! { * });
+        signature.extend(rest);
+    }
+
+    let text_signature = quote!( #( #signature ),* ).to_string();
 
     let init_args = data
         .iter()
@@ -67,13 +78,15 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         })
         .collect::<Vec<_>>();
 
+    dbg!(quote!(( #( #signature ),* )));
+
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
             #[new]
             #[pyo3(
                 signature = ( #( #signature ),* ),
-                text_signiture = ( #( #signature ),* )
+                text_signature = #text_signature
             )]
             pub fn __pyderive_new(
                 #(#init_args),*
