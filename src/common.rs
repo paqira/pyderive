@@ -34,7 +34,7 @@ pub fn is_string(ty: &Type) -> bool {
     .map_or(false, |seg| seg.ident.eq("String"))
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FieldData {
     pub field: Field,
     pub get: bool,

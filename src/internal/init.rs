@@ -4,6 +4,14 @@ use syn::DeriveInput;
 
 use crate::common::FieldData;
 
+fn signiture(d: &FieldData) -> proc_macro2::TokenStream {
+    let pyident = &d.pyident;
+    match &d.default {
+        Some(default) => quote! { #pyident=#default },
+        None => quote! { #pyident },
+    }
+}
+
 // FIXME:
 // Does row string (r#..#) prefer for idents?
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
@@ -17,38 +25,25 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let data = FieldData::try_from_input(&input)?;
 
     // signature
-    let mut iter = data.iter();
     let mut signature = Vec::new();
+
     signature.extend(
-        iter.by_ref()
+        data.iter()
             .take_while(|d| !d.kw_only.unwrap_or(false))
             .filter(|d| d.init.unwrap_or(true))
-            .map(|d| {
-                let pyident = d.pyident.to_owned();
-                match &d.default {
-                    Some(default) => quote! { #pyident=#default },
-                    None => quote! { #pyident },
-                }
-            }),
+            .map(signiture),
     );
 
-    let rest = iter
-        .clone()
-        .filter(|d| d.init.unwrap_or(true))
-        .map(|d| {
-            let pyident = d.pyident.to_owned();
-            match &d.default {
-                Some(default) => quote! { #pyident=#default },
-                None => quote! { #pyident },
-            }
-        })
+    let rest_args = data
+        .iter()
+        .skip_while(|d| !d.kw_only.unwrap_or(false))
+        .map(signiture)
         .collect::<Vec<_>>();
-    if !rest.is_empty() {
-        signature.push(quote! { * });
-        signature.extend(rest);
-    }
 
-    let text_signature = quote!( #( #signature ),* ).to_string();
+    if !rest_args.is_empty() {
+        signature.push(quote! { * });
+        signature.extend(rest_args);
+    }
 
     let init_args = data
         .iter()
@@ -82,10 +77,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pymethods]
         impl #struct_name {
             #[new]
-            #[pyo3(
-                signature = ( #( #signature ),* ),
-                text_signature = #text_signature
-            )]
+            #[pyo3(signature = ( #( #signature ),* ))]
             pub fn __pyderive_new(
                 #(#init_args),*
             ) -> Self {
