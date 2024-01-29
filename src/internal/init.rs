@@ -4,6 +4,8 @@ use syn::DeriveInput;
 
 use crate::common::FieldData;
 
+// FIXME:
+// Does row string (r#..#) prefer for idents?
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     // #[pyderive]                          -> __init__(field):     ...
     // #[pyderive(default=xxx)]             -> __init__(field=xxx): ...
