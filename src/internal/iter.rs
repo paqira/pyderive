@@ -46,7 +46,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             pub fn __iter__(slf: pyo3::PyRef<'_, Self>) -> pyo3::PyResult<pyo3::Py<#iter_name>> {
                 let py = slf.py();
                 let iter = #iter_name {
-                    inner: vec![ #(#args),* ].into_iter(),
+                    inner: std::vec![ #(#args),* ].into_iter(),
                 };
                 pyo3::Py::new(py, iter)
             }
