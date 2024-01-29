@@ -78,6 +78,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         impl #struct_name {
             #[new]
             #[pyo3(signature = ( #( #signature ),* ))]
+            #[allow(non_snake_case)]
             pub fn __pyderive_new(
                 #(#init_args),*
             ) -> Self {
