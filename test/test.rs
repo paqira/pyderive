@@ -1,5 +1,6 @@
 use pyderive::*;
-use pyo3::{prelude::*, py_run};
+use pyo3::{prelude::*, py_run, types::*};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 #[cfg(test)]
 mod test_repr {
@@ -12,8 +13,8 @@ mod test_repr {
         #[derive(Default)]
         #[allow(dead_code)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -30,9 +31,9 @@ mod test_repr {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
+            fd_name_a: i64,
             #[pyo3(set)]
-            field_name_b: f64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -41,7 +42,7 @@ mod test_repr {
             py_run!(
                 py,
                 data,
-                r#"assert repr(data) == "PyClass(field_name_a=0, field_name_b=0.0)""#
+                r#"assert repr(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
             )
         });
     }
@@ -52,8 +53,8 @@ mod test_repr {
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -62,7 +63,7 @@ mod test_repr {
             py_run!(
                 py,
                 data,
-                r#"assert repr(data) == "PyClass(field_name_a=0, field_name_b=0.0)""#
+                r#"assert repr(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
             )
         });
     }
@@ -73,8 +74,8 @@ mod test_repr {
         #[pyclass(set_all)]
         #[derive(Default)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -83,7 +84,7 @@ mod test_repr {
             py_run!(
                 py,
                 data,
-                r#"assert repr(data) == "PyClass(field_name_a=0, field_name_b=0.0)""#
+                r#"assert repr(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
             )
         });
     }
@@ -95,8 +96,8 @@ mod test_repr {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(name = "new_name")]
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -105,7 +106,7 @@ mod test_repr {
             py_run!(
                 py,
                 data,
-                r#"assert repr(data) == "PyClass(new_name=0, fieldNameB=0.0)""#
+                r#"assert repr(data) == "PyClass(new_name=0, fdNameB=0.0)""#
             )
         });
     }
@@ -157,8 +158,8 @@ mod test_str {
         #[derive(Default)]
         #[allow(dead_code)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -175,9 +176,9 @@ mod test_str {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
+            fd_name_a: i64,
             #[pyo3(set)]
-            field_name_b: f64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -186,7 +187,7 @@ mod test_str {
             py_run!(
                 py,
                 data,
-                r#"assert str(data) == "PyClass(field_name_a=0, field_name_b=0.0)""#
+                r#"assert str(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
             )
         });
     }
@@ -197,8 +198,8 @@ mod test_str {
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -207,7 +208,7 @@ mod test_str {
             py_run!(
                 py,
                 data,
-                r#"assert str(data) == "PyClass(field_name_a=0, field_name_b=0.0)""#
+                r#"assert str(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
             )
         });
     }
@@ -218,8 +219,8 @@ mod test_str {
         #[pyclass(set_all)]
         #[derive(Default)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -228,7 +229,7 @@ mod test_str {
             py_run!(
                 py,
                 data,
-                r#"assert str(data) == "PyClass(field_name_a=0, field_name_b=0.0)""#
+                r#"assert str(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
             )
         });
     }
@@ -240,8 +241,8 @@ mod test_str {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(name = "new_name")]
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -250,7 +251,7 @@ mod test_str {
             py_run!(
                 py,
                 data,
-                r#"assert str(data) == "PyClass(new_name=0, fieldNameB=0.0)""#
+                r#"assert str(data) == "PyClass(new_name=0, fdNameB=0.0)""#
             )
         });
     }
@@ -302,8 +303,8 @@ mod test_iter {
         #[derive(Default)]
         #[allow(dead_code)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -320,9 +321,9 @@ mod test_iter {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
+            fd_name_a: i64,
             #[pyo3(set)]
-            field_name_b: f64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -338,8 +339,8 @@ mod test_iter {
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -356,8 +357,8 @@ mod test_iter {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -374,8 +375,8 @@ mod test_iter {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(name = "new_name")]
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -429,8 +430,8 @@ mod test_len {
         #[derive(Default)]
         #[allow(dead_code)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -447,9 +448,9 @@ mod test_len {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
+            fd_name_a: i64,
             #[pyo3(set)]
-            field_name_b: f64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -465,8 +466,8 @@ mod test_len {
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -483,8 +484,8 @@ mod test_len {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -501,8 +502,8 @@ mod test_len {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(name = "new_name")]
-            field_name_a: i64,
-            field_name_b: f64,
+            fd_name_a: i64,
+            fd_name_b: f64,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -558,16 +559,78 @@ mod test_init {
         #[pyclass]
         #[allow(dead_code)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_bool: bool,
+            fd_name_str: String,
+            fd_name_int: i64,
+            fd_name_float: f64,
+            fn_name_bytes: Vec<u8>,
+
+            fd_name_opt_str: Option<String>,
+            fd_name_opt_int: Option<i64>,
+
+            fd_name_vec_str: Vec<String>,
+            fd_name_vec_int: Vec<i64>,
+
+            fd_name_vec_opt_str: Vec<Option<String>>,
+            fd_name_vec_opt_int: Vec<Option<i64>>,
+
+            fd_name_hs_str: HashSet<String>,
+            fd_name_js_int: BTreeSet<i64>,
+
+            fd_name_hm_str: HashMap<String, String>,
+            fd_name_hm_int: BTreeMap<i64, i64>,
+
+            fd_name_pybool: Py<PyBool>,
+            fd_name_pystr: Py<PyString>,
+            fd_name_pyint: Py<PyLong>,
+            fd_name_pyfloat: Py<PyFloat>,
+
+            fd_name_opt_pystr: Option<Py<PyString>>,
+            fd_name_opt_pyint: Option<Py<PyLong>>,
+
+            fd_name_vec_pystr: Vec<Py<PyString>>,
+            fd_name_vec_pyint: Vec<Py<PyLong>>,
+
+            fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
+            fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
         }
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             let py_class = py.get_type::<PyClass>();
             assert_eq!("PyClass", py_class.name().unwrap().to_string());
-            pyo3::py_run!(py, py_class, "py_class(0, '')");
-            pyo3::py_run!(py, py_class, "py_class(field_name_b='', field_name_a=0)");
+            pyo3::py_run!(
+                py,
+                py_class,
+                "py_class(
+                    True, 'str', 1, 1.0, b'str',
+                    'str', 1,
+                    ['str'], [1],
+                    ['str'], [1],
+                    {'str'}, {1},
+                    {'str': 'str'}, {1: 1},
+                    True, 'str', 1, 1.0,
+                    'str', 1,
+                    ['str'], [1],
+                    ['str'], [1],
+                )"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "py_class(
+fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=b'str',
+fd_name_opt_str=None, fd_name_opt_int=None,
+fd_name_vec_str=[], fd_name_vec_int=[],
+fd_name_vec_opt_str=[None], fd_name_vec_opt_int=[None],
+fd_name_hs_str=set(), fd_name_js_int=set(),
+fd_name_hm_str={}, fd_name_hm_int={},
+fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0,
+fd_name_opt_pystr=None, fd_name_opt_pyint=None,
+fd_name_vec_pystr=[], fd_name_vec_pyint=[],
+fd_name_vec_opt_pystr=[None], fd_name_vec_opt_pyint=[None],
+            )"
+            );
         });
     }
 
@@ -578,16 +641,16 @@ mod test_init {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
+            fd_name_a: i64,
             #[pyo3(set)]
-            field_name_b: String,
+            fd_name_b: String,
         }
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             let py_class = py.get_type::<PyClass>();
             assert_eq!("PyClass", py_class.name().unwrap().to_string());
-            pyo3::py_run!(py, py_class, "assert py_class(0, '').field_name_a == 0")
+            pyo3::py_run!(py, py_class, "assert py_class(0, '').fd_name_a == 0")
         })
     }
 
@@ -598,8 +661,8 @@ mod test_init {
         #[derive(Default)]
         struct PyClass {
             #[pyo3(name = "new_name")]
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_a: i64,
+            fd_name_b: String,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -607,16 +670,16 @@ mod test_init {
             let py_class = py.get_type::<PyClass>();
             assert_eq!("renamedClass", py_class.name().unwrap().to_string());
             pyo3::py_run!(py, py_class, "assert py_class(0, '').new_name == 0");
-            pyo3::py_run!(py, py_class, "assert py_class(0, '').fieldNameB == ''");
+            pyo3::py_run!(py, py_class, "assert py_class(0, '').fdNameB == ''");
             pyo3::py_run!(
                 py,
                 py_class,
-                "assert py_class(fieldNameB='', new_name=0).new_name == 0"
+                "assert py_class(fdNameB='', new_name=0).new_name == 0"
             );
             pyo3::py_run!(
                 py,
                 py_class,
-                "assert py_class(fieldNameB='', new_name=0).fieldNameB == ''"
+                "assert py_class(fdNameB='', new_name=0).fdNameB == ''"
             );
         });
     }
@@ -650,15 +713,174 @@ except TypeError: pass"
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            #[pyderive(default = 100)]
-            field: i64,
+            #[pyderive(default = true)]
+            fd_name_bool: bool,
+            #[pyderive(default = "str".to_string())]
+            fd_name_str: String,
+            #[pyderive(default = 1)]
+            fd_name_int: i64,
+            #[pyderive(default = 1.0)]
+            fd_name_float: f64,
+            #[pyderive(default = None)]
+            fd_name_opt: Option<i64>,
+            #[pyderive(default = "str".to_string())]
+            fd_name_opt_str: Option<String>,
+            #[pyderive(default = 10)]
+            fd_name_opt_int: Option<i64>,
+            #[pyderive(default = None)]
+            fd_name_opt_pystr: Option<Py<PyString>>,
+            #[pyderive(default = None)]
+            fd_name_opt_pyint: Option<Py<PyLong>>,
         }
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             let py_class = py.get_type::<PyClass>();
-            pyo3::py_run!(py, py_class, "assert py_class().field == 100");
-            pyo3::py_run!(py, py_class, "assert py_class(0).field == 0");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_bool is True");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_str == 'str'");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_int == 1");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_float == 1.0");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_opt is None");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_opt_str == 'str'");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_opt_int == 10");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_opt_pystr is None");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_opt_pyint is None");
+
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0,
+            ).fd_name_bool is False"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0,
+            ).fd_name_str == ''"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0,
+            ).fd_name_int == 0"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0,
+            ).fd_name_float == 0.0"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0,
+            ).fd_name_opt == 1"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0,
+            ).fd_name_opt_str == ''"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0,
+            ).fd_name_opt_int == 0"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0,
+            ).fd_name_opt_pyint == 0"
+            );
+            pyo3::py_run!(
+                py,
+                py_class,
+                "assert py_class(
+                fd_name_bool=False,
+                fd_name_str='',
+                fd_name_int=0,
+                fd_name_float=0.0,
+                fd_name_opt=1,
+                fd_name_opt_str='',
+                fd_name_opt_int=0,
+                fd_name_opt_pystr='',
+                fd_name_opt_pyint=0
+            ).fd_name_opt_pystr == ''"
+            );
         });
     }
 
@@ -668,14 +890,33 @@ except TypeError: pass"
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            #[pyderive(init = false, default = 100)]
-            field: i64,
+            #[pyderive(init = false, default = true)]
+            fd_name_bool: bool,
+            #[pyderive(init = false, default = "str".to_string())]
+            fd_name_str: String,
+            #[pyderive(init = false, default = 1)]
+            fd_name_int: i64,
+            #[pyderive(init = false, default = 1.0)]
+            fd_name_float: f64,
+            #[pyderive(init = false, default = None)]
+            fd_name_opt: Option<i64>,
+            #[pyderive(init = false, default = Some("str".to_string()))]
+            fd_name_opt_str: Option<String>,
+            #[pyderive(init = false, default = Some(10))]
+            fd_name_opt_int: Option<i64>,
         }
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             let py_class = py.get_type::<PyClass>();
-            pyo3::py_run!(py, py_class, "assert py_class().field == 100");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_bool is True");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_str == 'str'");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_int == 1");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_float == 1.0");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_opt is None");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_opt_str == 'str'");
+            pyo3::py_run!(py, py_class, "assert py_class().fd_name_opt_int == 10");
+
             pyo3::py_run!(
                 py,
                 py_class,
@@ -691,16 +932,17 @@ except TypeError: pass"
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            field_a: i64,
+            fd_a: i64,
             #[pyderive(kw_only)]
-            field_b: i64,
+            fd_b: i64,
         }
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             let py_class = py.get_type::<PyClass>();
-            pyo3::py_run!(py, py_class, "assert py_class(0, field_b=1).field_a == 0");
-            pyo3::py_run!(py, py_class, "assert py_class(0, field_b=1).field_b == 1");
+            pyo3::py_run!(py, py_class, "assert py_class(0, fd_b=1).fd_a == 0");
+            pyo3::py_run!(py, py_class, "assert py_class(0, fd_b=1).fd_b == 1");
+
             pyo3::py_run!(
                 py,
                 py_class,
@@ -717,15 +959,15 @@ except TypeError: pass"
         #[derive(Default)]
         struct PyClass {
             #[pyderive(kw_only, default = 100)]
-            field_a: i64,
-            field_b: i64,
+            fd_a: i64,
+            fd_b: i64,
         }
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             let py_class = py.get_type::<PyClass>();
-            pyo3::py_run!(py, py_class, "assert py_class(field_b=0).field_a == 100");
-            pyo3::py_run!(py, py_class, "assert py_class(field_b=0).field_b == 0");
+            pyo3::py_run!(py, py_class, "assert py_class(fd_b=0).fd_a == 100");
+            pyo3::py_run!(py, py_class, "assert py_class(fd_b=0).fd_b == 0");
         });
     }
 }
@@ -740,17 +982,17 @@ mod test_match_args {
         #[pyclass]
         #[allow(dead_code)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_a: i64,
+            fd_name_b: String,
         }
 
         #[pymethods]
         impl PyClass {
             #[new]
-            pub fn new(field_name_a: i64, field_name_b: String) -> Self {
+            pub fn new(fd_name_a: i64, fd_name_b: String) -> Self {
                 Self {
-                    field_name_a,
-                    field_name_b,
+                    fd_name_a,
+                    fd_name_b,
                 }
             }
         }
@@ -777,18 +1019,18 @@ match py_class(0, ''):
         #[pyclass]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
+            fd_name_a: i64,
             #[pyo3(set)]
-            field_name_b: String,
+            fd_name_b: String,
         }
 
         #[pymethods]
         impl PyClass {
             #[new]
-            pub fn new(field_name_a: i64, field_name_b: String) -> Self {
+            pub fn new(fd_name_a: i64, fd_name_b: String) -> Self {
                 Self {
-                    field_name_a,
-                    field_name_b,
+                    fd_name_a,
+                    fd_name_b,
                 }
             }
         }
@@ -800,7 +1042,7 @@ match py_class(0, ''):
             pyo3::py_run!(
                 py,
                 py_class,
-                "assert py_class(0, '').__match_args__ == ('field_name_a', )"
+                "assert py_class(0, '').__match_args__ == ('fd_name_a', )"
             );
             pyo3::py_run!(
                 py,
@@ -820,17 +1062,17 @@ match py_class(0, ''):
         #[derive(Default)]
         struct PyClass {
             #[pyo3(name = "new_name")]
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_a: i64,
+            fd_name_b: String,
         }
 
         #[pymethods]
         impl PyClass {
             #[new]
-            pub fn new(field_name_a: i64, field_name_b: String) -> Self {
+            pub fn new(fd_name_a: i64, fd_name_b: String) -> Self {
                 Self {
-                    field_name_a,
-                    field_name_b,
+                    fd_name_a,
+                    fd_name_b,
                 }
             }
         }
@@ -842,7 +1084,7 @@ match py_class(0, ''):
             pyo3::py_run!(
                 py,
                 py_class,
-                "assert py_class(0, '').__match_args__ == ('new_name', 'fieldNameB')"
+                "assert py_class(0, '').__match_args__ == ('new_name', 'fdNameB')"
             );
 
             pyo3::py_run!(
@@ -858,8 +1100,8 @@ match py_class(0, ''):
                 py,
                 py_class,
                 "
-match py_class(field_name_b='', field_name_a=0):
-    case py_class(new_name=a, fieldNameB=b) if a == 0 and b == '': pass
+match py_class(fd_name_b='', fd_name_a=0):
+    case py_class(new_name=a, fdNameB=b) if a == 0 and b == '': pass
     case _: raise AssertionError"
             );
         });
@@ -947,15 +1189,15 @@ match py_class(0):
         #[derive(Default)]
         struct PyClass {
             #[pyderive(match_args = false)]
-            field_a: i64,
-            field_b: i64,
+            fd_a: i64,
+            fd_b: i64,
         }
 
         #[pymethods]
         impl PyClass {
             #[new]
-            pub fn new(field_a: i64, field_b: i64) -> Self {
-                Self { field_a, field_b }
+            pub fn new(fd_a: i64, fd_b: i64) -> Self {
+                Self { fd_a, fd_b }
             }
         }
 
@@ -966,7 +1208,7 @@ match py_class(0):
             pyo3::py_run!(
                 py,
                 py_class,
-                r#"assert py_class(0, 0).__match_args__ == ("field_b", )"#
+                r#"assert py_class(0, 0).__match_args__ == ("fd_b", )"#
             );
         });
     }
@@ -983,8 +1225,8 @@ mod test_hash {
         #[derive(Default, Hash)]
         #[allow(dead_code)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_a: i64,
+            fd_name_b: String,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -1001,9 +1243,9 @@ mod test_hash {
         #[derive(Default, Hash)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
+            fd_name_a: i64,
             #[pyo3(set)]
-            field_name_b: String,
+            fd_name_b: String,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -1019,8 +1261,8 @@ mod test_hash {
         #[pyclass(get_all)]
         #[derive(Default, Hash)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_a: i64,
+            fd_name_b: String,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -1037,8 +1279,8 @@ mod test_hash {
         #[derive(Default, Hash)]
         struct PyClass {
             #[pyo3(get)]
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_a: i64,
+            fd_name_b: String,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -1055,8 +1297,8 @@ mod test_hash {
         #[derive(Default, Hash)]
         struct PyClass {
             #[pyo3(name = "new_name")]
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_a: i64,
+            fd_name_b: String,
         }
 
         pyo3::prepare_freethreaded_python();
@@ -1078,8 +1320,8 @@ mod test_eq {
         #[derive(Default, PartialEq, Eq)]
         #[allow(dead_code)]
         struct PyClass {
-            field_name_a: i64,
-            field_name_b: String,
+            fd_name_a: i64,
+            fd_name_b: String,
         }
 
         pyo3::prepare_freethreaded_python();
