@@ -622,7 +622,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// except TypeError:
 ///     pass
 /// else:
-///     raise AssertionError"
+///     raise AssertionError";
 ///     py_run!(py, val1, script);
 ///
 ///     let val1 = PyCell::new(py, PyClass { val: f64::NAN })?;
