@@ -21,7 +21,7 @@ fn signiture(d: &FieldData) -> proc_macro2::TokenStream {
 }
 
 // FIXME:
-// Does row string (r#..#) prefer for idents?
+// Does row string (r#..) prefer for idents?
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = input.ident.clone();
     let data = FieldData::try_from_input(&input)?;
