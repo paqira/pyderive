@@ -1,8 +1,10 @@
+use quote::ToTokens;
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     spanned::Spanned,
-    Attribute, Ident, Lit, LitBool, LitStr, Meta, MetaList, Result, Token,
+    Attribute, Expr, ExprAssign, Ident, Lit, LitBool, LitFloat, LitInt, LitStr, Meta, MetaList,
+    Result, Token,
 };
 
 use self::{
@@ -136,7 +138,7 @@ pub struct PyderiveFieldOption {
     pub iter: Option<bool>,
     pub len: Option<bool>,
     pub kw_only: Option<bool>,
-    pub default: Option<Lit>,
+    pub default: Option<Expr>,
 }
 
 impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
@@ -233,7 +235,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         return Err(syn::Error::new(v.left.span(), "duplicated default"));
                     }
                     None => {
-                        new.default = Some(v.right);
+                        new.default = Some(*v.right);
                     }
                 },
             }
@@ -296,7 +298,6 @@ impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
 
 // pyo3 struct
 pub mod pyo3_struct {
-
     use super::*;
 
     pub mod kw {
@@ -477,6 +478,49 @@ pub mod pyderive_field {
         syn::custom_keyword!(len);
         syn::custom_keyword!(kw_only);
         syn::custom_keyword!(default);
+
+        syn::custom_keyword!(None);
+    }
+
+    #[derive(Debug, Clone)]
+    pub enum DefaultAssignableExpr {
+        Str(LitStr),
+        Int(LitInt),
+        Float(LitFloat),
+        Bool(LitBool),
+        None(kw::None),
+    }
+
+    impl ToTokens for DefaultAssignableExpr {
+        fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+            match self {
+                DefaultAssignableExpr::Str(str) => str.to_tokens(tokens),
+                DefaultAssignableExpr::Int(int) => int.to_tokens(tokens),
+                DefaultAssignableExpr::Float(float) => float.to_tokens(tokens),
+                DefaultAssignableExpr::Bool(bool) => bool.to_tokens(tokens),
+                DefaultAssignableExpr::None(none) => none.to_tokens(tokens),
+            }
+        }
+    }
+
+    impl Parse for DefaultAssignableExpr {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let lookahead = input.lookahead1();
+            if lookahead.peek(kw::None) {
+                Ok(Self::None(input.parse()?))
+            } else {
+                match input.parse::<Lit>()? {
+                    Lit::Str(str) => Ok(Self::Str(str)),
+                    Lit::Int(int) => Ok(Self::Int(int)),
+                    Lit::Float(float) => Ok(Self::Float(float)),
+                    Lit::Bool(bool) => Ok(Self::Bool(bool)),
+                    _ => Err(syn::Error::new(
+                        input.span(),
+                        "support string, int, float and bool literal and None",
+                    )),
+                }
+            }
+        }
     }
 
     #[derive(Debug)]
@@ -521,7 +565,7 @@ pub mod pyderive_field {
         Iter(OptionFieldAttr<kw::iter, LitBool>),
         Len(OptionFieldAttr<kw::len, LitBool>),
         KwOnly(OptionFieldAttr<kw::kw_only, LitBool>),
-        Default(ExprAssignGeneric<kw::default, Lit>),
+        Default(ExprAssign),
     }
 
     impl Parse for PyderiveFieldAttr {

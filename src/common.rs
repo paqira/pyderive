@@ -1,7 +1,7 @@
 use quote::format_ident;
 use syn::{
     punctuated::Punctuated, spanned::Spanned, Data, DataEnum, DataStruct, DataUnion, DeriveInput,
-    Field, Fields, FieldsNamed, Ident, Lit, Path, Result, Token, Type, TypePath,
+    Expr, Field, Fields, FieldsNamed, Ident, Path, Result, Token, Type, TypePath,
 };
 
 use crate::attr::{
@@ -18,7 +18,7 @@ pub fn is_py(ty: &Type) -> bool {
         }) => seg.last(),
         _ => None,
     }
-    .map_or(false, |seg| seg.ident.eq("py"))
+    .map_or(false, |seg| seg.ident.eq("Py"))
 }
 
 pub fn is_string(ty: &Type) -> bool {
@@ -50,7 +50,7 @@ pub struct FieldData {
     pub iter: Option<bool>,
     pub len: Option<bool>,
     pub kw_only: Option<bool>,
-    pub default: Option<Lit>,
+    pub default: Option<Expr>,
 }
 
 impl FieldData {

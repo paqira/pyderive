@@ -4,10 +4,18 @@ use syn::DeriveInput;
 
 use crate::common::FieldData;
 
+// #[pyderive]                          -> __init__(field):     ...
+// #[pyderive(default=xxx)]             -> __init__(field=xxx): ...
+// #[pyderive(init=true)]               -> __init__(field):     ...
+// #[pyderive(init=false)]              -> __init__():          field=default()
+// #[pyderive(init=true, default=xxx)]  -> __init__(field=xxx): ...
+// #[pyderive(init=false, default=xxx)] -> __init__():          field=xxx
+
+// For init=true
 fn signiture(d: &FieldData) -> proc_macro2::TokenStream {
     let pyident = &d.pyident;
     match &d.default {
-        Some(default) => quote! { #pyident=#default },
+        Some(expr) => quote! { #pyident=#expr },
         None => quote! { #pyident },
     }
 }
@@ -15,12 +23,6 @@ fn signiture(d: &FieldData) -> proc_macro2::TokenStream {
 // FIXME:
 // Does row string (r#..#) prefer for idents?
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
-    // #[pyderive]                          -> __init__(field):     ...
-    // #[pyderive(default=xxx)]             -> __init__(field=xxx): ...
-    // #[pyderive(init=true)]               -> __init__(field):     ...
-    // #[pyderive(init=false)]              -> __init__():          field=default()
-    // #[pyderive(init=true, default=xxx)]  -> __init__(field=xxx): ...
-    // #[pyderive(init=false, default=xxx)] -> __init__():          field=xxx
     let struct_name = input.ident.clone();
     let data = FieldData::try_from_input(&input)?;
 
@@ -65,7 +67,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
             match &d.init {
                 Some(false) => match &d.default {
-                    Some(default) => quote! { #ident: #default },
+                    Some(expr) => quote! { #ident: #expr },
                     None => quote! { #ident: #ty::default() },
                 },
                 _ => quote! { #ident: #pyident },
