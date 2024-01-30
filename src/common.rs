@@ -36,6 +36,7 @@ pub fn is_string(ty: &Type) -> bool {
 
 #[derive(Debug, Clone)]
 pub struct FieldData {
+    pub index:usize,
     pub field: Field,
     pub get: bool,
     pub set: bool,
@@ -85,7 +86,8 @@ impl FieldData {
 
         fields
             .iter()
-            .map(|field| {
+            .enumerate()
+            .map(|(index, field)| {
                 let pyo3_field_opt = Pyo3FieldOption::try_from(&field.attrs)?;
                 let pyderive_field_opt = PyderiveFieldOption::try_from(&field.attrs)?;
 
@@ -102,6 +104,7 @@ impl FieldData {
                 };
 
                 Ok(FieldData {
+                    index,
                     field: field.to_owned(),
                     get,
                     set,
