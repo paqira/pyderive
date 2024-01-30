@@ -65,20 +65,20 @@ impl FieldData {
                 unnamed => {
                     return Err(syn::Error::new(
                         unnamed.span(),
-                        "support struct with field only",
+                        "support struct with field, not unit",
                     ))
                 }
             },
             Data::Enum(DataEnum { enum_token, .. }) => {
                 return Err(syn::Error::new(
                     enum_token.span(),
-                    "support struct with field only",
+                    "support struct with field, not enum",
                 ))
             }
             Data::Union(DataUnion { union_token, .. }) => {
                 return Err(syn::Error::new(
                     union_token.span(),
-                    "support struct with field only",
+                    "support struct with field, not union",
                 ))
             }
         };
