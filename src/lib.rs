@@ -1,9 +1,21 @@
+//! This library provides derive macros of Python spacial methods and a class attribute for PyO3.
+//!
+//! The field attribute `#[pyderive(..)]` helps to costomize implementations,
+//! like [`dataclasses.field()`][dataclasses-field] of Python.
+//!
+//! It requires to enable `multiple-pymethods` feature of PyO3
+//! because the derive macros that this library provides may implement multiple `#[pymethods]`.
+//!
+//! [dataclasses-field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
+//!
+//! # Example
+//!
 //! ```
-//! # use pyo3::prelude::*;
-//! // Enable `multiple-pymethods` feature of pyo3
+//! // Enable `multiple-pymethods` feature of PyO3
+//! use pyo3::prelude::*;
 //! use pyderive::*;
 //!
-//! // Place #[derive(PyInit, ...)] before #[pyclass] to read its attr.
+//! // Place #[derive(PyInit, ...)] before #[pyclass]
 //! #[derive(PyInit, PyMatchArgs, PyRepr, PyEq, PyHash)]
 //! #[pyclass(get_all)]
 //! #[derive(PartialEq, Hash)]
@@ -17,10 +29,10 @@
 //! # Python script
 //! from rust_module import MyClass
 //!
-//! # Derives __init__ (technically __new__)
+//! # Implements __init__() (technically __new__())
 //! m = MyClass("a", 1, None)
 //!
-//! # Derives __match_args__ (supports pattern matching by positional arg)
+//! # Implements __match_args__ (supports Pattern Matching by positional arguments)
 //! match m:
 //!     case MyClass(a, b, c):
 //!         assert a == "a"
@@ -29,27 +41,53 @@
 //!     case _:
 //!         raise AssertionError
 //!
-//! # Derives __repr__
+//! # Implements __repr__()
 //! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 //!
-//! # Derives __eq__ based on PartialEq/Eq trait
+//! # Implements __eq__() based on PartialEq/Eq trait
 //! assert m == m
 //!
-//! # Derives __hash__ based on Hash trait
+//! # Implements __hash__() based on Hash trait
 //! assert hash(m) == 3289857268557676066
 //! ```
 //!
-//! `pyderive` provides derive macros of Python special methods and a class attribute.
+//! # Detail
 //!
-//! It requires to enable `multiple-pymethods` feature of pyo3 because this may derive multiple `#[pymethods]`.
+//! Some macros change implementations depend on `#[pyclass(..)]` and `#[pyo3(..)]` arguments,
+//! hence it should place `#[derive(PyInit)]` etc. before `#[pyclass(..)]` and `#[pyo3(..)]`.
 //!
-//! *Note that implementing any of `__eq__`, `__lt__`, `__le__`, `__gt__` and `__ge__` methods will cause Python not to generate a default `__hash__` implementation, so consider also implementing `__hash__`.*
+//! We list the default implementation that the macros generate.
+//!
+//! | Derive Macro    | Derives                                       |
+//! | --------------- | --------------------------------------------- |
+//! | [`PyInit`]      | `__init__()` (`__new__()`) with all fields    |
+//! | [`PyMatchArgs`] | `__match_args__` contains `get` field names   |
+//! | [`PyRepr`]      | `__repr__()` returns `get` and `set` fields   |
+//! | [`PyStr`]       | `__str__()` returns `get` and `set` fields    |
+//! | [`PyIter`]      | `__iter__()` returns iterator of `get` fields |
+//! | [`PyLen`]       | `__len__()` returns number of `get` fields    |
+//!
+//! We call the field is *`get` (or `set`) field*
+//! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
+//! its struct has a `#[pyclass/pyo3(get_all)]` (or `#[pyclass/pyo3(set_all)]`) attribute.
+//!
+//! The following derive macros depend on traits.
+//!
+//! | Derive Macro    | Derives                                                                                                         |
+//! | --------------- | --------------------------------------------------------------------------------------------------------------- |
+//! | [`PyEq`]        | `__eq__()` and `__ne__()` based on [`PartialEq`]/[`Eq`] trait                                                   |
+//! | [`PyOrder`]     | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
+//! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //!
 //! # Customize Implementation
 //!
-//! The field attributes `#[pyderive]` is used to customize implementations produced by [pyderive](crate)'s derive.
+//! The field attributes `#[pyderive(..)]` is used to customize implementations
+//! produced by [pyderive](crate)'s derive.
 //!
-//! ```rust
+//! ```
+//! # use pyo3::prelude::*;
+//! use pyderive::*;
+//!
 //! #[derive(PyInit, PyRepr)]
 //! #[pyclass]
 //! struct MyClass {
@@ -58,81 +96,113 @@
 //!     #[pyo3(get)]
 //!     int_field: i64,
 //!     #[pyderive(default=10)]
-//!     opt_field: Option<String>
+//!     opt_field: Option<i64>
 //! }
 //! ```
 //!
-//! The `#[pyderive]` overwrites default behavior.
+//! It allows to ommit right-hand side,
+//! and it evaluates to right-hand is `true`
+//! expcept `default`, for example,
+//! `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
 //!
-//! - `#[pyderive(repr=true/false)]`
+//! - `#[pyderive(repr=<bool>)]`
 //!
-//!    If `true`, the field is included in the string that the generated `__repr__` method returns.
+//!    If `repr=true`,
+//!    the field is included in the string that the `__repr__()` method returns;
+//!    if `repr=false`, it isn't.
 //!
-//!    Notes, `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
-//! - `#[pyderive(str=true/false)]`
+//! - `#[pyderive(str=<bool>)]`
 //!
-//!    If `true`, the field is included in the string that the generated `__str__` method returns.
+//!    If `str=true`,
+//!    the field is included in the string that the `__str__()` method returns;
+//!    if `str=false`, it isn't.
+//! 
+//! - `#[pyderive(init=<bool>)]`
 //!
-//!    Notes, `#[pyderive(str)]` is equivalent to `#[pyderive(str=true)]`.
-//! - `#[pyderive(init=true/false)]`
+//!    If `init=true`,
+//!    the field is included as the parameters of the `__init__()` (`__new__()` precisely) method;
+//!    If `init=false`, it isn't.
 //!
-//!    If `true`, the field is included as a parameter of generated `__init__` (`__new__` precisely) method.
+//!    The attribute `#[pyderive(default=<expr>)]` is used to costomize default value.
+//!    It supports any rust expression which PyO3 supports, e.g.,
+//! 
+//!    ```
+//!    # use pyderive::*;
+//!    # use pyo3::prelude::*;
+//!    #
+//!    #[derive(PyInit)]
+//!    #[pyclass]
+//!    struct PyClass {
+//!        #[pyderive(default = Some("str".to_string()))]
+//!        field: Option<String>,
+//!    }
+//!    ```
+//! 
+//!    We note that this internally produce `#[pyo3(signiture=..)]` attribute.
 //!
-//!    Notes, `#[pyderive(init)]` is equivalent to `#[pyderive(init=true)]`.
-//!    
-//!    This supports default value with `#[pyderive(default)]` attribute.
-//!    We note that this internally produce `#[pyo3(signiture)]` field attribute.
-//!    We list the equivarent Python code of `init` and `default` specification:
-//!
-//!     1. `#[pyderive] field: i64` or just `field: i64` (no `#[pyderive]`)
+//!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
 //!
 //!         ```python
 //!         def __init__(self, field): self.field = field
 //!         ```
-//!     2. `#[pyderive(init=false)] field: i64`
+//! 
+//!     2. `#[pyderive(init=false)]`
 //!       
 //!        The field is not included as the parameter,
-//!        and initialized by [`Default::default()`] in the `__init__` method.         
+//!        and initialized by [`Default::default()`] in the `__init__()` method.         
 //!
 //!         ```python
 //!         def __init__(self): self.field = field::default()  # call rust method
 //!         ```
-//!     3. `#[pyderive(default=<Literal>)] field: i64`
+//! 
+//!     3. `#[pyderive(default=<expr>)]`
 //!
-//!        The field is included as the parameter with default value `<Literal>`.
+//!        The field is included as the parameter with default value `<expr>`.
 //!
 //!         ```python
-//!         def __init__(self, field=<Literal>): self.field = field
+//!         def __init__(self, field=<expr>): self.field = field
 //!         ```
-//!     4. `#[pyderive(init=false, default=<Literal>)] field: i64`
+//! 
+//!     4. `#[pyderive(init=false, default=<expr>)]`
 //!
 //!        The field is not included as the parameter,
-//!        and initialized by `<Literal>` in the `__init__` method.     
+//!        and initialized with `<expr>` in the `__init__()` method.     
 //!
 //!         ```python
-//!         def __init__(self): self.field = <Literal>
+//!         def __init__(self): self.field = <expr>
 //!         ```
-//! - `#[pyderive(kw_only=true/false)]`
+//! 
+//! - `#[pyderive(kw_only=true)]`
 //!
-//!    If `true`, put `*,` in front of this field in the argument of generated `__init__` method,
-//!    hence, the following fields are keyword only argument.
+//!    If `kw_only=true`,
+//!    it puts `*,` in front of the field in the argument of the `__init__()` method,
+//!    that is, the following fields are keyword only argument.
+//!    Note, `kw_only=false` has no effect.
+//! 
+//! - `#[pyderive(match_args=<bool>)]`
 //!
-//!    Notes, `#[pyderive(kw_only)]` is equivalent to `#[pyderive(kw_only=true)]`
-//! - `#[pyderive(match_args=true/false)]`
+//!    If `match_args=true`,
+//!    the field is included in the `__match_args__` class attribute;
+//!    if `match_args=false`, it isn't.
 //!
-//!    If `true`, the field is included in the generated `__match_args__` class attribute.
+//!    We note that, as far as I know,
+//!    the field must be accessible on the pattern matching. 
+//!    For example,
+//!    pattern matching works for *not* get field with a getter and `#[pyderive(match_args=true)]` attribute,
+//!    but it doesn't if the field does not decorated with `#[pyderive(match_args=true)]`.
+//! 
+//! - `#[pyderive(iter=<bool>)]`
 //!
-//!    Notes, `#[pyderive(match_args)]` is equivalent to `#[pyderive(match_args=true)]`
-//! - `#[pyderive(iter=true/false)]`
+//!    If `iter=true`,
+//!    the field is included in the iterator that `__iter__()` returns;
+//!    if `iter=false`, it isn't.
+//! 
+//! - `#[pyderive(len=<bool>)]`
 //!
-//!    If `true`, the field is included in the iterator that generated `__iter__` method returs.
-//!
-//!    Notes, `#[pyderive(iter)]` is equivalent to `#[pyderive(iter=true)]`
-//! - `#[pyderive(len=true/false)]`
-//!
-//!    If `true`, `__len__` the field is counted in the generated `__len__` method.
-//!
-//!    Notes, `#[pyderive(len)]` is equivalent to `#[pyderive(len=true)]`
+//!    If `len=true`,
+//!    the field is counted by the `__iter__()`;
+//!    if `len=false`, it isn't.
+//! 
 extern crate proc_macro;
 
 use syn::{parse_macro_input, DeriveInput};
@@ -141,11 +211,17 @@ mod attr;
 mod common;
 mod internal;
 
-/// Derive [`__repr__`][__repr__] that prints `get` and `set` fileds.
+/// Derive macro generating a [`__repr__()`][__repr__] fn/Python method.
 ///
-/// Place `#[derive(__repr__)]` before `#[pyclass]` to read its attributes.
+/// It returns the string that contains `get` and `set` fileds as default,
+/// and they are orderd by declaration.
+/// It should place `#[derive(PyRepr)]` before `#[pyclass]`.
 ///
-/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+/// If the filed is deocrated by `#[pyderive(repr=true)]` attribute,
+/// the field is included in the string that `__str__()` returns;
+/// if `#[pyderive(repr=false)]`, it isn't.
+/// 
+/// We note that `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
 ///
 /// [__repr__]: https://docs.python.org/reference/datamodel.html#object.__repr__
 /// [repr]: https://docs.python.org/library/functions.html#repr
@@ -157,7 +233,7 @@ mod internal;
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// // Put before `#[pyclass]` to read its attributes.
+/// // Place before `#[pyclass]`
 /// #[derive(PyRepr)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
@@ -166,6 +242,8 @@ mod internal;
 ///     float: f64,
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
+///     #[pyderive(repr=false)]
+///     omitted: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -176,8 +254,9 @@ mod internal;
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
+///         omitted: "omitted".to_string(),
 ///     })?;
-///     py_run!(py, val, "assert repr(val) == \"PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)\"");
+///     py_run!(py, val, r#"assert repr(val) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
 ///     Ok(())
 /// });
 /// ```
@@ -190,11 +269,17 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__str__`][__str__] that prints `get` and `set` fileds.
+/// Derive macro generating a [`__str__()`][__str__] fn/Python method.
 ///
-/// Place `#[derive(__str__)]` before `#[pyclass]` to read its attributes.
+/// It returns the string that contains `get` and `set` fileds as default,
+/// and they are orderd by declaration.
+/// It should place `#[derive(PyStr)]` before `#[pyclass]`.
 ///
-/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+/// If the filed is deocrated by `#[pyderive(str=true)]` attribute,
+/// the field is included in the string that `__str__()` returns;
+/// if `#[pyderive(str=false)]`, it isn't.
+///
+/// We note that `#[pyderive(str)]` is equivalent to `#[pyderive(str=true)]`.
 ///
 /// [__str__]: https://docs.python.org/reference/datamodel.html#object.__str__
 /// [str]: https://docs.python.org/library/functions.html#str
@@ -206,7 +291,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// // Put before `#[pyclass]` to read its attributes.
+/// // Place before `#[pyclass]`
 /// #[derive(PyStr)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
@@ -215,6 +300,8 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     float: f64,
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
+///     #[pyderive(str=false)]
+///     omitted: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -225,8 +312,9 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
+///         omitted: "omitted".to_string(),
 ///     })?;
-///     py_run!(py, val, "assert str(val) == \"PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)\"");
+///     py_run!(py, val, r#"assert str(val) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
 ///     Ok(())
 /// });
 /// ```
@@ -239,11 +327,15 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__len__`][__len__] that returns number of `get` fields.
+/// Derive macro generating a [`__len__()`][__len__] fn/Python method.
 ///
-/// Place `#[derive(__len__)]` before `#[pyclass]` to read its attributes.
+/// That returns number of `get` fields as default.
+/// It should place `#[derive(PyLen)]` before `#[pyclass]`.
 ///
-/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+/// If the filed is deocrated by `#[pyderive(len=true)]` attribute,
+/// the field is counted by the `__iter__()`; if `#[pyderive(len=false)]`, it isn't.
+///
+/// We note that `#[pyderive(len)]` is equivalent to `#[pyderive(len=true)]`.
 ///
 /// [__len__]: https://docs.python.org/reference/datamodel.html#object.__len__
 ///
@@ -254,7 +346,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// // Put before `#[pyclass]` to read its attributes.
+/// // Place before `#[pyclass]`
 /// #[derive(PyLen)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
@@ -263,6 +355,8 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     float: f64,
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
+///     #[pyderive(len=false)]
+///     omitted: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -273,6 +367,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
+///         omitted: "omitted".to_string(),
 ///     })?;
 ///     py_run!(py, val, "assert len(val) == 5");
 ///     Ok(())
@@ -287,11 +382,15 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__iter__`][__iter__] that return iterator of `get` fields.
+/// Derive macro generating a [`__iter__()`][__iter__] fn/Python method.
 ///
-/// Place `#[derive(__iter__)]` before `#[pyclass]` to read its attributes.
+/// It returns an iterator of `get` fileds as default,
+/// and they are orderd by declaration.
+/// It should place `#[derive(PyIter)]` before `#[pyclass]`.
 ///
-/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+/// If the filed is deocrated by `#[pyderive(iter=true)]` attribute,
+/// the field is included to the iterartor that `__iter__()` returns;
+/// if `#[pyderive(iter=false)]`, it isn't.
 ///
 /// [__iter__]: https://docs.python.org/reference/datamodel.html#object.__iter__
 ///
@@ -302,7 +401,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
-/// // Put before `#[pyclass]` to read its attributes.
+/// // Place before `#[pyclass]`
 /// #[derive(PyIter)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
@@ -311,6 +410,8 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     float: f64,
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
+///     #[pyderive(iter=false)]
+///     omitted: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -321,6 +422,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
+///         omitted: "omitted".to_string(),
 ///     })?;
 ///     py_run!(py, val, "assert tuple(val) == ('s', 1, 1.0, ('s', 1, 1.0), None)");
 ///     Ok(())
@@ -335,11 +437,16 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__init__`][__init__] (technically [`__new__`][__new__]).
+/// Derive macro generating a [`__init__()`][__init__] Python method (technically [`__new__()`][__new__]).
 ///
-/// Place `#[derive(__init__)]` before `#[pyclass]` to read its attributes.
+/// It has all fields as the argumetns as default,
+/// and they are orderd by declaration.
+/// It should place `#[derive(PyInit)]` before `#[pyclass]`.
 ///
-/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+/// If the filed is deocrated by `#[pyderive(init=true)]` attribute,
+/// the field is included to the arguments of the `__init__()`;
+/// if `#[pyderive(init=false)]`, it isn't.
+/// See the [Customize Implementation of the crate doc](crate) for detail.
 ///
 /// [__init__]: https://docs.python.org/reference/datamodel.html#object.__init__
 /// [__new__]: https://docs.python.org/reference/datamodel.html#object.__new__
@@ -351,7 +458,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// // Put before `#[pyclass]` to read its attributes.
+/// // Place before `#[pyclass]`
 /// #[derive(PyInit)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
@@ -396,13 +503,17 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__eq__`][__eq__] based on [`PartialEq`]/[`Eq`] trait.
+/// Derive macro generating a [`__eq__()`][__eq__] and [`__ne__()`][__ne__] fn/Python methods.
 ///
-/// *Note that implementing any of `__eq__` method will cause
-/// Python not to generate a default `__hash__` implementation,
-/// so consider also implementing `__hash__`.*
+/// The implementation is based on [`PartialEq`]/[`Eq`] trait.
 ///
-/// We note that this implements:
+/// *Note that implementing any of `__eq__()` method will cause
+/// Python not to generate a default `__hash__()` implementation,
+/// so consider also implementing `__hash__()`.*
+///
+/// # Expansion
+///
+/// This implements:
 ///
 /// ```no_run, ignore
 /// pub fn __eq__(&self, other: &Self) -> bool {
@@ -414,6 +525,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 ///
 /// [__eq__]: https://docs.python.org/reference/datamodel.html#object.__eq__
+/// [__ne__]: https://docs.python.org/reference/datamodel.html#object.__ne__
 ///
 /// # Example
 ///
@@ -452,16 +564,19 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__lt__`][__lt__], [`__le__`][__le__], [`__gt__`][__gt__] and [`__ge__`][__ge__] based on [`PartialOrd`]/[`Ord`] trait.
+/// Derive macro generating [`__lt__()`][__lt__], [`__le__()`][__le__], [`__gt__()`][__gt__] and [`__ge__()`][__ge__] fn/Python methods.
 ///
-/// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`],
-/// and throw [`TypeError`][TypeError] on incompatible comparision.
+/// The implementation is based on [`PartialOrd`]/[`Ord`] trait.
 ///
-/// *Note that implementing any of `__lt__`, `__le__`, `__gt__` and `__ge__` methods
-/// will cause Python not to generate a default `__hash__` implementation,
-/// so consider also implementing `__hash__`.*
+/// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
 ///
-/// We note that, for example, this implements:
+/// *Note that implementing any of `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` methods
+/// will cause Python not to generate a default `__hash__()` implementation,
+/// so consider also implementing `__hash__()`.*
+///
+/// # Expansion
+///
+/// This implements, for example;
 ///
 /// ```no_run, ignore
 /// pub fn __lt__(&self, other: &Self) -> pyo3::PyResult<bool> {
@@ -498,25 +613,20 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     let val2 = PyCell::new(py, PyClass { val: 1.0 })?;
 ///     py_run!(py, val1 val2, "assert val1 < val2");
 ///     py_run!(py, val1 val2, "assert val1 <= val2");
-///
-///     py_run!(py, val1 val2, "assert not val1 < val1");
-///     py_run!(py, val1 val2, "assert val1 <= val1");
-///
 ///     py_run!(py, val1 val2, "assert not val1 > val2");
 ///     py_run!(py, val1 val2, "assert not val1 >= val2");
-///
-///     py_run!(py, val1 val2, "assert not val1 > val1");
-///     py_run!(py, val1 val2, "assert val1 >= val1");
-///
-///     let val1 = PyCell::new(py, PyClass { val: f64::NAN })?;
-///     py_run!(py, val1, "assert not val1 < val1");
-///     py_run!(py, val1, "
+///     
+///     let script = "
 /// try:
 ///     val1 < 1
 /// except TypeError:
 ///     pass
 /// else:
-///     raise AssertionError");
+///     raise AssertionError"
+///     py_run!(py, val1, script);
+/// 
+///     let val1 = PyCell::new(py, PyClass { val: f64::NAN })?;
+///     py_run!(py, val1, "assert not val1 < val1");
 ///
 ///     Ok(())
 /// });
@@ -530,9 +640,13 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__hash__`][__hash__] based on [`Hash`] trait.
+/// Derive macro generating a [`__hash__()`][__hash__] fn/Python method.
 ///
-/// We note that this implements:
+/// The implementation is based on [`Hash`] trait.
+///
+/// # Expansion
+///
+/// This implements:
 ///
 /// ```no_run, ignore
 /// pub fn __hash__(&self) -> u64 {
@@ -582,15 +696,15 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive [`__match_args__`][__match_args__] with `get` fields.
+/// Derive macro generating a [`__match_args__`][__match_args__] const/Python class attribute.
 ///
-/// It contains all `get` field names in declaration order, but not the other fileds.
+/// It contains `get` field as default,
+/// and they are orderd by declaration.
+/// It should place `#[derive(PyMatchArgs)]` before `#[pyclass]`.
 ///
-/// Place `#[derive(__match_args__)]` before `#[pyclass]` to read its attributes.
-///
-/// We note that it does not generates `__match_args__` if `get` field is not exists.
-///
-/// See the [Customize Implementation of crate doc](crate) to customize implementation.
+/// If the filed is deocrated by `#[pyderive(match_args=true)]` attribute,
+/// the field is included to the `__match_args__`;
+/// if `#[pyderive(match_args=false)]`, it isn't.
 ///
 /// [__match_args__]: https://docs.python.org/reference/datamodel.html#object.__match_args__
 ///
@@ -601,7 +715,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
-/// // Put before `#[pyclass]` to read its attributes.
+/// // Place before `#[pyclass]`
 /// #[derive(PyInit, PyMatchArgs)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
