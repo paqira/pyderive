@@ -1685,11 +1685,13 @@ mod test_eq {
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             let data1 = PyCell::new(py, PyClass::default()).unwrap();
-            let data2 = PyCell::new(py, PyClass { f: f64::NAN }).unwrap();
-            py_run!(py, data1 data2,  "assert data1 != data2");
-            py_run!(py, data1 data2,  "assert not data2 == data2");
-            py_run!(py, data1 data2,  "assert data2 != data2");
-            py_run!(py, data1 data2,  "try: assert not data2 < 1
+            let data2 = PyCell::new(py, PyClass::default()).unwrap();
+            let data3 = PyCell::new(py, PyClass { f: f64::NAN }).unwrap();
+            py_run!(py, data1 data2 data3, "assert data1 == data2");
+            py_run!(py, data1 data2 data3, "assert data1 != data3");
+            py_run!(py, data1 data2 data3, "assert not data3 == data3");
+            py_run!(py, data1 data2 data3, "assert data3 != data3");
+            py_run!(py, data1 data2 data3, "try: assert not data3 < 1
 except TypeError: pass");
         });
     }
