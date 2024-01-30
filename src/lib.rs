@@ -1,4 +1,4 @@
-//! This library provides derive macros of Python spacial methods and a class attribute for PyO3.
+//! This library provides derive macros of Python spacial methods and a class attribute for [PyO3][PyO3].
 //!
 //! The field attribute `#[pyderive(..)]` helps to costomize implementations,
 //! like [`dataclasses.field()`][dataclasses-field] of Python.
@@ -7,6 +7,7 @@
 //! because the derive macros that this library provides may implement multiple `#[pymethods]`.
 //!
 //! [dataclasses-field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
+//! [PyO3]: https://github.com/PyO3/pyo3
 //!
 //! # Example
 //!
@@ -45,7 +46,7 @@
 //! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 //!
 //! # Implements __eq__() based on PartialEq/Eq trait
-//! assert m == m
+//! assert m == MyClass("a", 1, None)
 //!
 //! # Implements __hash__() based on Hash trait
 //! assert hash(m) == 3289857268557676066
@@ -76,7 +77,7 @@
 //! | Derive Macro    | Derives                                                                                                         |
 //! | --------------- | --------------------------------------------------------------------------------------------------------------- |
 //! | [`PyEq`]        | `__eq__()` and `__ne__()` based on [`PartialEq`]/[`Eq`] trait                                                   |
-//! | [`PyOrd`]     | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
+//! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //!
 //! # Customize Implementation
@@ -333,7 +334,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// It should place `#[derive(PyLen)]` before `#[pyclass]`.
 ///
 /// If the filed is deocrated by `#[pyderive(len=true)]` attribute,
-/// the field is counted by the `__iter__()`; if `#[pyderive(len=false)]`, it isn't.
+/// the field is counted by the `__len__()`; if `#[pyderive(len=false)]`, it isn't.
 ///
 /// We note that `#[pyderive(len)]` is equivalent to `#[pyderive(len=true)]`.
 ///
