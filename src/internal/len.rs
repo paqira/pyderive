@@ -2,16 +2,15 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::DeriveInput;
 
-use crate::{attr::StructOption, common::FieldData};
+use crate::common::FieldData;
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = input.ident.clone();
-    let struct_option = StructOption::try_from(&input.attrs)?;
-    let field_data = FieldData::try_from_data(input, &struct_option)?;
+    let data = FieldData::try_from_input(&input)?;
 
-    let length = field_data
+    let length = data
         .iter()
-        .filter(|d| d.get())
+        .filter(|d| d.len.unwrap_or(d.get))
         .collect::<Vec<_>>()
         .len();
 

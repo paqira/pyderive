@@ -1,16 +1,13 @@
 [package]
 name = "pyderive"
-version = "0.1.1"
+version = "0.2.3"
 edition = "2021"
 authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Derive macro of Python special methods and a class attribute for pyo3"
 readme = "README.md"
 categories = ["api-bindings"]
-keywords = [
-    "python",
-    "pyo3",
-]
+keywords = ["python", "pyo3"]
 
 repository = "https://github.com/paqira/pyderive"
 
@@ -26,7 +23,7 @@ path = "test/test.rs"
 heck = "0.4.1"
 proc-macro2 = "1.0.78"
 quote = "1.0.35"
-syn = {version = "2.0.48", features = ["derive", "extra-traits"]}
+syn = { version = "2.0.48", features = ["derive", "extra-traits", "full"] }
 
 [dev-dependencies]
-pyo3 = {version = "0.20.2", features = ["multiple-pymethods"]}
+pyo3 = { version = "0.20.2", features = ["multiple-pymethods"] }
