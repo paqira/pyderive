@@ -76,7 +76,7 @@
 //! | Derive Macro    | Derives                                                                                                         |
 //! | --------------- | --------------------------------------------------------------------------------------------------------------- |
 //! | [`PyEq`]        | `__eq__()` and `__ne__()` based on [`PartialEq`]/[`Eq`] trait                                                   |
-//! | [`PyOrder`]     | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
+//! | [`PyOrd`]     | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //!
 //! # Customize Implementation
@@ -116,7 +116,7 @@
 //!    If `str=true`,
 //!    the field is included in the string that the `__str__()` method returns;
 //!    if `str=false`, it isn't.
-//! 
+//!
 //! - `#[pyderive(init=<bool>)]`
 //!
 //!    If `init=true`,
@@ -125,7 +125,7 @@
 //!
 //!    The attribute `#[pyderive(default=<expr>)]` is used to costomize default value.
 //!    It supports any rust expression which PyO3 supports, e.g.,
-//! 
+//!
 //!    ```
 //!    # use pyderive::*;
 //!    # use pyo3::prelude::*;
@@ -137,7 +137,7 @@
 //!        field: Option<String>,
 //!    }
 //!    ```
-//! 
+//!
 //!    We note that this internally produce `#[pyo3(signiture=..)]` attribute.
 //!
 //!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
@@ -145,7 +145,7 @@
 //!         ```python
 //!         def __init__(self, field): self.field = field
 //!         ```
-//! 
+//!
 //!     2. `#[pyderive(init=false)]`
 //!       
 //!        The field is not included as the parameter,
@@ -154,7 +154,7 @@
 //!         ```python
 //!         def __init__(self): self.field = field::default()  # call rust method
 //!         ```
-//! 
+//!
 //!     3. `#[pyderive(default=<expr>)]`
 //!
 //!        The field is included as the parameter with default value `<expr>`.
@@ -162,7 +162,7 @@
 //!         ```python
 //!         def __init__(self, field=<expr>): self.field = field
 //!         ```
-//! 
+//!
 //!     4. `#[pyderive(init=false, default=<expr>)]`
 //!
 //!        The field is not included as the parameter,
@@ -171,14 +171,14 @@
 //!         ```python
 //!         def __init__(self): self.field = <expr>
 //!         ```
-//! 
+//!
 //! - `#[pyderive(kw_only=true)]`
 //!
 //!    If `kw_only=true`,
 //!    it puts `*,` in front of the field in the argument of the `__init__()` method,
 //!    that is, the following fields are keyword only argument.
 //!    Note, `kw_only=false` has no effect.
-//! 
+//!
 //! - `#[pyderive(match_args=<bool>)]`
 //!
 //!    If `match_args=true`,
@@ -186,23 +186,23 @@
 //!    if `match_args=false`, it isn't.
 //!
 //!    We note that, as far as I know,
-//!    the field must be accessible on the pattern matching. 
+//!    the field must be accessible on the pattern matching.
 //!    For example,
 //!    pattern matching works for *not* get field with a getter and `#[pyderive(match_args=true)]` attribute,
 //!    but it doesn't if the field does not decorated with `#[pyderive(match_args=true)]`.
-//! 
+//!
 //! - `#[pyderive(iter=<bool>)]`
 //!
 //!    If `iter=true`,
 //!    the field is included in the iterator that `__iter__()` returns;
 //!    if `iter=false`, it isn't.
-//! 
+//!
 //! - `#[pyderive(len=<bool>)]`
 //!
 //!    If `len=true`,
 //!    the field is counted by the `__iter__()`;
 //!    if `len=false`, it isn't.
-//! 
+//!
 extern crate proc_macro;
 
 use syn::{parse_macro_input, DeriveInput};
@@ -220,7 +220,7 @@ mod internal;
 /// If the filed is deocrated by `#[pyderive(repr=true)]` attribute,
 /// the field is included in the string that `__str__()` returns;
 /// if `#[pyderive(repr=false)]`, it isn't.
-/// 
+///
 /// We note that `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
 ///
 /// [__repr__]: https://docs.python.org/reference/datamodel.html#object.__repr__
@@ -600,7 +600,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
-/// #[derive(PyOrder)]
+/// #[derive(PyOrd)]
 /// #[pyclass]
 /// #[derive(PartialOrd, PartialEq)]
 /// struct PyClass {
@@ -624,17 +624,17 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// else:
 ///     raise AssertionError"
 ///     py_run!(py, val1, script);
-/// 
+///
 ///     let val1 = PyCell::new(py, PyClass { val: f64::NAN })?;
 ///     py_run!(py, val1, "assert not val1 < val1");
 ///
 ///     Ok(())
 /// });
 /// ```
-#[proc_macro_derive(PyOrder)]
+#[proc_macro_derive(PyOrd)]
 pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    match internal::order::implementation(input) {
+    match internal::ord::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }

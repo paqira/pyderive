@@ -53,7 +53,7 @@ This provides deriving following special methods and attribute;
 | `PyIter`      | `__iter__()`                                |
 | `PyLen`       | `__len__()`                                 |
 | `PyEq`        | `__eq__()`                                  |
-| `PyOrder`     | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` |
+| `PyOrd`     | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` |
 | `PyHash`      | `__hash__()`                                |
 
 The field attributes `#[pyderive(..)]` is used to customize the implementation,

@@ -1701,7 +1701,7 @@ mod test_order {
 
     #[test]
     fn test_ord() {
-        #[derive(PyOrder)]
+        #[derive(PyOrd)]
         #[pyclass]
         #[derive(Default, PartialOrd, PartialEq, Eq, Ord)]
         #[allow(dead_code)]
@@ -1734,7 +1734,7 @@ except TypeError: pass");
 
     #[test]
     fn test_patial_ord() {
-        #[derive(PyOrder)]
+        #[derive(PyOrd)]
         #[pyclass]
         #[derive(Default, PartialOrd, PartialEq)]
         #[allow(dead_code)]
