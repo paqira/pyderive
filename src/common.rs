@@ -15,10 +15,19 @@ pub fn is_py(ty: &Type) -> bool {
                 segments: ref seg, ..
             },
             ..
-        }) => seg.last(),
-        _ => None,
+        }) => {
+            let mut iter = seg.iter();
+            match iter.next() {
+                Some(first) if first.ident.eq("pyo3") => match iter.next() {
+                    Some(second) if second.ident.eq("Py") => iter.next().is_none(),
+                    _ => false,
+                },
+                Some(first) if first.ident.eq("Py") => iter.next().is_none(),
+                _ => false,
+            }
+        }
+        _ => false,
     }
-    .map_or(false, |seg| seg.ident.eq("Py"))
 }
 
 pub fn is_string(ty: &Type) -> bool {
@@ -28,15 +37,31 @@ pub fn is_string(ty: &Type) -> bool {
                 segments: ref seg, ..
             },
             ..
-        }) => seg.last(),
-        _ => None,
+        }) => {
+            let mut iter = seg.iter();
+            match iter.next() {
+                Some(first) if first.ident.eq("std") => match iter.next() {
+                    Some(second) if second.ident.eq("string") => match iter.next() {
+                        Some(third) if third.ident.eq("String") => iter.next().is_none(),
+                        _ => false,
+                    },
+                    _ => false,
+                },
+                Some(first) if first.ident.eq("string") => match iter.next() {
+                    Some(second) if second.ident.eq("String") => iter.next().is_none(),
+                    _ => false,
+                },
+                Some(first) if first.ident.eq("String") => iter.next().is_none(),
+                _ => false,
+            }
+        }
+        _ => false,
     }
-    .map_or(false, |seg| seg.ident.eq("String"))
 }
 
 #[derive(Debug, Clone)]
 pub struct FieldData {
-    pub index:usize,
+    pub index: usize,
     pub field: Field,
     pub get: bool,
     pub set: bool,
