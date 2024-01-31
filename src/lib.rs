@@ -145,7 +145,7 @@
 //!    We note that this internally produce `#[pyo3(signiture=..)]` attribute.
 //!
 //!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
-//! 
+//!
 //!         Pseudo-code:
 //!
 //!         ```python
@@ -208,7 +208,7 @@
 //!    If `len=true`,
 //!    the field is counted by the `__iter__()`;
 //!    if `len=false`, it isn't.
-//! 
+//!
 //! - `#[pyderive(dataclass_field=<bool>)]`
 //!
 //!    If `dataclass_field=true`,
