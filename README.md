@@ -1,6 +1,6 @@
 # pyderive
 
-`pyderive` provides derive macros for Python spacial methods and a class attribute for [PyO3][PyO3].
+`pyderive` provides derive macros for Python spacial methods and a class attribute for [PyO3].
 
 [PyO3]: https://github.com/PyO3/pyo3
 
@@ -47,17 +47,18 @@ assert hash(m) == 3289857268557676066
 
 This provides deriving following special methods and attribute;
 
-| Derive Macro  | Python Method/Attribute                           |
-| ------------- | ------------------------------------------------- |
-| `PyInit`      | `__init__()` (`__new__()` precisely)              |
-| `PyMatchArgs` | `__match_args__`                                  |
-| `PyRepr`      | `__repr__()`                                      |
-| `PyStr`       | `__str__()`                                       |
-| `PyIter`      | `__iter__()`                                      |
-| `PyLen`       | `__len__()`                                       |
-| `PyEq`        | `__eq__()` and `__ne__()`                         |
-| `PyOrd`       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` |
-| `PyHash`      | `__hash__()`                                      |
+| Derive Macro        | Python Method/Attribute                                         |
+| ------------------- | --------------------------------------------------------------- |
+| `PyInit`            | `__init__()` (`__new__()` precisely)                            |
+| `PyMatchArgs`       | `__match_args__`                                                |
+| `PyRepr`            | `__repr__()`                                                    |
+| `PyStr`             | `__str__()`                                                     |
+| `PyIter`            | `__iter__()`                                                    |
+| `PyLen`             | `__len__()`                                                     |
+| `PyEq`              | `__eq__()` and `__ne__()`                                       |
+| `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`               |
+| `PyHash`            | `__hash__()`                                                    |
+| `PyDataclassFields` | `__dataclass_fields__` (to support helper funcs of dataclasses) |
 
 The field attributes `#[pyderive(..)]` is used to customize the implementation,
 like [`dataclasses.field()`][dataclasses-field] of Python.

@@ -1,4 +1,4 @@
-//! This library provides derive macros of Python spacial methods and a class attribute for [PyO3][PyO3].
+//! This library provides derive macros of Python spacial methods and a class attribute for [PyO3].
 //!
 //! The field attribute `#[pyderive(..)]` helps to costomize implementations,
 //! like [`dataclasses.field()`][dataclasses-field] of Python.
@@ -145,6 +145,8 @@
 //!    We note that this internally produce `#[pyo3(signiture=..)]` attribute.
 //!
 //!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
+//! 
+//!         Pseudo-code:
 //!
 //!         ```python
 //!         def __init__(self, field): self.field = field
@@ -779,7 +781,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     }
 }
 
-/// Derive macro generating a `__dataclass_fields__` getter to support helper functions of [dataclasses][dataclasses].
+/// Derive macro generating a `__dataclass_fields__` getter to support helper functions of [dataclasses].
 ///
 /// It returns a [`dataclasses.Field`][Field] dict that helper functions of [dataclasses][dataclasses] use.
 /// It supportes
@@ -795,9 +797,9 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///
 /// The resulting dict contains all fields as default.
 ///
-/// If the filed is deocrated by `#[pyderive(field=true)]` attribute,
+/// If the filed is deocrated by `#[pyderive(dataclass_field=true)]` attribute,
 /// the field is included to the dict that `__dataclass_fields__` returns;
-/// if `#[pyderive(field=false)]`, it isn't.
+/// if `#[pyderive(dataclass_field=false)]`, it isn't.
 ///
 /// ## Notice
 ///
