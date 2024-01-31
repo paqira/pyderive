@@ -1341,15 +1341,17 @@ mod test_match_args {
         Python::with_gil(|py| {
             let py_class = py.get_type::<PyClass>();
             assert_eq!("PyClass", py_class.name().unwrap().to_string());
-            pyo3::py_run!(
-                py,
-                py_class,
-                "
+            if py.version_info() >= (3, 10) {
+                pyo3::py_run!(
+                    py,
+                    py_class,
+                    "
 match py_class(0, ''):
     case py_class(): pass
     case _: raise AssertionError
 "
-            );
+                );
+            }
         })
     }
 
@@ -1384,14 +1386,17 @@ match py_class(0, ''):
                 py_class,
                 "assert py_class(0, '').__match_args__ == ('fd_name_a', )"
             );
-            pyo3::py_run!(
-                py,
-                py_class,
-                "
+
+            if py.version_info() >= (3, 10) {
+                pyo3::py_run!(
+                    py,
+                    py_class,
+                    "
 match py_class(0, ''):
     case py_class(a) if a == 0: pass
     case _: raise AssertionError"
-            );
+                );
+            }
         })
     }
 
@@ -1427,23 +1432,25 @@ match py_class(0, ''):
                 "assert py_class(0, '').__match_args__ == ('new_name', 'fdNameB')"
             );
 
-            pyo3::py_run!(
-                py,
-                py_class,
-                "
+            if py.version_info() >= (3, 10) {
+                pyo3::py_run!(
+                    py,
+                    py_class,
+                    "
 match py_class(0, ''):
     case py_class(a, b) if a == 0 and b == '': pass
     case _: raise AssertionError"
-            );
+                );
 
-            pyo3::py_run!(
-                py,
-                py_class,
-                "
+                pyo3::py_run!(
+                    py,
+                    py_class,
+                    "
 match py_class(fd_name_b='', fd_name_a=0):
     case py_class(new_name=a, fdNameB=b) if a == 0 and b == '': pass
     case _: raise AssertionError"
-            );
+                );
+            }
         });
     }
 
@@ -1480,15 +1487,17 @@ match py_class(fd_name_b='', fd_name_a=0):
                 "assert py_class(0).__match_args__ == ('field', )"
             );
 
-            pyo3::py_run!(
-                py,
-                py_class,
-                "
+            if py.version_info() >= (3, 10) {
+                pyo3::py_run!(
+                    py,
+                    py_class,
+                    "
 match py_class(0):
     case py_class(a) if a == 1: pass
     case _: raise AssertionError
 "
-            );
+                );
+            }
         });
     }
 
