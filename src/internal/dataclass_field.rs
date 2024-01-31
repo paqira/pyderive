@@ -45,24 +45,44 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
             quote! {
                 #[allow(unused_mut)]
-                let mut field = Field.call1((
-                    // default
-                    #default,
-                    // default_factory
-                    MISSING,
-                    // init
-                    pyo3::types::PyBool::new(py, #init),
-                    // repr
-                    pyo3::types::PyBool::new(py, #repr),
-                    // hash
-                    py.None(),
-                    // compare
-                    py.None(),
-                    // metadata
-                    py.None(),
-                    // kw_only
-                    pyo3::types::PyBool::new(py, #kw_only),
-                ))?;
+                let mut field = if py.version_info() >= (3, 10) {
+                    Field.call1((
+                        // default
+                        #default,
+                        // default_factory
+                        MISSING,
+                        // init
+                        pyo3::types::PyBool::new(py, #init),
+                        // repr
+                        pyo3::types::PyBool::new(py, #repr),
+                        // hash
+                        py.None(),
+                        // compare
+                        py.None(),
+                        // metadata
+                        py.None(),
+                        // kw_only
+                        // python >= 3.10
+                        pyo3::types::PyBool::new(py, #kw_only),
+                    ))
+                } else {
+                    Field.call1((
+                        // default
+                        #default,
+                        // default_factory
+                        MISSING,
+                        // init
+                        pyo3::types::PyBool::new(py, #init),
+                        // repr
+                        pyo3::types::PyBool::new(py, #repr),
+                        // hash
+                        py.None(),
+                        // compare
+                        py.None(),
+                        // metadata
+                        py.None(),
+                    ))
+                }?;
 
                 field.setattr(pyo3::intern!(py, "name"), pyo3::intern!(py, #pyname))?;
                 field.setattr(pyo3::intern!(py, "type"), #field.to_object(py).as_ref(py).get_type())?;

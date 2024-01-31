@@ -2008,6 +2008,7 @@ astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['s
                 py,
                 py_class,
                 r#"
+import sys
 from dataclasses import _FIELD, _FIELD_CLASSVAR, MISSING, fields
 
 a = py_class(0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -2016,33 +2017,41 @@ for field in fields(a):
     if field.name == "field":
         assert field.type == int
         assert field._field_type is _FIELD, field.name
-        assert field.kw_only is False, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False, field.name
     elif field.name == "class_":
         assert field.type == int
         assert field._field_type is _FIELD_CLASSVAR, field.name
-        assert field.kw_only is False, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False, field.name
     elif field.name == "init_defualt":
         assert field.type == int
         assert field.default == 1, field.name
         assert field.default_factory is MISSING, field.name
         assert field._field_type is _FIELD, field.name
-        assert field.kw_only is False, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False, field.name
     elif field.name == "class_defualt":
         assert field.type == int
         assert field.default == 1, field.name
         assert field.default_factory is MISSING, field.name
         assert field._field_type is _FIELD_CLASSVAR, field.name
-        assert field.kw_only is False, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False, field.name
     elif field.name == "repr":
         assert field.repr is True, field.name
-        assert field.kw_only is False, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False, field.name
     elif field.name == "no_repr":
         assert field.repr is False, field.name
-        assert field.kw_only is False, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False, field.name
     elif field.name == "kw_only":
-        assert field.kw_only is True, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is True, field.name
     elif field.name == "follow_kw_only":
-        assert field.kw_only is True, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is True, field.name
     else:
         raise AssertionError(field.name)
 "#
