@@ -138,6 +138,7 @@ pub struct PyderiveFieldOption {
     pub iter: Option<bool>,
     pub len: Option<bool>,
     pub kw_only: Option<bool>,
+    pub dataclass_field: Option<bool>,
     pub default: Option<Expr>,
 }
 
@@ -230,6 +231,18 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         new.kw_only = Some(is_true!(v));
                     }
                 },
+                PyderiveFieldAttr::DataclassField(v) => match new.dataclass_field {
+                    Some(_) => {
+                        return Err(syn::Error::new(
+                            extract_ident!(v).span(),
+                            "duplicated dataclass_field",
+                        ));
+                    }
+                    None => {
+                        new.dataclass_field = Some(is_true!(v));
+                    }
+                },
+
                 PyderiveFieldAttr::Default(v) => match new.default {
                     Some(_) => {
                         return Err(syn::Error::new(v.left.span(), "duplicated default"));
@@ -477,7 +490,9 @@ pub mod pyderive_field {
         syn::custom_keyword!(iter);
         syn::custom_keyword!(len);
         syn::custom_keyword!(kw_only);
+        syn::custom_keyword!(dataclass_field);
         syn::custom_keyword!(default);
+        syn::custom_keyword!(default_factory);
 
         syn::custom_keyword!(None);
     }
@@ -565,6 +580,7 @@ pub mod pyderive_field {
         Iter(OptionFieldAttr<kw::iter, LitBool>),
         Len(OptionFieldAttr<kw::len, LitBool>),
         KwOnly(OptionFieldAttr<kw::kw_only, LitBool>),
+        DataclassField(OptionFieldAttr<kw::dataclass_field, LitBool>),
         Default(ExprAssign),
     }
 
@@ -585,6 +601,8 @@ pub mod pyderive_field {
                 Ok(Self::Len(input.parse()?))
             } else if lookahead.peek(kw::kw_only) {
                 Ok(Self::KwOnly(input.parse()?))
+            } else if lookahead.peek(kw::dataclass_field) {
+                Ok(Self::DataclassField(input.parse()?))
             } else if lookahead.peek(kw::default) {
                 Ok(Self::Default(input.parse()?))
             } else {

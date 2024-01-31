@@ -59,14 +59,17 @@
 //!
 //! We list the default implementation that the macros generate.
 //!
-//! | Derive Macro    | Derives                                       |
-//! | --------------- | --------------------------------------------- |
-//! | [`PyInit`]      | `__init__()` (`__new__()`) with all fields    |
-//! | [`PyMatchArgs`] | `__match_args__` contains `get` field names   |
-//! | [`PyRepr`]      | `__repr__()` returns `get` and `set` fields   |
-//! | [`PyStr`]       | `__str__()` returns `get` and `set` fields    |
-//! | [`PyIter`]      | `__iter__()` returns iterator of `get` fields |
-//! | [`PyLen`]       | `__len__()` returns number of `get` fields    |
+//! | Derive Macro          | Derives                                                                      |
+//! | --------------------- | ---------------------------------------------------------------------------- |
+//! | [`PyInit`]            | `__init__()` (`__new__()`) with all fields                                   |
+//! | [`PyMatchArgs`]       | `__match_args__` attr. contains `get` field names                            |
+//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields                                  |
+//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields                                   |
+//! | [`PyIter`]            | `__iter__()` returns iterator of `get` fields                                |
+//! | [`PyLen`]             | `__len__()` returns number of `get` fields                                   |
+//! | [`PyDataclassFields`] | `__dataclass_fields__` getter (to support helper functions of [dataclasses]) |
+//!
+//! [dataclasses]: https://docs.python.org/3/library/dataclasses.html
 //!
 //! We call the field is *`get` (or `set`) field*
 //! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
@@ -167,7 +170,7 @@
 //!     4. `#[pyderive(init=false, default=<expr>)]`
 //!
 //!        The field is not included as the parameter,
-//!        and initialized with `<expr>` in the `__init__()` method.     
+//!        and initialized with `<expr>` in the `__init__()` method.
 //!
 //!         ```python
 //!         def __init__(self): self.field = <expr>
@@ -203,6 +206,12 @@
 //!    If `len=true`,
 //!    the field is counted by the `__iter__()`;
 //!    if `len=false`, it isn't.
+//! 
+//! - `#[pyderive(dataclass_field=<bool>)]`
+//!
+//!    If `dataclass_field=true`,
+//!    the field is included to the return value of the `__dataclass_fields__` getter;
+//!    if `dataclass_field=false`, it isn't. See [`PyDataclassFields`] for detail.
 //!
 extern crate proc_macro;
 
@@ -765,6 +774,118 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::match_args::implementation(input) {
+        Ok(r) => r,
+        Err(e) => e.into_compile_error().into(),
+    }
+}
+
+/// Derive macro generating a `__dataclass_fields__` getter to support helper functions of [dataclasses][dataclasses].
+///
+/// It returns a [`dataclasses.Field`][Field] dict that helper functions of [dataclasses][dataclasses] use.
+/// It supportes
+/// [`dataclasses.is_dataclass()`][is_dataclass],
+/// [`dataclasses.fields()`][fields],
+/// [`dataclasses.asdict()`][asdict] (include nest),
+/// [`dataclasses.astuple()`][astuple] (include nest)
+/// and [`dataclasses.replace()`][replace].
+///
+/// It should place `#[derive(PyDataclassField)]` before `#[pyclass]`.
+/// This does not generate other fn/method,
+/// use [`PyInit`] etc. to implement `__init__()` etc.
+///
+/// The resulting dict contains all fields as default.
+///
+/// If the filed is deocrated by `#[pyderive(field=true)]` attribute,
+/// the field is included to the dict that `__dataclass_fields__` returns;
+/// if `#[pyderive(field=false)]`, it isn't.
+///
+/// ## Notice
+///
+/// 1. It strognly recomends that all fields in the argument of the constructor
+///    (all fields on pyderive as default) must bet `get`, like `dataclass` does.
+/// 2. This cannot to handle `default_factory` field of `Field`.
+///    The `default` value assigns to the `default` field, not `default_factory`.
+/// 3. The resulting `Field`'s fields, `name`, `type`, `init`, `repr` and `kw_only`,
+///    have *proper* value but others not, see Appendix.
+/// 4. This handles `init=false` field as [`typing.ClassVar`][ClassVar],
+///    see Appendix.
+/// 5. This derive macro depends on internal behavior of Python.
+///
+/// ## Appendix
+///
+/// Table of *non-proper* value fields of `Field`:
+///
+/// | Field Name        | Value                                                                |
+/// | ----------------- | -------------------------------------------------------------------- |
+/// | `default`         | `default` value given by `#[pyderive(..)]` or `dataclasses.MISSING`  |
+/// | `default_factory` | `dataclasses.MISSING`                                                |
+/// | `hash`            | `None`                                                               |
+/// | `compare`         | `None`                                                               |
+/// | `metadata`        | `None`                                                               |
+///
+/// Table of `#[pyderive(..)]` v.s. handling:
+///
+/// | Field Attr.                 | Handling                                      |
+/// | --------------------------- | --------------------------------------------- |
+/// |`init=true` (default)        | Dataclass field                               |
+/// |`init=false`                 | [`typing.ClassVar` field][dataclass_ClassVar] |
+/// |`dataclass_field=false`      | Ommit from `__dataclass_fields__`             |
+///
+/// [dataclasses]: https://docs.python.org/3/library/dataclasses.html
+/// [dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass
+/// [Field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.Field
+/// [fields]: https://docs.python.org/3/library/dataclasses.html#dataclasses.fields
+/// [asdict]: https://docs.python.org/3/library/dataclasses.html#dataclasses.asdict
+/// [astuple]: https://docs.python.org/3/library/dataclasses.html#dataclasses.astuple
+/// [replace]: https://docs.python.org/3/library/dataclasses.html#dataclasses.replace
+/// [is_dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.is_dataclass
+/// [ClassVar]: https://docs.python.org/3/library/typing.html#typing.ClassVar
+/// [dataclass_ClassVar]: https://docs.python.org/3/library/dataclasses.html#class-variables
+///
+/// # Example
+///
+/// ```
+/// # use std::error::Error;
+/// # use pyderive::*;
+/// # use pyo3::prelude::*;
+/// # use pyo3::py_run;
+/// // Place before `#[pyclass]`
+/// #[derive(PyInit, PyDataclassFields)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+/// }
+///
+/// # pyo3::prepare_freethreaded_python();
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let val = PyCell::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///         option: None,
+///     })?;
+///
+///     py_run!(py, val,
+/// "
+/// from dataclasses import is_dataclass, asdict, astuple
+///
+/// assert is_dataclass(val) is True
+/// assert asdict(val) == {'string': 's', 'integer': 1, 'float': 1.0, 'tuple': ('s', 1, 1.0), 'option': None}
+/// assert astuple(val) == ('s', 1, 1.0, ('s', 1, 1.0), None)
+/// "
+///     );
+///     Ok(())
+/// });
+/// ```
+#[proc_macro_derive(PyDataclassFields, attributes(pyderive))]
+pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    match internal::dataclass_field::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }

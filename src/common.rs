@@ -76,6 +76,7 @@ pub struct FieldData {
     pub iter: Option<bool>,
     pub len: Option<bool>,
     pub kw_only: Option<bool>,
+    pub dataclass_field: Option<bool>,
     pub default: Option<Expr>,
 }
 
@@ -142,6 +143,7 @@ impl FieldData {
                     iter: pyderive_field_opt.iter,
                     len: pyderive_field_opt.len,
                     kw_only: pyderive_field_opt.kw_only,
+                    dataclass_field: pyderive_field_opt.dataclass_field,
                     default: pyderive_field_opt.default,
                 })
             })
