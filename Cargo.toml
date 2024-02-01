@@ -2,6 +2,8 @@
 name = "pyderive"
 version = "0.2.5"
 edition = "2021"
+# MSRV of inventory inventory v0.3
+rust-version = "1.62"
 authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Derive macro of Python special methods and a class attribute for PyO3"
