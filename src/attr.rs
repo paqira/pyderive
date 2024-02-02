@@ -24,7 +24,6 @@ fn take_meta_list(a: &Attribute) -> Option<&MetaList> {
 pub struct Pyo3StructOption {
     pub get: bool,
     pub set: bool,
-    pub name: Option<String>,
     pub rename: RenamingRule,
 }
 
@@ -38,9 +37,6 @@ impl FromIterator<Pyo3StructAttr> for Pyo3StructOption {
                 }
                 Pyo3StructAttr::Set(_) => {
                     new.set = true;
-                }
-                Pyo3StructAttr::Name { value: val, .. } => {
-                    new.name = Some(val.value().to_string());
                 }
                 Pyo3StructAttr::Rename { value: val, .. } => {
                     new.rename = val;
@@ -317,7 +313,6 @@ pub mod pyo3_struct {
         // all of supporting option
         syn::custom_keyword!(get_all);
         syn::custom_keyword!(set_all);
-        syn::custom_keyword!(name);
         syn::custom_keyword!(rename_all);
     }
 
@@ -380,11 +375,6 @@ pub mod pyo3_struct {
     pub enum Pyo3StructAttr {
         Get(kw::get_all),
         Set(kw::set_all),
-        Name {
-            path: kw::name,
-            eq_token: Token![=],
-            value: LitStr,
-        },
         Rename {
             path: kw::rename_all,
             eq_token: Token![=],
@@ -399,12 +389,6 @@ pub mod pyo3_struct {
                 Ok(Self::Get(input.parse()?))
             } else if input.peek(kw::set_all) {
                 Ok(Self::Set(input.parse()?))
-            } else if input.peek(kw::name) {
-                Ok(Self::Name {
-                    path: input.parse()?,
-                    eq_token: input.parse()?,
-                    value: input.parse()?,
-                })
             } else if input.peek(kw::rename_all) {
                 Ok(Self::Rename {
                     path: input.parse()?,
