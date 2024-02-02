@@ -37,15 +37,15 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             if let Some(true) = &d.kw_only {
                 kw_only = true;
             }
-            let field_type = if d.init.unwrap_or(true) {
+            // init=false -> ClassVar
+            let field_type = if *init {
                 format_ident!("{}", "_FIELD")
             } else {
                 format_ident!("{}", "_FIELD_CLASSVAR")
             };
 
             quote! {
-                #[allow(unused_mut)]
-                let mut field = if py.version_info() >= (3, 10) {
+                let field = if py.version_info() >= (3, 10) {
                     Field.call1((
                         // default
                         #default,
@@ -61,8 +61,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                         py.None(),
                         // metadata
                         py.None(),
-                        // kw_only
-                        // python >= 3.10
+                        // kw_only for python >= 3.10
                         pyo3::types::PyBool::new(py, #kw_only),
                     ))
                 } else {
@@ -84,12 +83,30 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                     ))
                 }?;
 
-                field.setattr(pyo3::intern!(py, "name"), pyo3::intern!(py, #pyname))?;
-                field.setattr(pyo3::intern!(py, "type"), #field.to_object(py).as_ref(py).get_type())?;
-                field.setattr(pyo3::intern!(py, "_field_type"), #field_type)?;
-                field.call_method1(pyo3::intern!(py, "__set_name__"), (sself, pyo3::intern!(py, #pyname)))?;
+                field.setattr(
+                    pyo3::intern!(py, "name"),
+                    pyo3::intern!(py, #pyname)
+                )?;
+                field.setattr(
+                    pyo3::intern!(py, "type"),
+                    #field.to_object(py).as_ref(py).get_type()
+                )?;
+                field.setattr(
+                    pyo3::intern!(py, "_field_type"),
+                    #field_type
+                )?;
 
-                fields.set_item(pyo3::intern!(py, #pyname), field)?;
+                // See (to support the PEP 487 __set_name__ protocol)
+                // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L341-L354
+                field.call_method1(
+                    pyo3::intern!(py, "__set_name__"),
+                    (sself, pyo3::intern!(py, #pyname))
+                )?;
+
+                fields.set_item(
+                    pyo3::intern!(py, #pyname),
+                    field
+                )?;
             }
         });
 
@@ -101,8 +118,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let py = slf.py();
                 let sself = std::borrow::Borrow::borrow(&slf);
 
-                #[allow(unused_mut)]
-                let mut fields = pyo3::types::PyDict::new(py);
+                let fields = pyo3::types::PyDict::new(py);
 
                 let dataclasses = pyo3::types::PyModule::import(py, "dataclasses")?;
 
