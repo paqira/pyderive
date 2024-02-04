@@ -27,28 +27,28 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let expanded = quote! {
         #[pyclass]
         struct #iter_name {
-            inner: std::vec::IntoIter<pyo3::PyObject>,
+            inner: ::std::vec::IntoIter<pyo3::PyObject>,
         }
 
         #[pymethods]
         impl #iter_name {
-            pub fn __iter__(slf: pyo3::PyRef<'_, Self>) -> pyo3::PyRef<'_, Self> {
+            pub fn __iter__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyRef<'_, Self> {
                 slf
             }
 
-            pub fn __next__(mut slf: pyo3::PyRefMut<'_, Self>) -> std::option::Option<pyo3::PyObject> {
+            pub fn __next__(mut slf: ::pyo3::PyRefMut<'_, Self>) -> ::std::option::Option<::pyo3::PyObject> {
                 slf.inner.next()
             }
         }
 
         #[pymethods]
         impl #struct_name {
-            pub fn __iter__(slf: pyo3::PyRef<'_, Self>) -> pyo3::PyResult<pyo3::Py<#iter_name>> {
+            pub fn __iter__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyResult<::pyo3::Py<#iter_name>> {
                 let py = slf.py();
                 let iter = #iter_name {
-                    inner: std::vec![ #(#args),* ].into_iter(),
+                    inner: ::std::vec![ #(#args),* ].into_iter(),
                 };
-                pyo3::Py::new(py, iter)
+                ::pyo3::Py::new(py, iter)
             }
         }
     };
