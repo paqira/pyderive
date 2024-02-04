@@ -43,6 +43,7 @@
 //!         raise AssertionError
 //!
 //! # Implements __repr__()
+//! assert str(m) == "MyClass(string='a', integer=1, option=None)"
 //! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 //!
 //! # Implements __eq__() based on PartialEq/Eq trait
