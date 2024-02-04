@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::DeriveInput;
 
-use crate::common::{is_py, is_string, FieldData};
+use crate::common::{is_py, FieldData};
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = &input.ident;
@@ -14,11 +14,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .filter(|d| d.dataclass_field.unwrap_or(true))
         .map(|d| {
             let ident = &d.field.ident;
-            let field = if is_string(&d.field.ty) {
-                quote! { (&sself.#ident) }
-            } else {
-                quote! { sself.#ident }
-            };
+            let field = quote! { this.#ident };
             let pyname = &d.pyname;
             let init = &d.init.unwrap_or(true);
             let repr = &d.repr.unwrap_or(true);
@@ -44,8 +40,9 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             };
 
             quote! {
+                let field_name = pyo3::intern!(py, #pyname);
                 let field = if py.version_info() >= (3, 10) {
-                    Field.call1((
+                    let args = (
                         // default
                         #default,
                         // default_factory
@@ -62,9 +59,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                         py.None(),
                         // kw_only for python >= 3.10
                         pyo3::types::PyBool::new(py, #kw_only),
-                    ))
+                    );
+                    Field.call1(args)
                 } else {
-                    Field.call1((
+                    let args = (
                         // default
                         #default,
                         // default_factory
@@ -79,37 +77,23 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                         py.None(),
                         // metadata
                         py.None(),
-                    ))
+                    );
+                    Field.call1(args)
                 }?;
 
                 // Field does not have name, type and _field_type
                 // in the constructor's arguments.
                 // From dataclasses._get_field at
                 // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L760-855
-                field.setattr(
-                    pyo3::intern!(py, "name"),
-                    pyo3::intern!(py, #pyname)
-                )?;
-                field.setattr(
-                    pyo3::intern!(py, "type"),
-                    #field.to_object(py).as_ref(py).get_type()
-                )?;
-                field.setattr(
-                    pyo3::intern!(py, "_field_type"),
-                    #field_type
-                )?;
+                field.setattr(pystr_name, field_name)?;
+                field.setattr(pystr_type, #field.to_object(py).as_ref(py).get_type())?;
+                field.setattr(pystr_field_type, #field_type)?;
 
                 // From dataclasses.Field (to support the PEP 487 __set_name__ protocol) at
                 // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L341-L354
-                field.call_method1(
-                    pyo3::intern!(py, "__set_name__"),
-                    (sself, pyo3::intern!(py, #pyname))
-                )?;
+                field.call_method1(pystr_set_name, (this, field_name))?;
 
-                fields.set_item(
-                    pyo3::intern!(py, #pyname),
-                    field
-                )?;
+                fields.set_item(field_name, field)?;
             }
         });
 
@@ -120,7 +104,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             #[getter]
             fn __dataclass_fields__<'p>(slf: pyo3::PyRef<'p, Self>) -> pyo3::PyResult<&'p pyo3::types::PyDict> {
                 let py = slf.py();
-                let sself = std::borrow::Borrow::borrow(&slf);
+
+                let this = std::borrow::Borrow::borrow(&slf);
 
                 let fields = pyo3::types::PyDict::new(py);
 
@@ -134,6 +119,11 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let _FIELD = dataclasses.getattr("_FIELD")?;
                 #[allow(non_snake_case)]
                 let _FIELD_CLASSVAR = dataclasses.getattr("_FIELD_CLASSVAR")?;
+
+                let pystr_name = pyo3::intern!(py, "name");
+                let pystr_type = pyo3::intern!(py, "type");
+                let pystr_field_type = pyo3::intern!(py, "_field_type");
+                let pystr_set_name = pyo3::intern!(py, "__set_name__");
 
                 #(#assingments)*
 
