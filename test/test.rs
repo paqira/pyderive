@@ -411,7 +411,7 @@ mod test_str {
 
                 fd_name_vec_opt_pystr,
                 fd_name_vec_opt_pyint,
-                
+
                 fd_name_pystr_abspath,
             ))]
             fn new(
