@@ -24,7 +24,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = input.ident.clone();
     let data = FieldData::try_from_input(&input)?;
 
-    // signature
+    // #[pyo3(signature=..)]
     let mut signature = Vec::new();
 
     signature.extend(
@@ -45,6 +45,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         signature.extend(rest_args);
     }
 
+    // constructor arguments
     let init_args = data
         .iter()
         .filter(|d| d.init.unwrap_or(true))
@@ -56,6 +57,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         })
         .collect::<Vec<_>>();
 
+    // Self arguments
     let self_args = data
         .iter()
         .map(|d| {

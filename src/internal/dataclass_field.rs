@@ -27,7 +27,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 .as_ref()
                 .map_or(quote!(MISSING.to_object(py)), |expr| {
                     if is_py(&d.field.ty) {
-                        // may never reach
                         quote!( #expr )
                     } else {
                         quote!( #expr.into_py(py) )
@@ -83,6 +82,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                     ))
                 }?;
 
+                // Field does not have name, type and _field_type
+                // in the constructor's arguments.
+                // From dataclasses._get_field at
+                // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L760-855
                 field.setattr(
                     pyo3::intern!(py, "name"),
                     pyo3::intern!(py, #pyname)
@@ -96,7 +99,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                     #field_type
                 )?;
 
-                // See (to support the PEP 487 __set_name__ protocol)
+                // From dataclasses.Field (to support the PEP 487 __set_name__ protocol) at
                 // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L341-L354
                 field.call_method1(
                     pyo3::intern!(py, "__set_name__"),
@@ -110,6 +113,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             }
         });
 
+    // Is borrowing goot strat?
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
