@@ -45,6 +45,8 @@ mod test_repr {
 
             fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
             fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
+
+            fd_name_pystr_abspath: ::pyo3::Py<PyString>,
         }
 
         #[pymethods]
@@ -85,6 +87,8 @@ mod test_repr {
 
                 fd_name_vec_opt_pystr,
                 fd_name_vec_opt_pyint,
+
+                fd_name_pystr_abspath,
             ))]
             fn new(
                 fd_name_bool: bool,
@@ -121,6 +125,8 @@ mod test_repr {
 
                 fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
                 fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
+
+                fd_name_pystr_abspath: ::pyo3::Py<PyString>,
             ) -> Self {
                 Self {
                     fd_name_bool,
@@ -148,6 +154,7 @@ mod test_repr {
                     fd_name_vec_pyint,
                     fd_name_vec_opt_pystr,
                     fd_name_vec_opt_pyint,
+                    fd_name_pystr_abspath,
                 }
             }
         }
@@ -170,8 +177,10 @@ mod test_repr {
     'str', 1,
     ['str'], [1],
     ['str'], [1],
+    'str',
 )
-assert repr(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=[115, 116, 114], fd_name_opt_str='str', fd_name_opt_int=1, fd_name_vec_str=['str'], fd_name_vec_int=[1], fd_name_vec_opt_str=['str'], fd_name_vec_opt_int=[1], fd_name_hs_str={'str'}, fd_name_js_int={1}, fd_name_hm_str={'str': 'str'}, fd_name_hm_int={1: 1}, fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0, fd_name_opt_pystr='str', fd_name_opt_pyint=1, fd_name_vec_pystr=['str'], fd_name_vec_pyint=[1], fd_name_vec_opt_pystr=['str'], fd_name_vec_opt_pyint=[1])""#
+
+assert repr(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=[115, 116, 114], fd_name_opt_str='str', fd_name_opt_int=1, fd_name_vec_str=['str'], fd_name_vec_int=[1], fd_name_vec_opt_str=['str'], fd_name_vec_opt_int=[1], fd_name_hs_str={'str'}, fd_name_js_int={1}, fd_name_hm_str={'str': 'str'}, fd_name_hm_int={1: 1}, fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0, fd_name_opt_pystr='str', fd_name_opt_pyint=1, fd_name_vec_pystr=['str'], fd_name_vec_pyint=[1], fd_name_vec_opt_pystr=['str'], fd_name_vec_opt_pyint=[1], fd_name_pystr_abspath='str')""#
             );
         });
     }
@@ -360,6 +369,8 @@ mod test_str {
 
             fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
             fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
+
+            fd_name_pystr_abspath: ::pyo3::Py<PyString>,
         }
 
         #[pymethods]
@@ -400,6 +411,8 @@ mod test_str {
 
                 fd_name_vec_opt_pystr,
                 fd_name_vec_opt_pyint,
+                
+                fd_name_pystr_abspath,
             ))]
             fn new(
                 fd_name_bool: bool,
@@ -436,6 +449,8 @@ mod test_str {
 
                 fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
                 fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
+
+                fd_name_pystr_abspath: ::pyo3::Py<PyString>,
             ) -> Self {
                 Self {
                     fd_name_bool,
@@ -463,6 +478,7 @@ mod test_str {
                     fd_name_vec_pyint,
                     fd_name_vec_opt_pystr,
                     fd_name_vec_opt_pyint,
+                    fd_name_pystr_abspath,
                 }
             }
         }
@@ -485,8 +501,10 @@ mod test_str {
     'str', 1,
     ['str'], [1],
     ['str'], [1],
+    'str',
 )
-assert str(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=[115, 116, 114], fd_name_opt_str='str', fd_name_opt_int=1, fd_name_vec_str=['str'], fd_name_vec_int=[1], fd_name_vec_opt_str=['str'], fd_name_vec_opt_int=[1], fd_name_hs_str={'str'}, fd_name_js_int={1}, fd_name_hm_str={'str': 'str'}, fd_name_hm_int={1: 1}, fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0, fd_name_opt_pystr='str', fd_name_opt_pyint=1, fd_name_vec_pystr=['str'], fd_name_vec_pyint=[1], fd_name_vec_opt_pystr=['str'], fd_name_vec_opt_pyint=[1])""#
+
+assert str(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=[115, 116, 114], fd_name_opt_str='str', fd_name_opt_int=1, fd_name_vec_str=['str'], fd_name_vec_int=[1], fd_name_vec_opt_str=['str'], fd_name_vec_opt_int=[1], fd_name_hs_str={'str'}, fd_name_js_int={1}, fd_name_hm_str={'str': 'str'}, fd_name_hm_int={1: 1}, fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0, fd_name_opt_pystr='str', fd_name_opt_pyint=1, fd_name_vec_pystr=['str'], fd_name_vec_pyint=[1], fd_name_vec_opt_pystr=['str'], fd_name_vec_opt_pyint=[1], fd_name_pystr_abspath='str')""#
             );
         });
     }
