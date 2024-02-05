@@ -186,6 +186,62 @@ assert repr(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, 
     }
 
     #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyRepr)]
+        #[pyclass(get_all)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        #[derive(PyRepr, Clone)]
+        #[pyclass(get_all)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            #[pyo3(signature=(field))]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            #[pyo3(signature=(field))]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        impl ToPyObject for PyClassB {
+            fn to_object(&self, py: Python<'_>) -> PyObject {
+                self.clone().into_py(py)
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            assert_eq!("PyClassA", py_class_a.name().unwrap().to_string());
+            assert_eq!("PyClassB", py_class_b.name().unwrap().to_string());
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+
+assert repr(a) == "PyClassA(field=PyClassB(field=1))"
+"#
+            );
+        });
+    }
+
+    #[test]
     fn test_no_get_set() {
         #[derive(PyRepr)]
         #[pyclass]
@@ -510,6 +566,63 @@ assert str(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, f
     }
 
     #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyStr)]
+        #[pyclass(get_all)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        // PyStr calls repr()
+        #[derive(PyRepr, Clone)]
+        #[pyclass(get_all)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            #[pyo3(signature=(field))]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            #[pyo3(signature=(field))]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        impl ToPyObject for PyClassB {
+            fn to_object(&self, py: Python<'_>) -> PyObject {
+                self.clone().into_py(py)
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            assert_eq!("PyClassA", py_class_a.name().unwrap().to_string());
+            assert_eq!("PyClassB", py_class_b.name().unwrap().to_string());
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+
+assert str(a) == "PyClassA(field=PyClassB(field=1))"
+"#
+            );
+        });
+    }
+
+    #[test]
     fn test_no_get_set() {
         #[derive(PyStr)]
         #[pyclass]
@@ -775,6 +888,66 @@ mod test_iter {
             py_run!(py, data, "assert tuple(data) == tuple()")
         });
     }
+
+    #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyIter)]
+        #[pyclass(get_all)]
+        struct PyClassA {
+            field_1: PyClassB,
+            field_2: i64,
+        }
+
+        #[derive(PyIter, Clone)]
+        #[pyclass(get_all)]
+        #[derive(PartialEq)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            #[pyo3(signature=(field_1, field_2))]
+            fn new(field_1: PyClassB, field_2: i64) -> Self {
+                Self { field_1, field_2 }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            #[pyo3(signature=(field))]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+
+            fn __eq__(&self, other: &Self) -> bool {
+                self.eq(other)
+            }
+        }
+
+        impl ToPyObject for PyClassB {
+            fn to_object(&self, py: Python<'_>) -> PyObject {
+                self.clone().into_py(py)
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1), 1)
+
+assert tuple(a) == (py_class_b(1), 1)
+"#
+            );
+        });
+    }
 }
 
 #[cfg(test)]
@@ -903,6 +1076,54 @@ mod test_len {
         Python::with_gil(|py| {
             let data = PyCell::new(py, PyClass::default()).unwrap();
             py_run!(py, data, "assert len(data) == 0")
+        });
+    }
+
+    #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyLen)]
+        #[pyclass(get_all)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        #[derive(PyLen, Clone)]
+        #[pyclass(get_all)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            #[pyo3(signature=(field))]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            #[pyo3(signature=(field))]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+
+assert len(a) == 1
+"#
+            );
         });
     }
 }
@@ -1328,6 +1549,37 @@ except TypeError: pass"
             pyo3::py_run!(py, py_class, "assert py_class(fd_b=0).fd_b == 0");
         });
     }
+
+    #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyInit)]
+        #[pyclass(get_all)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        #[derive(PyInit, Clone)]
+        #[pyclass(get_all)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+
+assert isinstance(a.field, py_class_b)
+assert a.field.field == 1
+"#
+            );
+        });
+    }
 }
 
 #[cfg(test)]
@@ -1579,6 +1831,52 @@ match py_class(0):
             );
         });
     }
+
+    #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyMatchArgs)]
+        #[pyclass(get_all)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        #[derive(PyMatchArgs, Clone)]
+        #[pyclass(get_all)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+
+assert a.__match_args__ == ('field', )
+"#
+            );
+        });
+    }
 }
 
 #[cfg(test)]
@@ -1674,6 +1972,54 @@ mod test_hash {
             py_run!(py, data, "assert hash(data) == -9000812902462168605")
         });
     }
+
+    #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyHash)]
+        #[pyclass(get_all)]
+        #[derive(Hash)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        #[derive(PyHash, Clone)]
+        #[pyclass(get_all)]
+        #[derive(Hash)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+
+assert hash(a) ==  2206609067086327257
+"#
+            );
+        });
+    }
 }
 
 #[cfg(test)]
@@ -1720,6 +2066,56 @@ mod test_eq {
             py_run!(py, data1 data2 data3, "assert data3 != data3");
             py_run!(py, data1 data2 data3, "try: assert not data3 < 1
 except TypeError: pass");
+        });
+    }
+
+    #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyEq)]
+        #[pyclass(get_all)]
+        #[derive(PartialEq)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        #[derive(PyEq, Clone)]
+        #[pyclass(get_all)]
+        #[derive(PartialEq)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+
+assert a == a
+assert a == py_class_a(py_class_b(1))
+assert a != py_class_a(py_class_b(2))
+"#
+            );
         });
     }
 }
@@ -1783,6 +2179,58 @@ except TypeError: pass");
             py_run!(py, data1 data2,  "assert not data2 >= data2");
             py_run!(py, data1 data2,  "try: assert not data2 < 1
 except TypeError: pass");
+        });
+    }
+
+    #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyOrd)]
+        #[pyclass(get_all)]
+        #[derive(PartialOrd, PartialEq)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        #[derive(PyOrd, Clone)]
+        #[pyclass(get_all)]
+        #[derive(PartialOrd, PartialEq)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+b = py_class_a(py_class_b(2))
+
+assert a < b
+assert a <= b
+assert not a > b
+assert not a >= b
+"#
+            );
         });
     }
 }
@@ -2072,6 +2520,62 @@ for field in fields(a):
             assert field.kw_only is True, field.name
     else:
         raise AssertionError(field.name)
+"#
+            );
+        });
+    }
+
+    #[test]
+    fn test_nest_pyclass() {
+        #[derive(PyDataclassFields)]
+        #[pyclass(get_all)]
+        struct PyClassA {
+            field: PyClassB,
+        }
+
+        #[derive(PyDataclassFields, Clone)]
+        #[pyclass(get_all)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        impl ToPyObject for PyClassB {
+            fn to_object(&self, py: Python<'_>) -> PyObject {
+                self.clone().into_py(py)
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+a = py_class_a(py_class_b(1))
+
+from dataclasses import is_dataclass, asdict, astuple
+
+assert is_dataclass(a) is True
+assert asdict(a) == {'field': {'field': 1}}
+astuple(a) == ((1, ), )
 "#
             );
         });
