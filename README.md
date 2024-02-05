@@ -60,6 +60,12 @@ This provides deriving following special methods and attribute;
 | `PyHash`            | `__hash__()`                                                    |
 | `PyDataclassFields` | `__dataclass_fields__` (to support helper funcs of dataclasses) |
 
+In addition, this provides a helper derive macro:
+
+| Derive Macro | Impl                                                         |
+| ------------ | ------------------------------------------------------------ |
+| `ToPyObject` | `ToPyObject` trait by `IntoPy<PyObject>` trait for `pyclass` |
+
 The field attributes `#[pyderive(..)]` is used to customize the implementation,
 like [`dataclasses.field()`][dataclasses-field] of Python.
 

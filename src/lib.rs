@@ -84,6 +84,17 @@
 //! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //!
+//! This prodieves a helper derive macro that generates an impl of [`pyo3::ToPyObject`][pyo3_ToPyObject]
+//! that required by [`PyRepr`], [`PyStr`], [`PyIter`] and [`PyDataclassFields`] derive macros.
+//!
+//! | Derive Macro   | Impl                                                                                                           |
+//! | -------------- | -------------------------------------------------------------------------------------------------------------- |
+//! | [`ToPyObject`] | [`ToPyObject`][pyo3_ToPyObject] trait by [`IntoPy<PyObject>`][pyo3_IntoPy] trait for [`pyclass`][pyo3_pyclass] |
+//!
+//! [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+//! [pyo3_IntoPy]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPy.html
+//! [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
+//!
 //! # Customize Implementation
 //!
 //! The field attributes `#[pyderive(..)]` is used to customize implementations
@@ -931,6 +942,81 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::dataclass_field::implementation(input) {
+        Ok(r) => r,
+        Err(e) => e.into_compile_error().into(),
+    }
+}
+
+/// Derive macro generating an impl of the trait [`ToPyObject`][pyo3_ToPyObject] by trait [`IntoPy<PyObject>`][pyo3_IntoPy].
+///
+/// It requires [`Clone`] trait.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_IntoPy]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPy.html
+///
+/// # Expansion
+///
+/// This implements, for example;
+///
+/// ```
+/// # use pyo3::prelude::*;
+/// # #[pyclass]
+/// # #[derive(Hash, Clone)]
+/// # struct PyClass {}
+/// impl ToPyObject for PyClass {
+///     fn to_object(&self, py: Python<'_>) -> PyObject {
+///         self.clone().into_py(py)
+///     }
+/// }
+/// ```
+///
+/// # Example
+///
+/// ```
+/// # use std::error::Error;
+/// # use pyderive::*;
+/// # use pyo3::prelude::*;
+/// # use pyo3::py_run;
+/// #[derive(PyInit, PyRepr)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     child: Child,
+/// }
+///
+/// // PyRepr requires ToPyObject trait for child pyclasses
+/// #[derive(PyInit, PyRepr, ToPyObject)]
+/// #[pyclass(get_all)]
+/// #[derive(Clone)]
+/// struct Child {
+///     field: i64,
+/// }
+/// #
+/// # // preliminary
+/// # #[pymodule]
+/// # fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+/// #    m.add_class::<PyClass>()?;
+/// #    m.add_class::<Child>()?;
+/// #    Ok(())
+/// # }
+/// # pyo3::append_to_inittab!(rust_module);
+/// # pyo3::prepare_freethreaded_python();
+///
+/// let test = r#"
+/// from rust_module import PyClass, Child
+///
+/// a = PyClass(Child(10))
+///
+/// assert repr(a) == "PyClass(child=Child(field=10))"
+/// "#;
+///
+/// assert!(
+///     Python::with_gil(|py| Python::run(py, test, None, None)).is_ok()
+/// );
+/// ```
+#[proc_macro_derive(ToPyObject)]
+pub fn py_to_py_object(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    match internal::to_py_object::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }

@@ -8,3 +8,4 @@ pub mod match_args;
 pub mod ord;
 pub mod repr;
 pub mod str;
+pub mod to_py_object;
