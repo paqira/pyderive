@@ -84,7 +84,7 @@
 //! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //!
-//! This prodieves a helper derive macro that generates an impl of [`pyo3::ToPyObject`][pyo3_ToPyObject]
+//! This prodieves a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
 //! that required by [`PyRepr`], [`PyStr`], [`PyIter`] and [`PyDataclassFields`] derive macros.
 //!
 //! | Derive Macro   | Impl                                                                                                           |
@@ -158,37 +158,49 @@
 //!
 //!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
 //!
-//!         Pseudo-code:
+//!        Pseudo-code:
 //!
-//!         ```python
-//!         def __init__(self, field): self.field = field
-//!         ```
+//!        ```python
+//!        def __init__(self, field): self.field = field
+//!        ```
 //!
 //!     2. `#[pyderive(init=false)]`
-//!       
+//!        
 //!        The field is not included as the parameter,
 //!        and initialized by [`Default::default()`] in the `__init__()` method.         
 //!
-//!         ```python
-//!         def __init__(self): self.field = field::default()  # call rust method
-//!         ```
+//!        Pseudo-code:
+//!
+//!        ```python
+//!        def __init__(self): self.field = field::default()  # call rust method
+//!        ```
+//!
+//!        We note that it evaluates `field::default() ` (rust code) every `__init__()` call.
 //!
 //!     3. `#[pyderive(default=<expr>)]`
 //!
 //!        The field is included as the parameter with default value `<expr>`.
 //!
-//!         ```python
-//!         def __init__(self, field=<expr>): self.field = field
-//!         ```
+//!        Pseudo-code:
+//!
+//!        ```python
+//!        def __init__(self, field=<expr>): self.field = field
+//!        ```
+//!
+//!        We note that it evaluates `<expr>` (rust code) every `__init__()` call (PyO3 feature).
 //!
 //!     4. `#[pyderive(init=false, default=<expr>)]`
 //!
 //!        The field is not included as the parameter,
 //!        and initialized with `<expr>` in the `__init__()` method.
 //!
-//!         ```python
-//!         def __init__(self): self.field = <expr>
-//!         ```
+//!        Pseudo-code:
+//!
+//!        ```python
+//!        def __init__(self): self.field = <expr>
+//!        ```
+//!
+//!        We note that it evaluates `<expr>` (rust code) every `__init__()` call.
 //!
 //! - `#[pyderive(kw_only=true)]`
 //!
@@ -321,7 +333,6 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
@@ -376,7 +387,6 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
@@ -436,7 +446,6 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
@@ -493,7 +502,6 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
@@ -575,7 +583,6 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
@@ -650,7 +657,6 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
@@ -725,7 +731,6 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
 /// # use pyderive::*;
@@ -772,7 +777,6 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
@@ -857,7 +861,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///
 /// ## Notice
 ///
-/// 1. It strognly recomends that all fields in the argument of the constructor
+/// 1. It recomends that all fields in the argument of the constructor
 ///    (all fields on pyderive as default) must bet `get`, like `dataclass` does.
 /// 2. This cannot to handle `default_factory` field of `Field`.
 ///    The `default` value assigns to the `default` field, not `default_factory`.
@@ -901,7 +905,6 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
@@ -973,7 +976,6 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
