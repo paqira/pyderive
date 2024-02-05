@@ -270,7 +270,6 @@ mod internal;
 /// # Example
 ///
 /// ```
-/// # use std::error::Error;
 /// # use pyderive::*;
 /// # use pyo3::prelude::*;
 /// # use pyo3::py_run;
