@@ -229,6 +229,11 @@ mod internal;
 /// It returns the string that contains `get` and `set` fileds as default,
 /// and they are orderd by declaration.
 /// It should place `#[derive(PyRepr)]` before `#[pyclass]`.
+/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
+/// for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// If the filed is deocrated by `#[pyderive(repr=true)]` attribute,
 /// the field is included in the string that `__str__()` returns;
@@ -287,6 +292,11 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// It returns the string that contains `get` and `set` fileds as default,
 /// and they are orderd by declaration.
 /// It should place `#[derive(PyStr)]` before `#[pyclass]`.
+/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
+/// for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// If the filed is deocrated by `#[pyderive(str=true)]` attribute,
 /// the field is included in the string that `__str__()` returns;
@@ -400,6 +410,11 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// It returns an iterator of `get` fileds as default,
 /// and they are orderd by declaration.
 /// It should place `#[derive(PyIter)]` before `#[pyclass]`.
+/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
+/// for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// If the filed is deocrated by `#[pyderive(iter=true)]` attribute,
 /// the field is included to the iterartor that `__iter__()` returns;
@@ -795,6 +810,11 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// It should place `#[derive(PyDataclassField)]` before `#[pyclass]`.
 /// This does not generate other fn/method,
 /// use [`PyInit`] etc. to implement `__init__()` etc.
+/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
+/// for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// The resulting dict contains all fields as default.
 ///
