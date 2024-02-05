@@ -21,7 +21,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             let default = &d
                 .default
                 .as_ref()
-                .map_or(quote!(MISSING.to_object(py)), |expr| {
+                .map_or(quote!( MISSING ), |expr| {
                     if is_py(&d.field.ty) {
                         quote!( #expr )
                     } else {
