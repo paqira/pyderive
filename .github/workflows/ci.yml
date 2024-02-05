@@ -28,6 +28,8 @@ jobs:
         uses: dtolnay/rust-toolchain@1.62
         with:
           components: clippy, rustfmt
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
       - name: Lint & Format
         run: |
           cargo fmt --check
