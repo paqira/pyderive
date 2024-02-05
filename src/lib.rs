@@ -272,7 +272,7 @@ mod internal;
 /// ```
 /// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
-/// 
+///
 /// // Place before `#[pyclass]`
 /// #[derive(PyRepr)]
 /// #[pyclass(get_all)]
@@ -336,7 +336,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
-/// 
+///
 /// // Place before `#[pyclass]`
 /// #[derive(PyStr)]
 /// #[pyclass(get_all)]
@@ -392,7 +392,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
-/// 
+///
 /// // Place before `#[pyclass]`
 /// #[derive(PyLen)]
 /// #[pyclass(get_all)]
@@ -453,7 +453,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
-/// 
+///
 /// // Place before `#[pyclass]`
 /// #[derive(PyIter)]
 /// #[pyclass(get_all)]
@@ -511,7 +511,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::prelude::*;
 /// use pyderive::*;
-/// 
+///
 /// // Place before `#[pyclass]`
 /// #[derive(PyInit)]
 /// #[pyclass(get_all)]
@@ -594,7 +594,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
-/// 
+///
 /// #[derive(PyEq)]
 /// #[pyclass]
 /// #[derive(PartialEq)]
@@ -668,7 +668,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
-/// 
+///
 /// #[derive(PyOrd)]
 /// #[pyclass]
 /// #[derive(PartialOrd, PartialEq)]
@@ -743,7 +743,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
-/// 
+///
 /// #[derive(PyHash)]
 /// #[pyclass]
 /// #[derive(Hash)]
@@ -790,7 +790,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::prelude::*;
 /// use pyderive::*;
-/// 
+///
 /// // Place before `#[pyclass]`
 /// #[derive(PyInit, PyMatchArgs)]
 /// #[pyclass(get_all)]
@@ -918,7 +918,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// ```
 /// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
-/// 
+///
 /// // Place before `#[pyclass]`
 /// #[derive(PyInit, PyDataclassFields)]
 /// #[pyclass(get_all)]
@@ -992,7 +992,7 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use pyo3::prelude::*;
 /// use pyderive::*;
-/// 
+///
 /// #[derive(PyInit, PyRepr)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
