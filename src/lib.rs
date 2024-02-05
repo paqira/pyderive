@@ -506,7 +506,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # pyo3::append_to_inittab!(module);
 /// # pyo3::prepare_freethreaded_python();
 ///
-/// let script = "
+/// let test = "
 /// from module import PyClass
 ///
 /// a = PyClass('s', 1, 1.0, ('s', 1, 1.0), None)
@@ -518,8 +518,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ";
 ///
 /// assert!(
-///     Python::with_gil(|py| Python::run(py, script, None, None))
-///     .is_ok()
+///     Python::with_gil(|py| Python::run(py, test, None, None)).is_ok()
 /// );
 /// ```
 #[proc_macro_derive(PyInit, attributes(pyderive))]
@@ -541,14 +540,21 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// # Expansion
 ///
-/// This implements:
+/// This implements, for example;
 ///
-/// ```no_run, ignore
-/// pub fn __eq__(&self, other: &Self) -> bool {
-///     self.eq(other)
-/// }
-/// pub fn __ne__(&self, other: &Self) -> bool {
-///     self.ne(other)
+/// ```
+/// # use pyo3::prelude::*;
+/// # #[pyclass]
+/// # #[derive(PartialEq)]
+/// # struct PyClass {}
+/// #[pymethods]
+/// impl PyClass {
+///     pub fn __eq__(&self, other: &Self) -> bool {
+///         self.eq(other)
+///     }
+///     pub fn __ne__(&self, other: &Self) -> bool {
+///         self.ne(other)
+///     }
 /// }
 /// ```
 ///
@@ -606,12 +612,21 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// This implements, for example;
 ///
-/// ```no_run, ignore
-/// pub fn __lt__(&self, other: &Self) -> pyo3::PyResult<bool> {
-///     match self.partial_cmp(other) {
-///         Some(std::cmp::Ordering::Less) => Ok(true),
-///         _ => Ok(false),
+/// ```
+/// # use std::cmp::Ordering;
+/// # use pyo3::prelude::*;
+/// # #[pyclass]
+/// # #[derive(PartialOrd, PartialEq)]
+/// # struct PyClass {}
+/// #[pymethods]
+/// impl PyClass {
+///     pub fn __lt__(&self, other: &Self) -> pyo3::PyResult<bool> {
+///         match self.partial_cmp(other) {
+///             Some(Ordering::Less) => Ok(true),
+///             _ => Ok(false),
+///         }
 ///     }
+///     // and __le__, __gt__ and __ge__
 /// }
 /// ```
 ///
@@ -644,14 +659,14 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     py_run!(py, val1 val2, "assert not val1 > val2");
 ///     py_run!(py, val1 val2, "assert not val1 >= val2");
 ///     
-///     let script = "
+///     let test = "
 /// try:
 ///     val1 < 1
 /// except TypeError:
 ///     pass
 /// else:
 ///     raise AssertionError";
-///     py_run!(py, val1, script);
+///     py_run!(py, val1, test);
 ///
 ///     let val1 = PyCell::new(py, PyClass { val: f64::NAN })?;
 ///     py_run!(py, val1, "assert not val1 < val1");
@@ -674,16 +689,23 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// # Expansion
 ///
-/// This implements:
+/// This implements, for example;
 ///
-/// ```no_run, ignore
-/// pub fn __hash__(&self) -> u64 {
-///     use std::collections::hash_map::DefaultHasher;
-///     use std::hash::{Hash, Hasher};
+/// ```
+/// # use pyo3::prelude::*;
+/// # #[pyclass]
+/// # #[derive(Hash)]
+/// # struct PyClass {}
+/// #[pymethods]
+/// impl PyClass {
+///     pub fn __hash__(&self) -> u64 {
+///         use std::collections::hash_map::DefaultHasher;
+///         use std::hash::{Hash, Hasher};
 ///
-///     let mut s = DefaultHasher::new();
-///     self.hash(&mut s);
-///     s.finish()
+///         let mut s = DefaultHasher::new();
+///         self.hash(&mut s);
+///         s.finish()
+///     }
 /// }
 /// ```
 ///
@@ -763,7 +785,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # pyo3::append_to_inittab!(module);
 /// # pyo3::prepare_freethreaded_python();
 ///
-/// let script = "
+/// let test = "
 /// from module import PyClass
 ///
 /// match PyClass('s', 1, 1.0, ('s', 1, 1.0), None):
@@ -780,7 +802,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert!(
 ///     Python::with_gil(|py|
 ///         if py.version_info() >= (3, 10) {
-///             Python::run(py, script, None, None)
+///             Python::run(py, test, None, None)
 ///         } else {
 ///             Ok(())
 ///         }
