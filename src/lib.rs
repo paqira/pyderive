@@ -58,17 +58,17 @@
 //! Some macros change implementations depend on `#[pyclass(..)]` and `#[pyo3(..)]` arguments,
 //! hence it should place `#[derive(PyInit)]` etc. before `#[pyclass(..)]` and `#[pyo3(..)]`.
 //!
-//! We list the default implementation that the macros generate.
+//! We list the default implementations that the macros generate.
 //!
-//! | Derive Macro          | Derives                                                                      |
-//! | --------------------- | ---------------------------------------------------------------------------- |
-//! | [`PyInit`]            | `__init__()` (`__new__()`) with all fields                                   |
-//! | [`PyMatchArgs`]       | `__match_args__` attr. contains `get` field names                            |
-//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields                                  |
-//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields                                   |
-//! | [`PyIter`]            | `__iter__()` returns iterator of `get` fields                                |
-//! | [`PyLen`]             | `__len__()` returns number of `get` fields                                   |
-//! | [`PyDataclassFields`] | `__dataclass_fields__` getter (to support helper functions of [dataclasses]) |
+//! | Derive Macro          | Derives                                       |
+//! | --------------------- | --------------------------------------------- |
+//! | [`PyInit`]            | `__init__()` (`__new__()`) with all fields    |
+//! | [`PyMatchArgs`]       | `__match_args__` attr. with `get` fields      |
+//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields   |
+//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields    |
+//! | [`PyIter`]            | `__iter__()` returns iterator of `get` fields |
+//! | [`PyLen`]             | `__len__()` returns number of `get` fields    |
+//! | [`PyDataclassFields`] | `__dataclass_fields__` getter with all fields |
 //!
 //! [dataclasses]: https://docs.python.org/3/library/dataclasses.html
 //!
@@ -84,7 +84,7 @@
 //! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //!
-//! This prodieves a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
+//! In addition, this prodieves a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
 //! that required by [`PyRepr`], [`PyStr`], [`PyIter`] and [`PyDataclassFields`] derive macros.
 //!
 //! | Derive Macro   | Impl                                                                                                           |
@@ -116,8 +116,8 @@
 //! }
 //! ```
 //!
-//! It allows to ommit right-hand side,
-//! and it evaluates to right-hand is `true`
+//! It allows to omit the right-hand side,
+//! and it evaluates to the right-hand as `true`
 //! expcept `default`, for example,
 //! `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
 //!
@@ -135,9 +135,9 @@
 //!
 //! - `#[pyderive(init=<bool>)]`
 //!
-//!    If `init=true`,
-//!    the field is included as the parameters of the `__init__()` (`__new__()` precisely) method;
-//!    If `init=false`, it isn't.
+//!    If `init=false`,
+//!    the field is *not* included as the parameters of the `__init__()` (`__new__()` precisely) method.
+//!    Notes, `init=true` has not effect.
 //!
 //!    The attribute `#[pyderive(default=<expr>)]` is used to costomize default value.
 //!    It supports any rust expression which PyO3 supports, e.g.,
@@ -154,7 +154,7 @@
 //!    }
 //!    ```
 //!
-//!    We note that this internally produce `#[pyo3(signiture=..)]` attribute.
+//!    We note that this internally produces `#[pyo3(signiture=..)]` attribute.
 //!
 //!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
 //!
@@ -172,7 +172,7 @@
 //!        Pseudo-code:
 //!
 //!        ```python
-//!        def __init__(self): self.field = field::default()  # call rust method
+//!        def __init__(self): self.field = field::default()  # call rust fn
 //!        ```
 //!
 //!        We note that it evaluates `field::default() ` (rust code) every `__init__()` call.
@@ -218,8 +218,8 @@
 //!    We note that, as far as I know,
 //!    the field must be accessible on the pattern matching.
 //!    For example,
-//!    pattern matching works for *not* get field with a getter and `#[pyderive(match_args=true)]` attribute,
-//!    but it doesn't if the field does not decorated with `#[pyderive(match_args=true)]`.
+//!    pattern matching works for *not `get` field with a getter* (and `match_args=true`),
+//!    but it doesn't if the field is not `get` field and does not have a getter (even it is `match_args=true`).
 //!
 //! - `#[pyderive(iter=<bool>)]`
 //!
@@ -235,9 +235,9 @@
 //!
 //! - `#[pyderive(dataclass_field=<bool>)]`
 //!
-//!    If `dataclass_field=true`,
-//!    the field is included to the return value of the `__dataclass_fields__` getter;
-//!    if `dataclass_field=false`, it isn't. See [`PyDataclassFields`] for detail.
+//!    If `dataclass_field=false`,
+//!    the field is *not* included to the return value of the `__dataclass_fields__` getter.
+//!    Notes, `dataclass_field=true` has not effect. See [`PyDataclassFields`] for detail.
 //!
 extern crate proc_macro;
 
@@ -270,9 +270,9 @@ mod internal;
 /// # Example
 ///
 /// ```
-/// # use pyderive::*;
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+/// 
 /// // Place before `#[pyclass]`
 /// #[derive(PyRepr)]
 /// #[pyclass(get_all)]
@@ -283,20 +283,22 @@ mod internal;
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(repr=false)]
-///     omitted: String,
+///     omit: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let val = PyCell::new(py, PyClass {
+///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omitted: "omitted".to_string(),
+///         omit: "omit".to_string(),
 ///     })?;
-///     py_run!(py, val, r#"assert repr(val) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///
+///     py_run!(py, a, r#"assert repr(a) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///
 ///     Ok(())
 /// });
 /// ```
@@ -332,9 +334,9 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyderive::*;
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+/// 
 /// // Place before `#[pyclass]`
 /// #[derive(PyStr)]
 /// #[pyclass(get_all)]
@@ -345,20 +347,22 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(str=false)]
-///     omitted: String,
+///     omit: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let val = PyCell::new(py, PyClass {
+///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omitted: "omitted".to_string(),
+///         omit: "omit".to_string(),
 ///     })?;
-///     py_run!(py, val, r#"assert str(val) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///
+///     py_run!(py, a, r#"assert str(a) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///
 ///     Ok(())
 /// });
 /// ```
@@ -386,9 +390,9 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyderive::*;
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+/// 
 /// // Place before `#[pyclass]`
 /// #[derive(PyLen)]
 /// #[pyclass(get_all)]
@@ -399,20 +403,22 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(len=false)]
-///     omitted: String,
+///     omit: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let val = PyCell::new(py, PyClass {
+///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omitted: "omitted".to_string(),
+///         omit: "omit".to_string(),
 ///     })?;
-///     py_run!(py, val, "assert len(val) == 5");
+///
+///     py_run!(py, a, "assert len(a) == 5");
+///
 ///     Ok(())
 /// });
 /// ```
@@ -445,9 +451,9 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
-/// # use pyderive::*;
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+/// 
 /// // Place before `#[pyclass]`
 /// #[derive(PyIter)]
 /// #[pyclass(get_all)]
@@ -458,20 +464,22 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(iter=false)]
-///     omitted: String,
+///     omit: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let val = PyCell::new(py, PyClass {
+///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omitted: "omitted".to_string(),
+///         omit: "omit".to_string(),
 ///     })?;
-///     py_run!(py, val, "assert tuple(val) == ('s', 1, 1.0, ('s', 1, 1.0), None)");
+///
+///     py_run!(py, a, "assert tuple(a) == ('s', 1, 1.0, ('s', 1, 1.0), None)");
+///
 ///     Ok(())
 /// });
 /// ```
@@ -501,9 +509,9 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyderive::*;
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
+/// use pyo3::prelude::*;
+/// use pyderive::*;
+/// 
 /// // Place before `#[pyclass]`
 /// #[derive(PyInit)]
 /// #[pyclass(get_all)]
@@ -513,19 +521,20 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     float: f64,
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
+///     #[pyderive(init=false)]
+///     omit: String,
 /// }
-/// #
-/// # // preliminary
-/// # #[pymodule]
-/// # fn module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-/// #    m.add_class::<PyClass>()?;
-/// #    Ok(())
-/// # }
-/// # pyo3::append_to_inittab!(module);
+///
+/// #[pymodule]
+/// fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+///    m.add_class::<PyClass>()?;
+///    Ok(())
+/// }
+/// pyo3::append_to_inittab!(rust_module);
 /// # pyo3::prepare_freethreaded_python();
 ///
 /// let test = "
-/// from module import PyClass
+/// from rust_module import PyClass
 ///
 /// a = PyClass('s', 1, 1.0, ('s', 1, 1.0), None)
 /// assert a.string == 's'
@@ -533,6 +542,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert a.float == 1.0
 /// assert a.tuple == ('s', 1, 1.0)
 /// assert a.option is None
+/// assert a.omit == ''
 /// ";
 ///
 /// assert!(
@@ -582,26 +592,26 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
-/// # use pyderive::*;
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+/// 
 /// #[derive(PyEq)]
 /// #[pyclass]
 /// #[derive(PartialEq)]
 /// struct PyClass {
-///     val: f64,
+///     field: f64,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let val1 = PyCell::new(py, PyClass { val: 0.0 })?;
-///     let val2 = PyCell::new(py, PyClass { val: 1.0 })?;
-///     py_run!(py, val1 val2, "assert val1 == val1");
-///     py_run!(py, val1 val2, "assert val1 != val2");
-///     py_run!(py, val1 val2, "assert val1 != 1");
+///     let a = PyCell::new(py, PyClass { field: 0.0 })?;
+///     let b = PyCell::new(py, PyClass { field: 1.0 })?;
+///     let c = PyCell::new(py, PyClass { field: f64::NAN })?;
 ///
-///     let val1 = PyCell::new(py, PyClass { val: f64::NAN })?;
-///     py_run!(py, val1, "assert val1 != val1");
+///     py_run!(py, a b, "assert a == a");
+///     py_run!(py, a b, "assert a != b");
+///     py_run!(py, c, "assert c != c");
+///     py_run!(py, a, "assert a != 1");
 ///
 ///     Ok(())
 /// });
@@ -656,36 +666,37 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
-/// # use pyderive::*;
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+/// 
 /// #[derive(PyOrd)]
 /// #[pyclass]
 /// #[derive(PartialOrd, PartialEq)]
 /// struct PyClass {
-///     val: f64,
+///     field: f64,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let val1 = PyCell::new(py, PyClass { val: 0.0 })?;
-///     let val2 = PyCell::new(py, PyClass { val: 1.0 })?;
-///     py_run!(py, val1 val2, "assert val1 < val2");
-///     py_run!(py, val1 val2, "assert val1 <= val2");
-///     py_run!(py, val1 val2, "assert not val1 > val2");
-///     py_run!(py, val1 val2, "assert not val1 >= val2");
+///     let a = PyCell::new(py, PyClass { field: 0.0 })?;
+///     let b = PyCell::new(py, PyClass { field: 1.0 })?;
+///     let c = PyCell::new(py, PyClass { field: f64::NAN })?;
+///
+///     py_run!(py, a b, "assert a < b");
+///     py_run!(py, a b, "assert a <= b");
+///     py_run!(py, a b, "assert not a > b");
+///     py_run!(py, a b, "assert not a >= b");
+///     py_run!(py, c, "assert not c < c");
 ///     
 ///     let test = "
 /// try:
-///     val1 < 1
+///     a < 1
 /// except TypeError:
 ///     pass
 /// else:
 ///     raise AssertionError";
-///     py_run!(py, val1, test);
-///
-///     let val1 = PyCell::new(py, PyClass { val: f64::NAN })?;
-///     py_run!(py, val1, "assert not val1 < val1");
+///     py_run!(py, a, test);
+
 ///
 ///     Ok(())
 /// });
@@ -730,9 +741,9 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
-/// # use pyderive::*;
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+/// 
 /// #[derive(PyHash)]
 /// #[pyclass]
 /// #[derive(Hash)]
@@ -743,11 +754,12 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let val = PyCell::new(py, PyClass {
+///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///     })?;
-///     py_run!(py, val, "assert hash(val) == -1989231435886966707");
+///
+///     py_run!(py, a, "assert hash(a) == -1989231435886966707");
 ///
 ///     Ok(())
 /// });
@@ -776,9 +788,9 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyderive::*;
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
+/// use pyo3::prelude::*;
+/// use pyderive::*;
+/// 
 /// // Place before `#[pyclass]`
 /// #[derive(PyInit, PyMatchArgs)]
 /// #[pyclass(get_all)]
@@ -788,21 +800,22 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     float: f64,
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
+///     #[pyderive(match_args=false)]
+///     omit: String,
 /// }
-/// #
-/// # // preliminary
-/// # #[pymodule]
-/// # fn module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-/// #    m.add_class::<PyClass>()?;
-/// #    Ok(())
-/// # }
-/// # pyo3::append_to_inittab!(module);
+///
+/// #[pymodule]
+/// fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+///    m.add_class::<PyClass>()?;
+///    Ok(())
+/// }
+/// pyo3::append_to_inittab!(rust_module);
 /// # pyo3::prepare_freethreaded_python();
 ///
 /// let test = "
-/// from module import PyClass
+/// from rust_module import PyClass
 ///
-/// match PyClass('s', 1, 1.0, ('s', 1, 1.0), None):
+/// match PyClass('s', 1, 1.0, ('s', 1, 1.0), None, 's'):
 ///     case PyClass(a, b, c, d, e):
 ///         assert a == 's'
 ///         assert b == 1
@@ -816,12 +829,11 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert!(
 ///     Python::with_gil(|py|
 ///         if py.version_info() >= (3, 10) {
-///             Python::run(py, test, None, None)
+///             Python::run(py, test, None, None).is_ok()
 ///         } else {
-///             Ok(())
+///             true
 ///         }
 ///     )
-///     .is_ok()
 /// )
 /// ```
 #[proc_macro_derive(PyMatchArgs, attributes(pyderive))]
@@ -888,7 +900,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// | --------------------------- | --------------------------------------------- |
 /// |`init=true` (default)        | Dataclass field                               |
 /// |`init=false`                 | [`typing.ClassVar` field][dataclass_ClassVar] |
-/// |`dataclass_field=false`      | Ommit from `__dataclass_fields__`             |
+/// |`dataclass_field=false`      | Omit from `__dataclass_fields__`              |
 ///
 /// [dataclasses]: https://docs.python.org/3/library/dataclasses.html
 /// [dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass
@@ -904,9 +916,9 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// # Example
 ///
 /// ```
-/// # use pyderive::*;
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+/// 
 /// // Place before `#[pyclass]`
 /// #[derive(PyInit, PyDataclassFields)]
 /// #[pyclass(get_all)]
@@ -916,27 +928,30 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///     float: f64,
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
+///     #[pyderive(dataclass_field=false)]
+///     omit: String
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let val = PyCell::new(py, PyClass {
+///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
+///         omit: "s".to_string()
 ///     })?;
 ///
-///     py_run!(py, val,
-/// "
+///     let test = "
 /// from dataclasses import is_dataclass, asdict, astuple
 ///
-/// assert is_dataclass(val) is True
-/// assert asdict(val) == {'string': 's', 'integer': 1, 'float': 1.0, 'tuple': ('s', 1, 1.0), 'option': None}
-/// assert astuple(val) == ('s', 1, 1.0, ('s', 1, 1.0), None)
-/// "
-///     );
+/// assert is_dataclass(a) is True
+/// assert asdict(a) == {'string': 's', 'integer': 1, 'float': 1.0, 'tuple': ('s', 1, 1.0), 'option': None}
+/// assert astuple(a) == ('s', 1, 1.0, ('s', 1, 1.0), None)
+/// ";
+///     py_run!(py, a, test);
+///
 ///     Ok(())
 /// });
 /// ```
@@ -975,9 +990,9 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// # use pyderive::*;
-/// # use pyo3::prelude::*;
-/// # use pyo3::py_run;
+/// use pyo3::prelude::*;
+/// use pyderive::*;
+/// 
 /// #[derive(PyInit, PyRepr)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
@@ -991,15 +1006,14 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// struct Child {
 ///     field: i64,
 /// }
-/// #
-/// # // preliminary
-/// # #[pymodule]
-/// # fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-/// #    m.add_class::<PyClass>()?;
-/// #    m.add_class::<Child>()?;
-/// #    Ok(())
-/// # }
-/// # pyo3::append_to_inittab!(rust_module);
+///
+/// #[pymodule]
+/// fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+///    m.add_class::<PyClass>()?;
+///    m.add_class::<Child>()?;
+///    Ok(())
+/// }
+/// pyo3::append_to_inittab!(rust_module);
 /// # pyo3::prepare_freethreaded_python();
 ///
 /// let test = r#"
