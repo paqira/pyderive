@@ -18,16 +18,13 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             let pyname = &d.pyname;
             let init = &d.init.unwrap_or(true);
             let repr = &d.repr.unwrap_or(true);
-            let default = &d
-                .default
-                .as_ref()
-                .map_or(quote!( MISSING ), |expr| {
-                    if is_py(&d.field.ty) {
-                        quote!( #expr )
-                    } else {
-                        quote!( #expr.into_py(py) )
-                    }
-                });
+            let default = &d.default.as_ref().map_or(quote!(MISSING), |expr| {
+                if is_py(&d.field.ty) {
+                    quote!( #expr )
+                } else {
+                    quote!( #expr.into_py(py) )
+                }
+            });
             // once kw_only, always kw_only
             if let Some(true) = &d.kw_only {
                 kw_only = true;
