@@ -241,7 +241,7 @@
 //!
 //! - `#[pyderive(annotation=<str>)]`
 //!     
-//!    If the field is decorated by `annotation=<str>`,
+//!    If the field is marked by `annotation=<str>`,
 //!    the field is included to the `__annotations__` dict with an annotation `<str>`;
 //!    if it is not, the field is not included.
 extern crate proc_macro;
@@ -263,7 +263,7 @@ mod internal;
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
-/// If the filed is deocrated by `#[pyderive(repr=true)]` attribute,
+/// If the filed is marked by `#[pyderive(repr=true)]` attribute,
 /// the field is included in the string that `__str__()` returns;
 /// if `#[pyderive(repr=false)]`, it isn't.
 ///
@@ -327,7 +327,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
-/// If the filed is deocrated by `#[pyderive(str=true)]` attribute,
+/// If the filed is marked by `#[pyderive(str=true)]` attribute,
 /// the field is included in the string that `__str__()` returns;
 /// if `#[pyderive(str=false)]`, it isn't.
 ///
@@ -385,7 +385,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// That returns number of `get` fields as default.
 /// It should place `#[derive(PyLen)]` before `#[pyclass]`.
 ///
-/// If the filed is deocrated by `#[pyderive(len=true)]` attribute,
+/// If the filed is marked by `#[pyderive(len=true)]` attribute,
 /// the field is counted by the `__len__()`; if `#[pyderive(len=false)]`, it isn't.
 ///
 /// We note that `#[pyderive(len)]` is equivalent to `#[pyderive(len=true)]`.
@@ -447,7 +447,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
-/// If the filed is deocrated by `#[pyderive(iter=true)]` attribute,
+/// If the filed is marked by `#[pyderive(iter=true)]` attribute,
 /// the field is included to the iterartor that `__iter__()` returns;
 /// if `#[pyderive(iter=false)]`, it isn't.
 ///
@@ -508,7 +508,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
-/// If the filed is deocrated by `#[pyderive(iter=true)]` attribute,
+/// If the filed is marked by `#[pyderive(iter=true)]` attribute,
 /// the field is included to the iterartor that `__reversed__()` returns;
 /// if `#[pyderive(iter=false)]`, it isn't.
 ///
@@ -564,7 +564,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// in the order of declaration.
 /// It should place `#[derive(PyInit)]` before `#[pyclass]`.
 ///
-/// If the filed is deocrated by `#[pyderive(init=false)]` attribute,
+/// If the filed is marked by `#[pyderive(init=false)]` attribute,
 /// the field is *not* included to the arguments of the `__init__()`.
 /// Notes, `init=true` has no effect.
 /// See the [Customize Implementation of the crate doc](crate) for detail.
@@ -844,7 +844,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// in the order of declaration.
 /// It should place `#[derive(PyMatchArgs)]` before `#[pyclass]`.
 ///
-/// If the filed is deocrated by `#[pyderive(match_args=true)]` attribute,
+/// If the filed is marked by `#[pyderive(match_args=true)]` attribute,
 /// the field is included to the `__match_args__`;
 /// if `#[pyderive(match_args=false)]`, it isn't.
 ///
@@ -934,7 +934,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///
 /// The resulting dict contains all fields as default.
 ///
-/// If the filed is deocrated by `#[pyderive(dataclass_field=false)]` attribute,
+/// If the filed is marked by `#[pyderive(dataclass_field=false)]` attribute,
 /// the field is *not* included to the dict that `__dataclass_fields__` returns.
 /// Notes, `dataclass_field=true` has no effect.
 ///
@@ -1049,7 +1049,7 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Derive macro generating a `__annotations__` fn/class attribute.
 ///
 /// The generated `__annotations__` dict contains all fields
-/// decorated by `#[pyderive(dataclass_field=<str>)]`
+/// marked by `#[pyderive(annotation=<str>)]`
 /// where `<str>` is a Python type hints string.
 ///
 /// # Example
