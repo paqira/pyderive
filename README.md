@@ -59,6 +59,7 @@ This provides deriving following special methods and attribute;
 | `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`               |
 | `PyHash`            | `__hash__()`                                                    |
 | `PyDataclassFields` | `__dataclass_fields__` (to support helper funcs of dataclasses) |
+| `PyAnnotations`     | `__annotations__`                                               |
 
 In addition, this provides a helper derive macro:
 

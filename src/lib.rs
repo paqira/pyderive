@@ -60,15 +60,16 @@
 //!
 //! We list the default implementations that the macros generate.
 //!
-//! | Derive Macro          | Derives                                       |
-//! | --------------------- | --------------------------------------------- |
-//! | [`PyInit`]            | `__init__()` (`__new__()`) with all fields    |
-//! | [`PyMatchArgs`]       | `__match_args__` attr. with `get` fields      |
-//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields   |
-//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields    |
-//! | [`PyIter`]            | `__iter__()` returns iterator of `get` fields |
-//! | [`PyLen`]             | `__len__()` returns number of `get` fields    |
-//! | [`PyDataclassFields`] | `__dataclass_fields__` getter with all fields |
+//! | Derive Macro          | Derives                                             |
+//! | --------------------- | --------------------------------------------------- |
+//! | [`PyInit`]            | `__init__()` (`__new__()`) with all fields          |
+//! | [`PyMatchArgs`]       | `__match_args__` attr. with `get` fields            |
+//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields         |
+//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields          |
+//! | [`PyIter`]            | `__iter__()` returns iterator of `get` fields       |
+//! | [`PyLen`]             | `__len__()` returns number of `get` fields          |
+//! | [`PyDataclassFields`] | `__dataclass_fields__` getter with all fields       |
+//! | [`PyAnnotations`]     | `__annotations__` class attr. with annotated fields |
 //!
 //! We call the field is *`get` (or `set`) field*
 //! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
@@ -237,6 +238,11 @@
 //!    the field is *not* included to the return value of the `__dataclass_fields__` getter.
 //!    Notes, `dataclass_field=true` has not effect. See [`PyDataclassFields`] for detail.
 //!
+//! - `#[pyderive(annotation=<str>)]`
+//!     
+//!    If the field is decorated by `annotation=<str>`,
+//!    the field is included to the `__annotations__` dict with an annotation `<str>`;
+//!    if it is not, the field is not included.
 extern crate proc_macro;
 
 use syn::{parse_macro_input, DeriveInput};
@@ -933,6 +939,20 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///     omit: String
 /// }
 ///
+/// let test = "
+/// from rust_module import PyClass
+///
+/// match PyClass('s', 1, 1.0, ('s', 1, 1.0), None, 's'):
+///     case PyClass(a, b, c, d, e):
+///         assert a == 's'
+///         assert b == 1
+///         assert c == 1.0
+///         assert d == ('s', 1, 1.0)
+///         assert e is None
+///     case _:
+///         raise AssertionError
+/// ";
+///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
@@ -960,6 +980,65 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::dataclass_field::implementation(input) {
+        Ok(r) => r,
+        Err(e) => e.into_compile_error().into(),
+    }
+}
+
+/// Derive macro generating a `__annotations__` fn/class attribute.
+///
+/// The generated `__annotations__` dict contains all fields
+/// decorated by `#[pyderive(dataclass_field=<str>)]`
+/// where `<str>` is a Python type hints string.
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyInit, PyAnnotations)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     #[pyderive(annotation="int")]
+///     string: i64,
+///     #[pyderive(annotation="Optional[str]")]
+///     // or "str | None" for python >= 3.10
+///     option: Option<String>,
+///     omit: String
+/// }
+///
+/// #[pymodule]
+/// fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+///    m.add_class::<PyClass>()?;
+///    Ok(())
+/// }
+/// pyo3::append_to_inittab!(rust_module);
+/// # pyo3::prepare_freethreaded_python();
+///
+/// let test = r#"
+/// from __future__ import annotations
+/// from typing import get_type_hints, Optional
+/// import sys
+///
+/// from rust_module import PyClass
+///
+/// if sys.version_info >= (3, 9):
+///     assert get_type_hints(PyClass, localns=locals()) == {'string': int, 'option': Optional[str]}
+/// else:
+///     from typing import ForwardRef
+///     assert get_type_hints(PyClass, localns=locals()) == {'string': ForwardRef('int'), 'option': ForwardRef('Optional[str]')}
+/// "#;
+///
+/// assert!(
+///     Python::with_gil(|py| Python::run(py, test, None, None)).is_ok()
+/// );
+/// ```
+#[proc_macro_derive(PyAnnotations, attributes(pyderive))]
+pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    match internal::annotations::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }

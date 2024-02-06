@@ -134,6 +134,7 @@ pub struct PyderiveFieldOption {
     pub kw_only: Option<bool>,
     pub dataclass_field: Option<bool>,
     pub default: Option<Expr>,
+    pub annotation: Option<String>,
 }
 
 impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
@@ -236,13 +237,20 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         new.dataclass_field = Some(is_true!(v));
                     }
                 },
-
                 PyderiveFieldAttr::Default(v) => match new.default {
                     Some(_) => {
                         return Err(syn::Error::new(v.left.span(), "duplicated default"));
                     }
                     None => {
                         new.default = Some(*v.right);
+                    }
+                },
+                PyderiveFieldAttr::Annotation(v) => match new.annotation {
+                    Some(_) => {
+                        return Err(syn::Error::new(v.left.span(), "duplicated annotation"));
+                    }
+                    None => {
+                        new.annotation = Some(v.right.value());
                     }
                 },
             }
@@ -474,6 +482,7 @@ pub mod pyderive_field {
         syn::custom_keyword!(kw_only);
         syn::custom_keyword!(dataclass_field);
         syn::custom_keyword!(default);
+        syn::custom_keyword!(annotation);
     }
 
     #[derive(Debug)]
@@ -520,6 +529,7 @@ pub mod pyderive_field {
         KwOnly(OptionFieldAttr<kw::kw_only, LitBool>),
         DataclassField(OptionFieldAttr<kw::dataclass_field, LitBool>),
         Default(ExprAssign),
+        Annotation(ExprAssignGeneric<kw::annotation, LitStr>),
     }
 
     impl Parse for PyderiveFieldAttr {
@@ -543,6 +553,8 @@ pub mod pyderive_field {
                 Ok(Self::DataclassField(input.parse()?))
             } else if lookahead.peek(kw::default) {
                 Ok(Self::Default(input.parse()?))
+            } else if lookahead.peek(kw::annotation) {
+                Ok(Self::Annotation(input.parse()?))
             } else {
                 Err(lookahead.error())
             }
