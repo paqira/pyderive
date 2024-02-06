@@ -22,6 +22,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let expanded = quote! {
         #[pyclass]
+        #[pyo3(name="pyclass_iterator", module="pyderive")]
         struct #iter_name {
             inner: ::std::vec::IntoIter<pyo3::PyObject>,
         }
