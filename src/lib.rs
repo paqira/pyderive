@@ -1073,10 +1073,10 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// from rust_module import PyClass
 ///
 /// if sys.version_info >= (3, 9):
-///     assert get_type_hints(PyClass, localns=locals()) == {'string': int, 'option': Optional[str]}
+///     assert get_type_hints(PyClass, globalns=globals()) == {'string': int, 'option': Optional[str]}
 /// else:
 ///     from typing import ForwardRef
-///     assert get_type_hints(PyClass, localns=locals()) == {'string': ForwardRef('int'), 'option': ForwardRef('Optional[str]')}
+///     assert get_type_hints(PyClass, globalns=globals()) == {'string': ForwardRef('int'), 'option': ForwardRef('Optional[str]')}
 /// "#;
 ///
 /// assert!(
