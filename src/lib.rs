@@ -60,17 +60,17 @@
 //!
 //! We list the default implementations that the macros generate.
 //!
-//! | Derive Macro          | Derives                                             |
-//! | --------------------- | --------------------------------------------------- |
-//! | [`PyInit`]            | `__init__()` (`__new__()`) with all fields          |
-//! | [`PyMatchArgs`]       | `__match_args__` attr. with `get` fields            |
-//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields         |
-//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields          |
-//! | [`PyIter`]            | `__iter__()` returns iterator of `get` fields       |
-//! | [`PyReversed`]        | `__reversed__()` returns iterator of `get` fields   |
-//! | [`PyLen`]             | `__len__()` returns number of `get` fields          |
-//! | [`PyDataclassFields`] | `__dataclass_fields__` getter with all fields       |
-//! | [`PyAnnotations`]     | `__annotations__` class attr. with annotated fields |
+//! | Derive Macro          | Derives                                                |
+//! | --------------------- | ------------------------------------------------------ |
+//! | [`PyInit`]            | `__init__()` (`__new__()`) with all fields             |
+//! | [`PyMatchArgs`]       | `__match_args__` attr. with `get` fields               |
+//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields            |
+//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields             |
+//! | [`PyIter`]            | `__iter__()` returns an iterator of `get` fields       |
+//! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields   |
+//! | [`PyLen`]             | `__len__()` returns number of `get` fields             |
+//! | [`PyDataclassFields`] | `__dataclass_fields__` getter with all fields          |
+//! | [`PyAnnotations`]     | `__annotations__` class attr. with annotated fields    |
 //!
 //! We call the field is *`get` (or `set`) field*
 //! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
@@ -230,7 +230,7 @@
 //! - `#[pyderive(len=<bool>)]`
 //!
 //!    If `len=true`,
-//!    the field is counted by the `__iter__()`;
+//!    the field is counted by the `__len__()`;
 //!    if `len=false`, it isn't.
 //!
 //! - `#[pyderive(dataclass_field=<bool>)]`
@@ -255,7 +255,7 @@ mod internal;
 /// Derive macro generating a [`__repr__()`][__repr__] fn/Python method.
 ///
 /// It returns the string that contains `get` and `set` fileds as default,
-/// and they are orderd by declaration.
+/// in the order of declaration.
 /// It should place `#[derive(PyRepr)]` before `#[pyclass]`.
 /// It requires [`ToPyObject`][pyo3_ToPyObject] trait
 /// for child [`pyclass`][pyo3_pyclass]es.
@@ -319,7 +319,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Derive macro generating a [`__str__()`][__str__] fn/Python method.
 ///
 /// It returns the string that contains `get` and `set` fileds as default,
-/// and they are orderd by declaration.
+/// in the order of declaration.
 /// It should place `#[derive(PyStr)]` before `#[pyclass]`.
 /// It requires [`ToPyObject`][pyo3_ToPyObject] trait
 /// for child [`pyclass`][pyo3_pyclass]es.
@@ -439,7 +439,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Derive macro generating a [`__iter__()`][__iter__] fn/Python method.
 ///
 /// It returns an iterator of `get` fileds as default,
-/// and they are orderd by declaration.
+/// in the order of declaration.
 /// It should place `#[derive(PyIter)]` before `#[pyclass]`.
 /// It requires [`ToPyObject`][pyo3_ToPyObject] trait
 /// for child [`pyclass`][pyo3_pyclass]es.
@@ -561,7 +561,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Derive macro generating a [`__init__()`][__init__] Python method (technically [`__new__()`][__new__]).
 ///
 /// It has all fields as the argumetns as default,
-/// and they are orderd by declaration.
+/// in the order of declaration.
 /// It should place `#[derive(PyInit)]` before `#[pyclass]`.
 ///
 /// If the filed is deocrated by `#[pyderive(init=false)]` attribute,
@@ -762,7 +762,6 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// else:
 ///     raise AssertionError";
 ///     py_run!(py, a, test);
-
 ///
 ///     Ok(())
 /// });
@@ -842,7 +841,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Derive macro generating a [`__match_args__`][__match_args__] const/Python class attribute.
 ///
 /// It contains `get` fields as default,
-/// and they are orderd by declaration.
+/// in the order of declaration.
 /// It should place `#[derive(PyMatchArgs)]` before `#[pyclass]`.
 ///
 /// If the filed is deocrated by `#[pyderive(match_args=true)]` attribute,
