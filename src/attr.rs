@@ -474,7 +474,6 @@ pub mod pyderive_field {
         syn::custom_keyword!(kw_only);
         syn::custom_keyword!(dataclass_field);
         syn::custom_keyword!(default);
-        syn::custom_keyword!(default_factory);
     }
 
     #[derive(Debug)]
