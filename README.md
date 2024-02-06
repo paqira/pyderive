@@ -54,6 +54,7 @@ This provides deriving following special methods and attribute;
 | `PyRepr`            | `__repr__()`                                                    |
 | `PyStr`             | `__str__()`                                                     |
 | `PyIter`            | `__iter__()`                                                    |
+| `PyReversed`        | `__reversed__()`                                                |
 | `PyLen`             | `__len__()`                                                     |
 | `PyEq`              | `__eq__()` and `__ne__()`                                       |
 | `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`               |

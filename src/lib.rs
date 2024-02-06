@@ -67,6 +67,7 @@
 //! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields         |
 //! | [`PyStr`]             | `__str__()` returns `get` and `set` fields          |
 //! | [`PyIter`]            | `__iter__()` returns iterator of `get` fields       |
+//! | [`PyReversed`]        | `__reversed__()` returns iterator of `get` fields   |
 //! | [`PyLen`]             | `__len__()` returns number of `get` fields          |
 //! | [`PyDataclassFields`] | `__dataclass_fields__` getter with all fields       |
 //! | [`PyAnnotations`]     | `__annotations__` class attr. with annotated fields |
@@ -223,7 +224,7 @@
 //! - `#[pyderive(iter=<bool>)]`
 //!
 //!    If `iter=true`,
-//!    the field is included in the iterator that `__iter__()` returns;
+//!    the field is included in the iterator that `__iter__()` and `__reversed__()` return;
 //!    if `iter=false`, it isn't.
 //!
 //! - `#[pyderive(len=<bool>)]`
@@ -491,6 +492,67 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::iter::implementation(input) {
+        Ok(r) => r,
+        Err(e) => e.into_compile_error().into(),
+    }
+}
+
+/// Derive macro generating a [`__reversed__()`][__reversed__] fn/Python method.
+///
+/// It returns an iterator of `get` fileds as default,
+/// in the reverse order of declaration.
+/// It should place `#[derive(PyReversed)]` before `#[pyclass]`.
+/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
+/// for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
+///
+/// If the filed is deocrated by `#[pyderive(iter=true)]` attribute,
+/// the field is included to the iterartor that `__reversed__()` returns;
+/// if `#[pyderive(iter=false)]`, it isn't.
+///
+/// [__reversed__]: https://docs.python.org/reference/datamodel.html#object.__reversed__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyReversed)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+///     #[pyderive(iter=false)]
+///     omit: String,
+/// }
+///
+/// # pyo3::prepare_freethreaded_python();
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = PyCell::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///         option: None,
+///         omit: "omit".to_string(),
+///     })?;
+///
+///     py_run!(py, a, "assert tuple(reversed(a)) == (None, ('s', 1, 1.0), 1.0, 1, 's')");
+///
+///     Ok(())
+/// });
+/// ```
+#[proc_macro_derive(PyReversed, attributes(pyderive))]
+pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    match internal::reversed::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }
