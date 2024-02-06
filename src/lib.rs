@@ -846,9 +846,9 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// Derive macro generating a `__dataclass_fields__` getter to support helper functions of [dataclasses].
 ///
 /// It returns a [`dataclasses.Field`][Field] dict that helper functions of [dataclasses][dataclasses] use.
-/// 
+///
 /// <div class="warning">It does not support <code>default_factory</code> attribute of <code>dataclasses.Field</code>.</div>
-/// 
+///
 /// It supportes
 /// [`dataclasses.is_dataclass()`][is_dataclass],
 /// [`dataclasses.fields()`][fields],
