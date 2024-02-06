@@ -70,8 +70,6 @@
 //! | [`PyLen`]             | `__len__()` returns number of `get` fields    |
 //! | [`PyDataclassFields`] | `__dataclass_fields__` getter with all fields |
 //!
-//! [dataclasses]: https://docs.python.org/3/library/dataclasses.html
-//!
 //! We call the field is *`get` (or `set`) field*
 //! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
 //! its struct has a `#[pyclass/pyo3(get_all)]` (or `#[pyclass/pyo3(set_all)]`) attribute.
@@ -175,7 +173,7 @@
 //!        def __init__(self): self.field = field::default()  # call rust fn
 //!        ```
 //!
-//!        We note that it evaluates `field::default() ` (rust code) every `__init__()` call.
+//!        We note that `field::default()` (rust code) is evaluated on every `__init__()` call.
 //!
 //!     3. `#[pyderive(default=<expr>)]`
 //!
@@ -187,7 +185,7 @@
 //!        def __init__(self, field=<expr>): self.field = field
 //!        ```
 //!
-//!        We note that it evaluates `<expr>` (rust code) every `__init__()` call (PyO3 feature).
+//!        We note that `<expr>` (rust code) is evaluated on every `__init__()` call (PyO3 feature).
 //!
 //!     4. `#[pyderive(init=false, default=<expr>)]`
 //!
@@ -200,7 +198,7 @@
 //!        def __init__(self): self.field = <expr>
 //!        ```
 //!
-//!        We note that it evaluates `<expr>` (rust code) every `__init__()` call.
+//!        We note that `<expr>` (rust code) is evaluated on every `__init__()` call.
 //!
 //! - `#[pyderive(kw_only=true)]`
 //!
@@ -218,8 +216,8 @@
 //!    We note that, as far as I know,
 //!    the field must be accessible on the pattern matching.
 //!    For example,
-//!    pattern matching works for *not `get` field with a getter* (and `match_args=true`),
-//!    but it doesn't if the field is not `get` field and does not have a getter (even it is `match_args=true`).
+//!    pattern matching does *not* works for *not `get` field without a getter*  (even it is `match_args=true`),
+//!    but it does work if the field has a getter.
 //!
 //! - `#[pyderive(iter=<bool>)]`
 //!
@@ -498,9 +496,9 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// and they are orderd by declaration.
 /// It should place `#[derive(PyInit)]` before `#[pyclass]`.
 ///
-/// If the filed is deocrated by `#[pyderive(init=true)]` attribute,
-/// the field is included to the arguments of the `__init__()`;
-/// if `#[pyderive(init=false)]`, it isn't.
+/// If the filed is deocrated by `#[pyderive(init=false)]` attribute,
+/// the field is *not* included to the arguments of the `__init__()`.
+/// Notes, `init=true` has no effect.
 /// See the [Customize Implementation of the crate doc](crate) for detail.
 ///
 /// [__init__]: https://docs.python.org/reference/datamodel.html#object.__init__
@@ -562,7 +560,7 @@ pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// The implementation is based on [`PartialEq`]/[`Eq`] trait.
 ///
-/// *Note that implementing any of `__eq__()` method will cause
+/// *Note that implementing `__eq__()` and `__ne__()` methods will cause
 /// Python not to generate a default `__hash__()` implementation,
 /// so consider also implementing `__hash__()`.*
 ///
@@ -631,7 +629,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
 ///
-/// *Note that implementing any of `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` methods
+/// *Note that implementing `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` methods
 /// will cause Python not to generate a default `__hash__()` implementation,
 /// so consider also implementing `__hash__()`.*
 ///
@@ -775,7 +773,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Derive macro generating a [`__match_args__`][__match_args__] const/Python class attribute.
 ///
-/// It contains `get` field as default,
+/// It contains `get` fields as default,
 /// and they are orderd by declaration.
 /// It should place `#[derive(PyMatchArgs)]` before `#[pyclass]`.
 ///
@@ -848,6 +846,9 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// Derive macro generating a `__dataclass_fields__` getter to support helper functions of [dataclasses].
 ///
 /// It returns a [`dataclasses.Field`][Field] dict that helper functions of [dataclasses][dataclasses] use.
+/// 
+/// <div class="warning">It does not support <code>default_factory</code> attribute of <code>dataclasses.Field</code>.</div>
+/// 
 /// It supportes
 /// [`dataclasses.is_dataclass()`][is_dataclass],
 /// [`dataclasses.fields()`][fields],
@@ -866,18 +867,18 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///
 /// The resulting dict contains all fields as default.
 ///
-/// If the filed is deocrated by `#[pyderive(dataclass_field=true)]` attribute,
-/// the field is included to the dict that `__dataclass_fields__` returns;
-/// if `#[pyderive(dataclass_field=false)]`, it isn't.
+/// If the filed is deocrated by `#[pyderive(dataclass_field=false)]` attribute,
+/// the field is *not* included to the dict that `__dataclass_fields__` returns.
+/// Notes, `dataclass_field=true` has no effect.
 ///
 /// ## Notice
 ///
 /// 1. It recomends that all fields in the argument of the constructor
-///    (all fields on pyderive as default) must bet `get`, like `dataclass` does.
-/// 2. This cannot to handle `default_factory` field of `Field`.
-///    The `default` value assigns to the `default` field, not `default_factory`.
-/// 3. The resulting `Field`'s fields, `name`, `type`, `init`, `repr` and `kw_only`,
-///    have *proper* value but others not, see Appendix.
+///    (all fields on pyderive as default) is `get` field, like `dataclass` does.
+/// 2. This does not support `default_factory` attribute of `dataclasses.Field`.
+///    The `default` value assigns to the `default` attribute, not `default_factory`.
+/// 3. The resulting `Field`'s attributes, `name`, `type`, `init`, `repr` and `kw_only`,
+///    have *proper* value, but others not, see Appendix.
 /// 4. This handles `init=false` field as [`typing.ClassVar`][ClassVar],
 ///    see Appendix.
 /// 5. This derive macro depends on internal behavior of Python.
@@ -894,7 +895,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// | `compare`         | `None`                                                               |
 /// | `metadata`        | `None`                                                               |
 ///
-/// Table of `#[pyderive(..)]` v.s. handling:
+/// Table of `#[pyderive(..)]` v.s. pyderive handling:
 ///
 /// | Field Attr.                 | Handling                                      |
 /// | --------------------------- | --------------------------------------------- |
@@ -999,7 +1000,7 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     child: Child,
 /// }
 ///
-/// // PyRepr requires ToPyObject trait for child pyclasses
+/// // PyRepr requires ToPyObject trait for child pyclass
 /// #[derive(PyInit, PyRepr, ToPyObject)]
 /// #[pyclass(get_all)]
 /// #[derive(Clone)]
