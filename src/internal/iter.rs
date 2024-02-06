@@ -19,12 +19,13 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             quote! { this.#ident.to_object(py) }
         })
         .collect::<Vec<_>>();
+    let length = args.len();
 
     let expanded = quote! {
         #[pyclass]
         #[pyo3(name="pyclass_iterator", module="pyderive")]
         struct #iter_name {
-            inner: ::std::vec::IntoIter<pyo3::PyObject>,
+            inner: ::std::array::IntoIter<pyo3::PyObject, #length>,
         }
 
         #[pymethods]
@@ -43,7 +44,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let py = slf.py();
                 let this = ::std::borrow::Borrow::borrow(&slf);
                 let iter = #iter_name {
-                    inner: ::std::vec![ #(#args),* ].into_iter(),
+                    inner: [ #(#args),* ].into_iter(),
                 };
                 ::pyo3::Py::new(py, iter)
             }
