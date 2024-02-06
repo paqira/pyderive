@@ -49,6 +49,7 @@ pub struct FieldData {
     pub kw_only: Option<bool>,
     pub dataclass_field: Option<bool>,
     pub default: Option<Expr>,
+    pub annotation: Option<String>,
 }
 
 impl FieldData {
@@ -116,6 +117,7 @@ impl FieldData {
                     kw_only: pyderive_field_opt.kw_only,
                     dataclass_field: pyderive_field_opt.dataclass_field,
                     default: pyderive_field_opt.default,
+                    annotation: pyderive_field_opt.annotation,
                 })
             })
             .collect::<syn::Result<Vec<_>>>()

@@ -1,3 +1,4 @@
+pub mod annotations;
 pub mod dataclass_field;
 pub mod eq;
 pub mod hash;
