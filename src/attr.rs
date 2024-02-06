@@ -36,8 +36,8 @@ impl FromIterator<Pyo3StructAttr> for Pyo3StructOption {
                 Pyo3StructAttr::Set(_) => {
                     new.set = true;
                 }
-                Pyo3StructAttr::Rename { value: val, .. } => {
-                    new.rename = val;
+                Pyo3StructAttr::Rename { value, .. } => {
+                    new.rename = value;
                 }
                 Pyo3StructAttr::Other => {}
             }
@@ -95,8 +95,8 @@ impl FromIterator<Pyo3FieldAttr> for Pyo3FieldOption {
                 Pyo3FieldAttr::Set(_) => {
                     new.set = true;
                 }
-                Pyo3FieldAttr::Name { value: val, .. } => {
-                    new.name = Some(val.value().to_string());
+                Pyo3FieldAttr::Name { value, .. } => {
+                    new.name = Some(value.value());
                 }
                 Pyo3FieldAttr::Other => {}
             }

@@ -32,7 +32,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             pub fn __iter__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyRef<'_, Self> {
                 slf
             }
-
             pub fn __next__(mut slf: ::pyo3::PyRefMut<'_, Self>) -> ::std::option::Option<::pyo3::PyObject> {
                 slf.inner.next()
             }
