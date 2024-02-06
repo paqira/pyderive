@@ -21,7 +21,7 @@ fn signiture(d: &FieldData) -> proc_macro2::TokenStream {
 }
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
-    let struct_name = input.ident.clone();
+    let struct_name = &input.ident;
     let data = FieldData::try_from_input(&input)?;
 
     // #[pyo3(signature=..)]

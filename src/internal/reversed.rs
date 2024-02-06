@@ -5,7 +5,7 @@ use syn::DeriveInput;
 use crate::common::FieldData;
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
-    let struct_name = input.ident.clone();
+    let struct_name = &input.ident;
     let data = FieldData::try_from_input(&input)?;
 
     let iter_name = format_ident!("Pyderive{}ReversedIterableWrapper", struct_name);

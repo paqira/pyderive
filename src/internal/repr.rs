@@ -7,7 +7,7 @@ use syn::DeriveInput;
 use crate::common::{is_py, FieldData};
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
-    let struct_name = input.ident.clone();
+    let struct_name = &input.ident;
     let data = FieldData::try_from_input(&input)?;
 
     // args of foramt!(..)
