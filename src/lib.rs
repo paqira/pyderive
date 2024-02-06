@@ -1065,7 +1065,6 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     #[pyderive(annotation="int")]
 ///     string: i64,
 ///     #[pyderive(annotation="Optional[str]")]
-///     // or "str | None" for python >= 3.10
 ///     option: Option<String>,
 ///     omit: String
 /// }
