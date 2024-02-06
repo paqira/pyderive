@@ -14,7 +14,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .filter(|d| d.dataclass_field.unwrap_or(true))
         .map(|d| {
             let ident = &d.field.ident;
-            let field = quote! { this.#ident };
+            let field = quote! { slf.#ident };
             let pyname = &d.pyname;
             let init = &d.init.unwrap_or(true);
             let repr = &d.repr.unwrap_or(true);
@@ -88,7 +88,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
                 // From dataclasses.Field (to support the PEP 487 __set_name__ protocol) at
                 // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L341-L354
-                field.call_method1(pystr_set_name, (this, field_name))?;
+                field.call_method1(pystr_set_name, (&slf, field_name))?;
 
                 fields.set_item(field_name, field)?;
             }
@@ -102,10 +102,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             fn __dataclass_fields__<'p>(slf: ::pyo3::PyRef<'p, Self>) -> ::pyo3::PyResult<&'p ::pyo3::types::PyDict> {
                 let py = slf.py();
 
-                let this = ::std::borrow::Borrow::borrow(&slf);
-
-                let fields = ::pyo3::types::PyDict::new(py);
-
                 let dataclasses = ::pyo3::types::PyModule::import(py, "dataclasses")?;
 
                 #[allow(non_snake_case)]
@@ -117,10 +113,13 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 #[allow(non_snake_case)]
                 let _FIELD_CLASSVAR = dataclasses.getattr("_FIELD_CLASSVAR")?;
 
+                // cashe attr. names
                 let pystr_name = ::pyo3::intern!(py, "name");
                 let pystr_type = ::pyo3::intern!(py, "type");
                 let pystr_field_type = ::pyo3::intern!(py, "_field_type");
                 let pystr_set_name = ::pyo3::intern!(py, "__set_name__");
+
+                let fields = ::pyo3::types::PyDict::new(py);
 
                 #(#assingments)*
 

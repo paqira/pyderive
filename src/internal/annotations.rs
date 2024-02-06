@@ -18,7 +18,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
             quote! {
                 annotations
-                    .set_item(::pyo3::intern!(py, #key), ::pyo3::intern!(py, #value))
+                    .set_item(
+                        ::pyo3::intern!(py, #key),
+                        ::pyo3::intern!(py, #value)
+                    )
                     .expect("fail to init __annotations__ dict");
             }
         })
@@ -29,14 +32,14 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     } else {
         quote! {
             #[pymethods]
-                impl #struct_name {
-                    #[classattr]
-                    fn __annotations__(py: ::pyo3::Python<'_>) -> &::pyo3::types::PyDict {
-                        let annotations = ::pyo3::types::PyDict::new(py);
-                        #(#assigns)*
-                        annotations
-                    }
+            impl #struct_name {
+                #[classattr]
+                fn __annotations__(py: ::pyo3::Python<'_>) -> &::pyo3::types::PyDict {
+                    let annotations = ::pyo3::types::PyDict::new(py);
+                    #(#assigns)*
+                    annotations
                 }
+            }
         }
     };
 

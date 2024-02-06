@@ -16,7 +16,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .map(|d| {
             let ident = &d.field.ident;
 
-            quote! { this.#ident.to_object(py) }
+            quote! { slf.#ident.to_object(py) }
         })
         .collect::<Vec<_>>();
     let length = args.len();
@@ -42,7 +42,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         impl #struct_name {
             pub fn __reversed__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyResult<::pyo3::Py<#iter_name>> {
                 let py = slf.py();
-                let this = ::std::borrow::Borrow::borrow(&slf);
                 let iter = #iter_name {
                     inner: [ #(#args),* ].into_iter().rev(),
                 };
