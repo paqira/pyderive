@@ -1002,20 +1002,6 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///     omit: String
 /// }
 ///
-/// let test = "
-/// from rust_module import PyClass
-///
-/// match PyClass('s', 1, 1.0, ('s', 1, 1.0), None, 's'):
-///     case PyClass(a, b, c, d, e):
-///         assert a == 's'
-///         assert b == 1
-///         assert c == 1.0
-///         assert d == ('s', 1, 1.0)
-///         assert e is None
-///     case _:
-///         raise AssertionError
-/// ";
-///
 /// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
