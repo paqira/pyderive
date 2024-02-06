@@ -498,7 +498,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 }
 
 /// Derive macro generating a [`__reversed__()`][__reversed__] fn/Python method.
-/// 
+///
 /// This is a reversed one of [`PyIter`].
 ///
 /// It returns an iterator of `get` fileds as default,
