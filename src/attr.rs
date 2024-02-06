@@ -1,10 +1,8 @@
-use quote::ToTokens;
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     spanned::Spanned,
-    Attribute, Expr, ExprAssign, Ident, Lit, LitBool, LitFloat, LitInt, LitStr, Meta, MetaList,
-    Result, Token,
+    Attribute, Expr, ExprAssign, Ident, Lit, LitBool, LitStr, Meta, MetaList, Result, Token,
 };
 
 use self::{
@@ -477,49 +475,6 @@ pub mod pyderive_field {
         syn::custom_keyword!(dataclass_field);
         syn::custom_keyword!(default);
         syn::custom_keyword!(default_factory);
-
-        syn::custom_keyword!(None);
-    }
-
-    #[derive(Debug, Clone)]
-    pub enum DefaultAssignableExpr {
-        Str(LitStr),
-        Int(LitInt),
-        Float(LitFloat),
-        Bool(LitBool),
-        None(kw::None),
-    }
-
-    impl ToTokens for DefaultAssignableExpr {
-        fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-            match self {
-                DefaultAssignableExpr::Str(str) => str.to_tokens(tokens),
-                DefaultAssignableExpr::Int(int) => int.to_tokens(tokens),
-                DefaultAssignableExpr::Float(float) => float.to_tokens(tokens),
-                DefaultAssignableExpr::Bool(bool) => bool.to_tokens(tokens),
-                DefaultAssignableExpr::None(none) => none.to_tokens(tokens),
-            }
-        }
-    }
-
-    impl Parse for DefaultAssignableExpr {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(kw::None) {
-                Ok(Self::None(input.parse()?))
-            } else {
-                match input.parse::<Lit>()? {
-                    Lit::Str(str) => Ok(Self::Str(str)),
-                    Lit::Int(int) => Ok(Self::Int(int)),
-                    Lit::Float(float) => Ok(Self::Float(float)),
-                    Lit::Bool(bool) => Ok(Self::Bool(bool)),
-                    _ => Err(syn::Error::new(
-                        input.span(),
-                        "support string, int, float and bool literal and None",
-                    )),
-                }
-            }
-        }
     }
 
     #[derive(Debug)]
