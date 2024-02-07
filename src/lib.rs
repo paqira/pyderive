@@ -30,10 +30,10 @@
 //! # Python script
 //! from rust_module import MyClass
 //!
-//! # Implements __init__() (technically __new__())
+//! # Derives __init__() (technically __new__())
 //! m = MyClass("a", 1, None)
 //!
-//! # Implements __match_args__ (supports Pattern Matching by positional arguments)
+//! # Derives __match_args__ (supports Pattern Matching by positional arguments)
 //! match m:
 //!     case MyClass(a, b, c):
 //!         assert a == "a"
@@ -42,14 +42,14 @@
 //!     case _:
 //!         raise AssertionError
 //!
-//! # Implements __repr__()
+//! # Derives __repr__()
 //! assert str(m) == "MyClass(string='a', integer=1, option=None)"
 //! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 //!
-//! # Implements __eq__() based on PartialEq/Eq trait
+//! # Derives __eq__() based on PartialEq/Eq trait
 //! assert m == MyClass("a", 1, None)
 //!
-//! # Implements __hash__() based on Hash trait
+//! # Derives __hash__() based on Hash trait
 //! assert hash(m) == 3289857268557676066
 //! ```
 //!
@@ -107,18 +107,18 @@
 //! #[derive(PyInit, PyRepr)]
 //! #[pyclass]
 //! struct MyClass {
-//!     str_field: String,
+//!     string: String,
 //!     #[pyderive(repr=false)]
 //!     #[pyo3(get)]
-//!     int_field: i64,
+//!     integer: i64,
 //!     #[pyderive(default=10)]
-//!     opt_field: Option<i64>
+//!     option: Option<i64>
 //! }
 //! ```
 //!
 //! It allows to omit the right-hand side,
 //! and it evaluates to the right-hand as `true`
-//! expcept `default`, for example,
+//! expcept `default` and `annotation`, for example,
 //! `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
 //!
 //! - `#[pyderive(repr=<bool>)]`
@@ -136,7 +136,7 @@
 //! - `#[pyderive(init=<bool>)]`
 //!
 //!    If `init=false`,
-//!    the field is *not* included as the parameters of the `__init__()` (`__new__()` precisely) method.
+//!    the field is excluded from the argument of the `__init__()` (`__new__()` precisely) method.
 //!    Notes, `init=true` has not effect.
 //!
 //!    The attribute `#[pyderive(default=<expr>)]` is used to costomize default value.
@@ -154,7 +154,7 @@
 //!    }
 //!    ```
 //!
-//!    We note that this internally produces `#[pyo3(signiture=..)]` attribute.
+//!    We note that this internally produces `#[pyo3(signiture = ..)]` attribute.
 //!
 //!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
 //!
@@ -166,7 +166,7 @@
 //!
 //!     2. `#[pyderive(init=false)]`
 //!        
-//!        The field is not included as the parameter,
+//!        The field is excluded from the argument,
 //!        and initialized by [`Default::default()`] in the `__init__()` method.         
 //!
 //!        Pseudo-code:
@@ -179,7 +179,7 @@
 //!
 //!     3. `#[pyderive(default=<expr>)]`
 //!
-//!        The field is included as the parameter with default value `<expr>`.
+//!        The field is included to the arguments with default value `<expr>`.
 //!
 //!        Pseudo-code:
 //!
@@ -191,7 +191,7 @@
 //!
 //!     4. `#[pyderive(init=false, default=<expr>)]`
 //!
-//!        The field is not included as the parameter,
+//!        The field is excluded from the arguments,
 //!        and initialized with `<expr>` in the `__init__()` method.
 //!
 //!        Pseudo-code:
@@ -205,9 +205,10 @@
 //! - `#[pyderive(kw_only=true)]`
 //!
 //!    If `kw_only=true`,
-//!    it puts `*,` in front of the field in the argument of the `__init__()` method,
-//!    that is, the following fields are keyword only argument.
+//!    the following fields are keyword only arguments, like [`dataclasses.KW_ONLY`][KW_ONLY].
 //!    Note, `kw_only=false` has no effect.
+//!
+//!    (It puts `*,` in front of the field of `#[pyo3(signature = ..)]`)
 //!
 //! - `#[pyderive(match_args=<bool>)]`
 //!
@@ -218,8 +219,8 @@
 //!    We note that, as far as I know,
 //!    the field must be accessible on the pattern matching.
 //!    For example,
-//!    pattern matching does *not* works for *not `get` field without a getter*  (even it is `match_args=true`),
-//!    but it does work if the field has a getter.
+//!    pattern matching does *not* work with *not `get` field without a getter*
+//!    (even if `match_args=true`), but it does work if the field has a getter.
 //!
 //! - `#[pyderive(iter=<bool>)]`
 //!
@@ -236,15 +237,17 @@
 //! - `#[pyderive(dataclass_field=<bool>)]`
 //!
 //!    If `dataclass_field=false`,
-//!    the field is *not* included to the return value of the `__dataclass_fields__` getter.
+//!    the field is excluded from the dict that  `__dataclass_fields__` getter returns.
 //!    Notes, `dataclass_field=true` has not effect. See [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(annotation=<str>)]`
 //!     
 //!    If the field is marked by `annotation=<str>`,
 //!    the field is included to the `__annotations__` dict with an annotation `<str>`;
-//!    if it is not, the field is not included.
+//!    if it is not, the field is excluded.
 //!    The derive macro [`PyDataclassFields`] reads this attribute also, see [`PyDataclassFields`] for detail.
+//!
+//! [KW_ONLY]: https://docs.python.org/3/library/dataclasses.html#dataclasses.KW_ONLY
 extern crate proc_macro;
 
 use syn::{parse_macro_input, DeriveInput};
@@ -257,19 +260,17 @@ mod internal;
 ///
 /// It returns the string that contains `get` and `set` fileds as default,
 /// in the order of declaration.
-/// It should place `#[derive(PyRepr)]` before `#[pyclass]`.
-/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
-/// for child [`pyclass`][pyo3_pyclass]es.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// If the filed is marked by `#[pyderive(repr=true)]` attribute,
 /// the field is included in the string that `__str__()` returns;
 /// if `#[pyderive(repr=false)]`, it isn't.
 ///
-/// We note that `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
+/// - It should place `#[derive(PyRepr)]` before `#[pyclass]`.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
 ///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// [__repr__]: https://docs.python.org/reference/datamodel.html#object.__repr__
 /// [repr]: https://docs.python.org/library/functions.html#repr
 ///
@@ -289,7 +290,7 @@ mod internal;
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(repr=false)]
-///     omit: String,
+///     excluded: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -300,7 +301,7 @@ mod internal;
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omit: "omit".to_string(),
+///         excluded: "excluded".to_string(),
 ///     })?;
 ///
 ///     py_run!(py, a, r#"assert repr(a) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
@@ -321,19 +322,17 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// It returns the string that contains `get` and `set` fileds as default,
 /// in the order of declaration.
-/// It should place `#[derive(PyStr)]` before `#[pyclass]`.
-/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
-/// for child [`pyclass`][pyo3_pyclass]es.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// If the filed is marked by `#[pyderive(str=true)]` attribute,
 /// the field is included in the string that `__str__()` returns;
 /// if `#[pyderive(str=false)]`, it isn't.
 ///
-/// We note that `#[pyderive(str)]` is equivalent to `#[pyderive(str=true)]`.
+/// - It should place `#[derive(PyStr)]` before `#[pyclass]`.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
 ///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// [__str__]: https://docs.python.org/reference/datamodel.html#object.__str__
 /// [str]: https://docs.python.org/library/functions.html#str
 ///
@@ -353,7 +352,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(str=false)]
-///     omit: String,
+///     excluded: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -364,7 +363,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omit: "omit".to_string(),
+///         excluded: "excluded".to_string(),
 ///     })?;
 ///
 ///     py_run!(py, a, r#"assert str(a) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
@@ -384,12 +383,11 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Derive macro generating a [`__len__()`][__len__] fn/Python method.
 ///
 /// That returns number of `get` fields as default.
-/// It should place `#[derive(PyLen)]` before `#[pyclass]`.
 ///
 /// If the filed is marked by `#[pyderive(len=true)]` attribute,
 /// the field is counted by the `__len__()`; if `#[pyderive(len=false)]`, it isn't.
 ///
-/// We note that `#[pyderive(len)]` is equivalent to `#[pyderive(len=true)]`.
+/// - It should place `#[derive(PyLen)]` before `#[pyclass]`.
 ///
 /// [__len__]: https://docs.python.org/reference/datamodel.html#object.__len__
 ///
@@ -409,7 +407,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(len=false)]
-///     omit: String,
+///     excluded: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -420,7 +418,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omit: "omit".to_string(),
+///         excluded: "excluded".to_string(),
 ///     })?;
 ///
 ///     py_run!(py, a, "assert len(a) == 5");
@@ -441,17 +439,17 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// It returns an iterator of `get` fileds as default,
 /// in the order of declaration.
-/// It should place `#[derive(PyIter)]` before `#[pyclass]`.
-/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
-/// for child [`pyclass`][pyo3_pyclass]es.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// If the filed is marked by `#[pyderive(iter=true)]` attribute,
 /// the field is included to the iterartor that `__iter__()` returns;
 /// if `#[pyderive(iter=false)]`, it isn't.
 ///
+/// - It should place `#[derive(PyIter)]` before `#[pyclass]`.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// [__iter__]: https://docs.python.org/reference/datamodel.html#object.__iter__
 ///
 /// # Example
@@ -470,7 +468,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(iter=false)]
-///     omit: String,
+///     excluded: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -481,7 +479,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omit: "omit".to_string(),
+///         excluded: "excluded".to_string(),
 ///     })?;
 ///
 ///     py_run!(py, a, "assert tuple(a) == ('s', 1, 1.0, ('s', 1, 1.0), None)");
@@ -500,21 +498,21 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Derive macro generating a [`__reversed__()`][__reversed__] fn/Python method.
 ///
-/// This is a reversed one of [`PyIter`].
-///
 /// It returns an iterator of `get` fileds as default,
 /// in the reverse order of declaration.
-/// It should place `#[derive(PyReversed)]` before `#[pyclass]`.
-/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
-/// for child [`pyclass`][pyo3_pyclass]es.
 ///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
+/// This is a reversed one of a derive macro, [`PyIter`].
 ///
 /// If the filed is marked by `#[pyderive(iter=true)]` attribute,
 /// the field is included to the iterartor that `__reversed__()` returns;
 /// if `#[pyderive(iter=false)]`, it isn't.
 ///
+/// - It should place `#[derive(PyReversed)]` before `#[pyclass]`.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// [__reversed__]: https://docs.python.org/reference/datamodel.html#object.__reversed__
 ///
 /// # Example
@@ -533,7 +531,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(iter=false)]
-///     omit: String,
+///     excluded: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -544,7 +542,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omit: "omit".to_string(),
+///         excluded: "excluded".to_string(),
 ///     })?;
 ///
 ///     py_run!(py, a, "assert tuple(reversed(a)) == (None, ('s', 1, 1.0), 1.0, 1, 's')");
@@ -565,12 +563,14 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// It has all fields as the argumetns as default,
 /// in the order of declaration.
-/// It should place `#[derive(PyInit)]` before `#[pyclass]`.
 ///
 /// If the filed is marked by `#[pyderive(init=false)]` attribute,
-/// the field is *not* included to the arguments of the `__init__()`.
+/// the field is excluded from the arguments of the `__init__()` method.
 /// Notes, `init=true` has no effect.
-/// See the [Customize Implementation of the crate doc](crate) for detail.
+///
+/// - It should place `#[derive(PyInit)]` before `#[pyclass]`.
+///
+/// See the [Customize Implementation](crate) section of the crate doc for detail.
 ///
 /// [__init__]: https://docs.python.org/reference/datamodel.html#object.__init__
 /// [__new__]: https://docs.python.org/reference/datamodel.html#object.__new__
@@ -591,7 +591,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(init=false)]
-///     omit: String,
+///     excluded: String,
 /// }
 ///
 /// #[pymodule]
@@ -611,7 +611,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert a.float == 1.0
 /// assert a.tuple == ('s', 1, 1.0)
 /// assert a.option is None
-/// assert a.omit == ''
+/// assert a.excluded == ''
 /// ";
 ///
 /// assert!(
@@ -716,7 +716,7 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # struct PyClass {}
 /// #[pymethods]
 /// impl PyClass {
-///     pub fn __lt__(&self, other: &Self) -> pyo3::PyResult<bool> {
+///     pub fn __lt__(&self, other: &Self) -> PyResult<bool> {
 ///         match self.partial_cmp(other) {
 ///             Some(Ordering::Less) => Ok(true),
 ///             _ => Ok(false),
@@ -845,11 +845,12 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// It contains `get` fields as default,
 /// in the order of declaration.
-/// It should place `#[derive(PyMatchArgs)]` before `#[pyclass]`.
 ///
 /// If the filed is marked by `#[pyderive(match_args=true)]` attribute,
 /// the field is included to the `__match_args__`;
 /// if `#[pyderive(match_args=false)]`, it isn't.
+///
+/// - It should place `#[derive(PyMatchArgs)]` before `#[pyclass]`.
 ///
 /// [__match_args__]: https://docs.python.org/reference/datamodel.html#object.__match_args__
 ///
@@ -869,7 +870,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(match_args=false)]
-///     omit: String,
+///     excluded: String,
 /// }
 ///
 /// #[pymodule]
@@ -913,78 +914,29 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     }
 }
 
-/// Derive macro generating a `__dataclass_fields__` getter to support helper functions of [dataclasses].
+/// Derive macro generating a `__dataclass_fields__` fn/getter.
 ///
-/// It returns a [`dataclasses.Field`][Field] dict that helper functions of [dataclasses][dataclasses] use.
-///
-/// It supportes
-/// [`dataclasses.is_dataclass()`][is_dataclass],
-/// [`dataclasses.fields()`][fields],
-/// [`dataclasses.asdict()`][asdict] (include nest),
-/// [`dataclasses.astuple()`][astuple] (include nest)
-/// and [`dataclasses.replace()`][replace].
-///
-/// It should place `#[derive(PyDataclassField)]` before `#[pyclass]`.
-/// This does not generate other fn/method,
-/// use [`PyInit`] etc. to implement `__init__()` etc.
-/// It requires [`ToPyObject`][pyo3_ToPyObject] trait
-/// for child [`pyclass`][pyo3_pyclass]es.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
+/// It returns a [`dataclasses.Field`][Field] dict that helper functions of the [dataclasses] module read.
+/// It supportes [`is_dataclass()`][is_dataclass], [`fields()`][fields],
+/// [`asdict()`][asdict] (include nest), [`astuple()`][astuple] (include nest)
+/// and [`replace()`][replace] of the dataclasses module.
 ///
 /// The resulting dict contains all fields as default.
 ///
 /// If the filed is marked by `#[pyderive(dataclass_field=false)]` attribute,
-/// the field is *not* included to the dict that `__dataclass_fields__` returns.
+/// the field is excluded from the dict that `__dataclass_fields__` returns.
 /// Notes, `dataclass_field=true` has no effect.
 ///
-/// It recomends that all fields in the argument of the constructor
-/// (all fields on pyderive as default) is `get` field, like `dataclass` does.
+/// - It should place `#[derive(PyDataclassField)]` before `#[pyclass]`.
+/// - All fields in the argument of the constructor should be `get` field, like `dataclass` does.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
 ///
-/// ## Notes
+/// This does not generate other fn/method,
+/// use [`PyInit`] etc. to implement `__init__()` etc.
 ///
-/// | Field Name        | Compatability                      |
-/// | ----------------- | ---------------------------------- |
-/// | `name`            | ✅                                 |
-/// | `type`            | ❌ (✅ if `annotation` given)      |
-/// | `default`         | ✅ (`MISSING` for pyderive)        |
-/// | `default_factory` | ✅ (`lambda: <expr>` or `MISSING`) |
-/// | `init`            | ✅                                 |
-/// | `repr`            | ✅                                 |
-/// | `hash`            | ❌ (`None` for pyderive)           |
-/// | `compare`         | ❌ (`None` for pyderive)           |
-/// | `metadata`        | ✅ (empty for pyderive)            |
-/// | `kw_only`         | ✅                                 |
-///
-/// 1. The `type` attribute of `Field` is `None` as default.
-///    If the field is marked by `#[pyderive(annotation=<type>)]`,
-///    pyderive uses given `<type>` as `type` attribute.
-/// 2. This uses `default_factory` attribute of `Field` instead of `default` attribute,
-///    `default` is [`dataclasses.MISSING`][MISSING].
-///    The `default_factory` attribute is, roughly, `lambda: <expr>`
-///    where `<expr>` is given by `#[pyderive(default=<expr>)]`, if the field is marked by.
-///    The `<expr>` (rust code) is evaluated on every `default_factory` call.
-/// 3. Attributes `hash` and `compare` are `None`.
-/// 4. This marks `init=false` field as a [`ClassVar` field][dataclass_ClassVar].
-///
-/// | Field Attr.                 | Handling                               |
-/// | --------------------------- | -------------------------------------- |
-/// |`init=true` (default)        | Dataclass field                        |
-/// |`init=false`                 | [`ClassVar` field][dataclass_ClassVar] |
-/// |`dataclass_field=false`      | Omit from `__dataclass_fields__`       |
-///
-/// [dataclasses]: https://docs.python.org/3/library/dataclasses.html
-/// [dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass
-/// [Field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.Field
-/// [fields]: https://docs.python.org/3/library/dataclasses.html#dataclasses.fields
-/// [asdict]: https://docs.python.org/3/library/dataclasses.html#dataclasses.asdict
-/// [astuple]: https://docs.python.org/3/library/dataclasses.html#dataclasses.astuple
-/// [replace]: https://docs.python.org/3/library/dataclasses.html#dataclasses.replace
-/// [is_dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.is_dataclass
-/// [ClassVar]: https://docs.python.org/3/library/typing.html#typing.ClassVar
-/// [dataclass_ClassVar]: https://docs.python.org/3/library/dataclasses.html#class-variables
-/// [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// # Example
 ///
@@ -1002,7 +954,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
 ///     #[pyderive(dataclass_field=false)]
-///     omit: String
+///     excluded: String,
 /// }
 ///
 /// # pyo3::prepare_freethreaded_python();
@@ -1013,7 +965,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///         float: 1.0,
 ///         tuple: ("s".to_string(), 1, 1.0),
 ///         option: None,
-///         omit: "s".to_string()
+///         excluded: "s".to_string(),
 ///     })?;
 ///
 ///     let test = "
@@ -1028,6 +980,50 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///     Ok(())
 /// });
 /// ```
+///
+/// # Implementation Notes
+///
+/// | `dataclasses.Field` Attribute | Compatibility                      |
+/// | ----------------------------- | ---------------------------------- |
+/// | `name`                        | ✅                                 |
+/// | `type`                        | ❌ (✅ if `annotation` given)      |
+/// | `default`                     | ✅ (`MISSING` for pyderive)        |
+/// | `default_factory`             | ✅ (`lambda: <expr>` or `MISSING`) |
+/// | `init`                        | ✅                                 |
+/// | `repr`                        | ✅                                 |
+/// | `hash`                        | ❌ (`None` for pyderive)           |
+/// | `compare`                     | ❌ (`None` for pyderive)           |
+/// | `metadata`                    | ✅ (empty for pyderive)            |
+/// | `kw_only`                     | ✅                                 |
+///
+/// 1. The `type` attribute of `Field` is `None` as default.
+///    If the field is marked by `#[pyderive(annotation=<type>)]`,
+///    this uses the given `<type>` as `type` attribute.
+/// 2. This uses `default_factory` attribute of `Field` instead of `default` attribute,
+///    `default` is [`dataclasses.MISSING`][MISSING].
+///    The `default_factory` attribute is, roughly, `lambda: <expr>`
+///    where `<expr>` is given by `#[pyderive(default=<expr>)]`, if the field is marked by.
+///    The `<expr>` (rust code) is evaluated on every `default_factory` call.
+/// 3. Attributes `hash` and `compare` are `None`.
+/// 4. This marks `init=false` field as a [`ClassVar` field][dataclass_ClassVar].
+///
+/// | Field Attribute        | Result                                 |
+/// | ---------------------- | -------------------------------------- |
+/// |`init=true` (default)   | Dataclass field                        |
+/// |`init=false`            | [`ClassVar` field][dataclass_ClassVar] |
+/// |`dataclass_field=false` | Exclude from `__dataclass_fields__`    |
+///
+/// [dataclasses]: https://docs.python.org/3/library/dataclasses.html
+/// [dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass
+/// [Field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.Field
+/// [fields]: https://docs.python.org/3/library/dataclasses.html#dataclasses.fields
+/// [asdict]: https://docs.python.org/3/library/dataclasses.html#dataclasses.asdict
+/// [astuple]: https://docs.python.org/3/library/dataclasses.html#dataclasses.astuple
+/// [replace]: https://docs.python.org/3/library/dataclasses.html#dataclasses.replace
+/// [is_dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.is_dataclass
+/// [ClassVar]: https://docs.python.org/3/library/typing.html#typing.ClassVar
+/// [dataclass_ClassVar]: https://docs.python.org/3/library/dataclasses.html#class-variables
+/// [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
 #[proc_macro_derive(PyDataclassFields, attributes(pyderive))]
 pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -1057,7 +1053,7 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     string: i64,
 ///     #[pyderive(annotation="Optional[str]")]
 ///     option: Option<String>,
-///     omit: String
+///     excluded: String,
 /// }
 ///
 /// #[pymodule]
@@ -1097,7 +1093,7 @@ pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 
 /// Derive macro generating an impl of the trait [`ToPyObject`][pyo3_ToPyObject] by trait [`IntoPy<PyObject>`][pyo3_IntoPy].
 ///
-/// It requires [`Clone`] trait.
+/// - It requires [`Clone`] trait.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_IntoPy]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPy.html
@@ -1109,7 +1105,7 @@ pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 /// ```
 /// # use pyo3::prelude::*;
 /// # #[pyclass]
-/// # #[derive(Hash, Clone)]
+/// # #[derive(Clone)]
 /// # struct PyClass {}
 /// impl ToPyObject for PyClass {
 ///     fn to_object(&self, py: Python<'_>) -> PyObject {

@@ -45,22 +45,22 @@ assert m == MyClass("a", 1, None)
 assert hash(m) == 3289857268557676066
 ```
 
-This provides deriving following special methods and attribute;
+This provides deriving following special methods and attributes;
 
-| Derive Macro        | Python Method/Attribute                                         |
-| ------------------- | --------------------------------------------------------------- |
-| `PyInit`            | `__init__()` (`__new__()` precisely)                            |
-| `PyMatchArgs`       | `__match_args__`                                                |
-| `PyRepr`            | `__repr__()`                                                    |
-| `PyStr`             | `__str__()`                                                     |
-| `PyIter`            | `__iter__()`                                                    |
-| `PyReversed`        | `__reversed__()`                                                |
-| `PyLen`             | `__len__()`                                                     |
-| `PyEq`              | `__eq__()` and `__ne__()`                                       |
-| `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`               |
-| `PyHash`            | `__hash__()`                                                    |
-| `PyDataclassFields` | `__dataclass_fields__` (to support helper funcs of dataclasses) |
-| `PyAnnotations`     | `__annotations__`                                               |
+| Derive Macro        | Python Method/Attribute                           |
+| ------------------- | ------------------------------------------------- |
+| `PyInit`            | `__init__()` (`__new__()` precisely)              |
+| `PyMatchArgs`       | `__match_args__`                                  |
+| `PyRepr`            | `__repr__()`                                      |
+| `PyStr`             | `__str__()`                                       |
+| `PyEq`              | `__eq__()` and `__ne__()`                         |
+| `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` |
+| `PyHash`            | `__hash__()`                                      |
+| `PyIter`            | `__iter__()`                                      |
+| `PyReversed`        | `__reversed__()`                                  |
+| `PyLen`             | `__len__()`                                       |
+| `PyDataclassFields` | `__dataclass_fields__`                            |
+| `PyAnnotations`     | `__annotations__`                                 |
 
 In addition, this provides a helper derive macro:
 
