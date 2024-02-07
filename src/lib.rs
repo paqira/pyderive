@@ -1031,7 +1031,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 #[proc_macro_derive(PyDataclassFields, attributes(pyderive))]
 pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    match internal::dataclass_field::implementation(input) {
+    match internal::dataclass_fields::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }
