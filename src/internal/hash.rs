@@ -9,8 +9,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pymethods]
         impl #struct_name {
             pub fn __hash__(&self) -> u64 {
-                use std::collections::hash_map::DefaultHasher;
-                use std::hash::{Hash, Hasher};
+                use ::std::collections::hash_map::DefaultHasher;
+                use ::std::hash::{Hash, Hasher};
 
                 let mut s = DefaultHasher::new();
                 self.hash(&mut s);
