@@ -248,26 +248,26 @@ a = py_class(0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 for field in fields(a):
     if field.name == "field":
-        assert field.type == int
+        assert field.type is None
         assert field._field_type is _FIELD, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
     elif field.name == "class_":
-        assert field.type == int
+        assert field.type is None
         assert field._field_type is _FIELD_CLASSVAR, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
     elif field.name == "init_defualt":
-        assert field.type == int
-        assert field.default == 1, field.name
-        assert field.default_factory is MISSING, field.name
+        assert field.type is None
+        assert field.default is MISSING, field.name
+        assert field.default_factory() == 1, field.name
         assert field._field_type is _FIELD, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
     elif field.name == "class_defualt":
-        assert field.type == int
-        assert field.default == 1, field.name
-        assert field.default_factory is MISSING, field.name
+        assert field.type is None
+        assert field.default is MISSING, field.name
+        assert field.default_factory() == 1, field.name
         assert field._field_type is _FIELD_CLASSVAR, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
@@ -343,6 +343,80 @@ from dataclasses import is_dataclass, asdict, astuple
 assert is_dataclass(a) is True
 assert asdict(a) == {'field': {'field': 1}}
 astuple(a) == ((1, ), )
+"#
+            );
+        });
+    }
+
+    #[test]
+    fn test_annotation() {
+        #[derive(PyDataclassFields)]
+        #[pyclass(get_all)]
+        struct PyClass {
+            #[pyderive(annotation = "Literal[1]")]
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClass {
+            #[new]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class = py.get_type::<PyClass>();
+            pyo3::py_run!(
+                py,
+                py_class,
+                r#"
+from dataclasses import fields
+
+for field in fields(py_class(10)):
+    if field.name == "field":
+        assert field.type == "'Literal[1]'"
+"#
+            );
+        });
+    }
+
+    #[test]
+    fn test_default_factory() {
+        #[derive(PyDataclassFields)]
+        #[pyclass(get_all)]
+        struct PyClass {
+            #[pyderive(
+                default=(|| {let r: Vec<i64> = Vec::new();r})(),
+            )]
+            field: Vec<i64>,
+        }
+
+        #[pymethods]
+        impl PyClass {
+            #[new]
+            fn new(field: Vec<i64>) -> Self {
+                Self { field }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class = py.get_type::<PyClass>();
+            pyo3::py_run!(
+                py,
+                py_class,
+                r#"
+from dataclasses import fields
+
+for field in fields(py_class([10, ])):
+    if field.name == "field":
+        a = field.default_factory()
+        b = field.default_factory()
+        a.append(1)
+        assert a == [1]
+        assert b == []
 "#
             );
         });
