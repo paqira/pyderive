@@ -34,7 +34,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             #[pymethods]
             impl #struct_name {
                 #[pyo3(signature = ())]
-                fn __call__(slf: PyRef<'_, Self>) -> ::pyo3::PyObject {
+                fn __call__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyObject {
                     let py = slf.py();
                     #default.into_py(py)
                 }
