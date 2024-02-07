@@ -136,7 +136,7 @@ mod test {
             field_2: i64,
         }
 
-        #[derive(PyIter, Clone)]
+        #[derive(PyReversed, Clone)]
         #[pyclass(get_all)]
         #[derive(PartialEq)]
         struct PyClassB {
