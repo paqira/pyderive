@@ -244,6 +244,7 @@
 //!    If the field is marked by `annotation=<str>`,
 //!    the field is included to the `__annotations__` dict with an annotation `<str>`;
 //!    if it is not, the field is not included.
+//!    The derive macro [`PyDataclassFields`] reads this attribute also, see [`PyDataclassFields`] for detail.
 extern crate proc_macro;
 
 use syn::{parse_macro_input, DeriveInput};
@@ -916,8 +917,6 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///
 /// It returns a [`dataclasses.Field`][Field] dict that helper functions of [dataclasses][dataclasses] use.
 ///
-/// <div class="warning">It does not support <code>default_factory</code> attribute of <code>dataclasses.Field</code>.</div>
-///
 /// It supportes
 /// [`dataclasses.is_dataclass()`][is_dataclass],
 /// [`dataclasses.fields()`][fields],
@@ -940,37 +939,40 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// the field is *not* included to the dict that `__dataclass_fields__` returns.
 /// Notes, `dataclass_field=true` has no effect.
 ///
-/// ## Notice
+/// It recomends that all fields in the argument of the constructor
+/// (all fields on pyderive as default) is `get` field, like `dataclass` does.
 ///
-/// 1. It recomends that all fields in the argument of the constructor
-///    (all fields on pyderive as default) is `get` field, like `dataclass` does.
-/// 2. This does not support `default_factory` attribute of `dataclasses.Field`.
-///    The `default` value assigns to the `default` attribute, not `default_factory`.
-/// 3. The resulting `Field`'s attributes, `name`, `type`, `init`, `repr` and `kw_only`,
-///    have *proper* value, but others not, see Appendix.
-/// 4. This handles `init=false` field as [`typing.ClassVar`][ClassVar],
-///    see Appendix.
-/// 5. This derive macro depends on internal behavior of Python.
+/// ## Notes
 ///
-/// ## Appendix
+/// | Field Name        | Compatability                      |
+/// | ----------------- | ---------------------------------- |
+/// | `name`            | ✅                                 |
+/// | `type`            | ❌ (✅ if `annotation` given)      |
+/// | `default`         | ✅ (`MISSING` for pyderive)        |
+/// | `default_factory` | ✅ (`lambda: <expr>` or `MISSING`) |
+/// | `init`            | ✅                                 |
+/// | `repr`            | ✅                                 |
+/// | `hash`            | ❌ (`None` for pyderive)           |
+/// | `compare`         | ❌ (`None` for pyderive)           |
+/// | `metadata`        | ✅ (empty for pyderive)            |
+/// | `kw_only`         | ✅                                 |
 ///
-/// Table of *non-proper* value fields of `Field`:
+/// 1. The `type` attribute of `Field` is `None` as default.
+///    If the field is marked by `#[pyderive(annotation=<type>)]`,
+///    pyderive uses given `<type>` as `type` attribute.
+/// 2. This uses `default_factory` attribute of `Field` instead of `default` attribute,
+///    `default` is [`dataclasses.MISSING`][MISSING].
+///    The `default_factory` attribute is, roughly, `lambda: <expr>`
+///    where `<expr>` is given by `#[pyderive(default=<expr>)]`, if the field is marked by.
+///    The `<expr>` (rust code) is evaluated on every `default_factory` call.
+/// 3. Attributes `hash` and `compare` are `None`.
+/// 4. This marks `init=false` field as a [`ClassVar` field][dataclass_ClassVar].
 ///
-/// | Field Name        | Value                                                                |
-/// | ----------------- | -------------------------------------------------------------------- |
-/// | `default`         | `default` value given by `#[pyderive(..)]` or `dataclasses.MISSING`  |
-/// | `default_factory` | `dataclasses.MISSING`                                                |
-/// | `hash`            | `None`                                                               |
-/// | `compare`         | `None`                                                               |
-/// | `metadata`        | `None`                                                               |
-///
-/// Table of `#[pyderive(..)]` v.s. pyderive handling:
-///
-/// | Field Attr.                 | Handling                                      |
-/// | --------------------------- | --------------------------------------------- |
-/// |`init=true` (default)        | Dataclass field                               |
-/// |`init=false`                 | [`typing.ClassVar` field][dataclass_ClassVar] |
-/// |`dataclass_field=false`      | Omit from `__dataclass_fields__`              |
+/// | Field Attr.                 | Handling                               |
+/// | --------------------------- | -------------------------------------- |
+/// |`init=true` (default)        | Dataclass field                        |
+/// |`init=false`                 | [`ClassVar` field][dataclass_ClassVar] |
+/// |`dataclass_field=false`      | Omit from `__dataclass_fields__`       |
 ///
 /// [dataclasses]: https://docs.python.org/3/library/dataclasses.html
 /// [dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass
@@ -982,6 +984,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// [is_dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.is_dataclass
 /// [ClassVar]: https://docs.python.org/3/library/typing.html#typing.ClassVar
 /// [dataclass_ClassVar]: https://docs.python.org/3/library/dataclasses.html#class-variables
+/// [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
 ///
 /// # Example
 ///
