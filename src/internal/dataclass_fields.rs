@@ -133,7 +133,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         }
     });
 
-    // Is borrowing goot strat?
     let expanded = quote! {
         #(#impl_factory)*
 
@@ -145,6 +144,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             fn __dataclass_fields__<'p>(slf: ::pyo3::PyRef<'p, Self>) -> ::pyo3::PyResult<&'p ::pyo3::types::PyDict> {
                 let py = slf.py();
 
+                // To support __set_name__ protocol
                 let cls = slf.into_py(py);
                 let cls = cls.as_ref(py).get_type();
 
