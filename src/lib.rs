@@ -30,7 +30,7 @@
 //! # Python script
 //! from rust_module import MyClass
 //!
-//! # Derives __init__() (technically __new__())
+//! # Derives __new__()
 //! m = MyClass("a", 1, None)
 //!
 //! # Derives __match_args__ (supports Pattern Matching by positional arguments)
@@ -62,7 +62,7 @@
 //!
 //! | Derive Macro          | Derives                                                |
 //! | --------------------- | ------------------------------------------------------ |
-//! | [`PyInit`]            | `__init__()` (`__new__()`) with all fields             |
+//! | [`PyInit`]            | `__new__()` with all fields                            |
 //! | [`PyMatchArgs`]       | `__match_args__` attr. with `get` fields               |
 //! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields            |
 //! | [`PyStr`]             | `__str__()` returns `get` and `set` fields             |
@@ -136,10 +136,12 @@
 //! - `#[pyderive(init=<bool>)]`
 //!
 //!    If `init=false`,
-//!    the field is excluded from the argument of the `__init__()` (`__new__()` precisely) method.
+//!    the field is excluded from the arguments of the `__new__()` method.
 //!    Notes, `init=true` has not effect.
-//!
-//!    The attribute `#[pyderive(default=<expr>)]` is used to costomize default value.
+//! 
+//! - `#[pyderive(default=<expr>)]`
+//! 
+//!    This is used to costomize default value for the the `__new__()` method.
 //!    It supports any rust expression which PyO3 supports, e.g.,
 //!
 //!    ```
@@ -166,8 +168,8 @@
 //!
 //!     2. `#[pyderive(init=false)]`
 //!        
-//!        The field is excluded from the argument,
-//!        and initialized by [`Default::default()`] in the `__init__()` method.         
+//!        The field is excluded from the arguments,
+//!        and initialized by [`Default::default()`] in the `__new__()` method.         
 //!
 //!        Pseudo-code:
 //!
@@ -175,7 +177,7 @@
 //!        def __init__(self): self.field = field::default()  # call rust fn
 //!        ```
 //!
-//!        We note that `field::default()` (rust code) is evaluated on every `__init__()` call.
+//!        We note that `field::default()` (rust code) is evaluated on every `__new__()` call.
 //!
 //!     3. `#[pyderive(default=<expr>)]`
 //!
@@ -187,12 +189,12 @@
 //!        def __init__(self, field=<expr>): self.field = field
 //!        ```
 //!
-//!        We note that `<expr>` (rust code) is evaluated on every `__init__()` call (PyO3 feature).
+//!        We note that `<expr>` (rust code) is evaluated on every `__new__()` call (PyO3 feature).
 //!
 //!     4. `#[pyderive(init=false, default=<expr>)]`
 //!
 //!        The field is excluded from the arguments,
-//!        and initialized with `<expr>` in the `__init__()` method.
+//!        and initialized with `<expr>` in the `__new__()` method.
 //!
 //!        Pseudo-code:
 //!
@@ -200,15 +202,15 @@
 //!        def __init__(self): self.field = <expr>
 //!        ```
 //!
-//!        We note that `<expr>` (rust code) is evaluated on every `__init__()` call.
+//!        We note that `<expr>` (rust code) is evaluated on every `__new__()` call.
 //!
 //! - `#[pyderive(kw_only=true)]`
 //!
 //!    If `kw_only=true`,
-//!    the following fields are keyword only arguments, like [`dataclasses.KW_ONLY`][KW_ONLY].
-//!    Note, `kw_only=false` has no effect.
-//!
-//!    (It puts `*,` in front of the field of `#[pyo3(signature = ..)]`)
+//!    the following fields are keyword only arguments in the `__new__()` method,
+//!    like [`dataclasses.KW_ONLY`][KW_ONLY]. Note, `kw_only=false` has no effect.
+//!    The derive macro [`PyDataclassFields`] reads this attribute also,
+//!    see [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(match_args=<bool>)]`
 //!
@@ -559,20 +561,19 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive macro generating a [`__init__()`][__init__] Python method (technically [`__new__()`][__new__]).
+/// Derive macro generating a [`__new__()`][__new__] Python method.
 ///
 /// It has all fields as the argumetns as default,
 /// in the order of declaration.
 ///
 /// If the filed is marked by `#[pyderive(init=false)]` attribute,
-/// the field is excluded from the arguments of the `__init__()` method.
+/// the field is excluded from the arguments of the `__new__()` method.
 /// Notes, `init=true` has no effect.
 ///
 /// - It should place `#[derive(PyInit)]` before `#[pyclass]`.
 ///
 /// See the [Customize Implementation](crate) section of the crate doc for detail.
 ///
-/// [__init__]: https://docs.python.org/reference/datamodel.html#object.__init__
 /// [__new__]: https://docs.python.org/reference/datamodel.html#object.__new__
 ///
 /// # Example
@@ -928,12 +929,12 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// Notes, `dataclass_field=true` has no effect.
 ///
 /// - It should place `#[derive(PyDataclassField)]` before `#[pyclass]`.
-/// - All fields in the argument of the constructor should be `get` field, like `dataclass` does.
+/// - All fields in the arguments of the `__new__()` method should be `get` field, like `dataclass` does.
 /// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
 ///   for child [`pyclass`][pyo3_pyclass]es.
 ///
 /// This does not generate other fn/method,
-/// use [`PyInit`] etc. to implement `__init__()` etc.
+/// use [`PyInit`] etc. to implement `__new__()` etc.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html

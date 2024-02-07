@@ -22,7 +22,7 @@ struct MyClass {
 ```python
 from rust_module import MyClass
 
-# Derives __init__() (technically __new__())
+# Derives __new__()
 m = MyClass("a", 1, None)
 
 # Derives __match_args__ (supports Pattern Matching by positional arguments)
@@ -49,7 +49,7 @@ This provides deriving following special methods and attributes;
 
 | Derive Macro        | Python Method/Attribute                           |
 | ------------------- | ------------------------------------------------- |
-| `PyInit`            | `__init__()` (`__new__()` precisely)              |
+| `PyInit`            | `__new__()`                                       |
 | `PyMatchArgs`       | `__match_args__`                                  |
 | `PyRepr`            | `__repr__()`                                      |
 | `PyStr`             | `__str__()`                                       |
