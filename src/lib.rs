@@ -16,8 +16,8 @@
 //! use pyo3::prelude::*;
 //! use pyderive::*;
 //!
-//! // Place #[derive(PyInit, ...)] before #[pyclass]
-//! #[derive(PyInit, PyMatchArgs, PyRepr, PyEq, PyHash)]
+//! // Place #[derive(PyNew, ...)] before #[pyclass]
+//! #[derive(PyNew, PyMatchArgs, PyRepr, PyEq, PyHash)]
 //! #[pyclass(get_all)]
 //! #[derive(PartialEq, Hash)]
 //! struct MyClass {
@@ -56,13 +56,13 @@
 //! # Detail
 //!
 //! Some macros change implementations depend on `#[pyclass(..)]` and `#[pyo3(..)]` arguments,
-//! hence it should place `#[derive(PyInit)]` etc. before `#[pyclass(..)]` and `#[pyo3(..)]`.
+//! hence it should place `#[derive(PyNew)]` etc. before `#[pyclass(..)]` and `#[pyo3(..)]`.
 //!
 //! We list the default implementations that the macros generate.
 //!
 //! | Derive Macro          | Derives                                                |
 //! | --------------------- | ------------------------------------------------------ |
-//! | [`PyInit`]            | `__new__()` with all fields                            |
+//! | [`PyNew`]             | `__new__()` with all fields                            |
 //! | [`PyMatchArgs`]       | `__match_args__` attr. with `get` fields               |
 //! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields            |
 //! | [`PyStr`]             | `__str__()` returns `get` and `set` fields             |
@@ -104,7 +104,7 @@
 //! # use pyo3::prelude::*;
 //! use pyderive::*;
 //!
-//! #[derive(PyInit, PyRepr)]
+//! #[derive(PyNew, PyRepr)]
 //! #[pyclass]
 //! struct MyClass {
 //!     string: String,
@@ -138,9 +138,9 @@
 //!    If `init=false`,
 //!    the field is excluded from the arguments of the `__new__()` method.
 //!    Notes, `init=true` has not effect.
-//! 
+//!
 //! - `#[pyderive(default=<expr>)]`
-//! 
+//!
 //!    This is used to costomize default value for the the `__new__()` method.
 //!    It supports any rust expression which PyO3 supports, e.g.,
 //!
@@ -148,7 +148,7 @@
 //!    # use pyderive::*;
 //!    # use pyo3::prelude::*;
 //!    #
-//!    #[derive(PyInit)]
+//!    #[derive(PyNew)]
 //!    #[pyclass]
 //!    struct PyClass {
 //!        #[pyderive(default = Some("str".to_string()))]
@@ -570,7 +570,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// the field is excluded from the arguments of the `__new__()` method.
 /// Notes, `init=true` has no effect.
 ///
-/// - It should place `#[derive(PyInit)]` before `#[pyclass]`.
+/// - It should place `#[derive(PyNew)]` before `#[pyclass]`.
 ///
 /// See the [Customize Implementation](crate) section of the crate doc for detail.
 ///
@@ -583,7 +583,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// use pyderive::*;
 ///
 /// // Place before `#[pyclass]`
-/// #[derive(PyInit)]
+/// #[derive(PyNew)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -619,10 +619,10 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Python::with_gil(|py| Python::run(py, test, None, None)).is_ok()
 /// );
 /// ```
-#[proc_macro_derive(PyInit, attributes(pyderive))]
-pub fn py_init(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+#[proc_macro_derive(PyNew, attributes(pyderive))]
+pub fn py_new(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    match internal::init::implementation(input) {
+    match internal::new::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }
@@ -862,7 +862,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// use pyderive::*;
 ///
 /// // Place before `#[pyclass]`
-/// #[derive(PyInit, PyMatchArgs)]
+/// #[derive(PyNew, PyMatchArgs)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -934,7 +934,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///   for child [`pyclass`][pyo3_pyclass]es.
 ///
 /// This does not generate other fn/method,
-/// use [`PyInit`] etc. to implement `__new__()` etc.
+/// use [`PyNew`] etc. to implement `__new__()` etc.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
@@ -946,7 +946,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// use pyderive::*;
 ///
 /// // Place before `#[pyclass]`
-/// #[derive(PyInit, PyDataclassFields)]
+/// #[derive(PyNew, PyDataclassFields)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     string: String,
@@ -1047,7 +1047,7 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// use pyderive::*;
 ///
 /// // Place before `#[pyclass]`
-/// #[derive(PyInit, PyAnnotations)]
+/// #[derive(PyNew, PyAnnotations)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     #[pyderive(annotation="int")]
@@ -1121,14 +1121,14 @@ pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 /// use pyo3::prelude::*;
 /// use pyderive::*;
 ///
-/// #[derive(PyInit, PyRepr)]
+/// #[derive(PyNew, PyRepr)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
 ///     child: Child,
 /// }
 ///
 /// // PyRepr requires ToPyObject trait for child pyclass
-/// #[derive(PyInit, PyRepr, ToPyObject)]
+/// #[derive(PyNew, PyRepr, ToPyObject)]
 /// #[pyclass(get_all)]
 /// #[derive(Clone)]
 /// struct Child {

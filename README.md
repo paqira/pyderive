@@ -9,8 +9,8 @@
 use pyo3::prelude::*;
 use pyderive::*;
 
-// Place #[derive(PyInit, ...)] before #[pyclass]
-#[derive(PyInit, PyMatchArgs, PyRepr, PyEq, PyHash)]
+// Place #[derive(PyNew, ...)] before #[pyclass]
+#[derive(PyNew, PyMatchArgs, PyRepr, PyEq, PyHash)]
 #[pyclass(get_all)]
 #[derive(PartialEq, Hash)]
 struct MyClass {
@@ -49,7 +49,7 @@ This provides deriving following special methods and attributes;
 
 | Derive Macro        | Python Method/Attribute                           |
 | ------------------- | ------------------------------------------------- |
-| `PyInit`            | `__new__()`                                       |
+| `PyNew`             | `__new__()`                                       |
 | `PyMatchArgs`       | `__match_args__`                                  |
 | `PyRepr`            | `__repr__()`                                      |
 | `PyStr`             | `__str__()`                                       |

@@ -8,7 +8,7 @@ mod test {
 
     #[test]
     fn test_no_get_set() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass]
         #[allow(dead_code)]
         struct PyClass {
@@ -89,7 +89,7 @@ fd_name_vec_opt_pystr=[None], fd_name_vec_opt_pyint=[None],
 
     #[test]
     fn test_get_set() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass]
         #[derive(Default)]
         struct PyClass {
@@ -109,7 +109,7 @@ fd_name_vec_opt_pystr=[None], fd_name_vec_opt_pyint=[None],
 
     #[test]
     fn test_name_rename_all() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass(get_all, name = "renamedClass", rename_all = "camelCase")]
         #[derive(Default)]
         struct PyClass {
@@ -139,7 +139,7 @@ fd_name_vec_opt_pystr=[None], fd_name_vec_opt_pyint=[None],
 
     #[test]
     fn test_pyderive_a() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -162,7 +162,7 @@ except TypeError: pass"
 
     #[test]
     fn test_pyderive_b() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -339,7 +339,7 @@ except TypeError: pass"
 
     #[test]
     fn test_pyderive_c() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -381,7 +381,7 @@ except TypeError: pass"
 
     #[test]
     fn test_pyderive_kw_only() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -407,7 +407,7 @@ except TypeError: pass"
 
     #[test]
     fn test_pyderive_kw_only_default() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
@@ -426,13 +426,13 @@ except TypeError: pass"
 
     #[test]
     fn test_nest_pyclass() {
-        #[derive(PyInit)]
+        #[derive(PyNew)]
         #[pyclass(get_all)]
         struct PyClassA {
             field: PyClassB,
         }
 
-        #[derive(PyInit, Clone)]
+        #[derive(PyNew, Clone)]
         #[pyclass(get_all)]
         struct PyClassB {
             field: i64,
