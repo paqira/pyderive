@@ -6,7 +6,7 @@ use syn::DeriveInput;
 use crate::common::FieldData;
 
 fn factory_name(struct_name: &Ident, pyname: &String) -> Ident {
-    format_ident!("__{}{}_Factory", struct_name, pyname)
+    format_ident!("__pyderive_internal_{}_{}_factory", struct_name, pyname)
 }
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
