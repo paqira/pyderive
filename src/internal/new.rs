@@ -81,7 +81,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             #[new]
             #[pyo3(signature = ( #( #signature ),* ))]
             #[allow(non_snake_case)]
-            pub fn __pyderive_new(
+            pub fn __pyderive_internal_py_new(
                 #(#init_args),*
             ) -> Self {
                 Self { #(#self_args),* }

@@ -30,6 +30,7 @@
 //! # Python script
 //! from rust_module import MyClass
 //!
+//!
 //! # Derives __new__()
 //! m = MyClass("a", 1, None)
 //!
@@ -749,7 +750,6 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// [__le__]: https://docs.python.org/reference/datamodel.html#object.__le__
 /// [__gt__]: https://docs.python.org/reference/datamodel.html#object.__gt__
 /// [__ge__]: https://docs.python.org/reference/datamodel.html#object.__ge__
-/// [TypeError]: https://docs.python.org/library/exceptions.html#TypeError
 ///
 /// # Example
 ///
@@ -1084,7 +1084,6 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # pyo3::prepare_freethreaded_python();
 ///
 /// let test = r#"
-/// from __future__ import annotations
 /// from typing import get_type_hints, Optional
 /// import sys
 ///

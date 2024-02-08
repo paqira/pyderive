@@ -304,6 +304,7 @@ impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
                         }
                     })
             })
+            // Return #[pyderive()]? Err
             .collect::<Result<Vec<_>>>()?
             .into_iter()
             .flatten()

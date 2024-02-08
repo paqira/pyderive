@@ -11,12 +11,10 @@ use crate::attr::{
 pub fn is_py(ty: &Type) -> bool {
     match &ty {
         Type::Path(TypePath {
-            path: Path {
-                segments: ref seg, ..
-            },
+            path: Path { ref segments, .. },
             ..
         }) => {
-            let mut iter = seg.iter();
+            let mut iter = segments.iter();
             match iter.next() {
                 Some(first) if first.ident.eq("pyo3") => match iter.next() {
                     Some(second) if second.ident.eq("Py") => iter.next().is_none(),
@@ -64,7 +62,7 @@ impl FieldData {
                 unnamed => {
                     return Err(syn::Error::new(
                         unnamed.span(),
-                        "support struct with field, not unit",
+                        "support struct with field, not tuple struct",
                     ))
                 }
             },

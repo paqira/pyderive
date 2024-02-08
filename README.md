@@ -22,6 +22,7 @@ struct MyClass {
 ```python
 from rust_module import MyClass
 
+
 # Derives __new__()
 m = MyClass("a", 1, None)
 
