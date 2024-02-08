@@ -15,7 +15,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let fields = data
         .iter()
-        .filter(|d| d.dataclass_field.unwrap_or(true))
+        .filter(|d| d.dataclass_field())
         .collect::<Vec<_>>();
 
     // Make a struct impls only __call__ returns default value
@@ -45,8 +45,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let mut kw_only = false;
     let assingments = fields.iter().map(|d| {
         let pyname = &d.pyname;
-        let init = &d.init.unwrap_or(true);
-        let repr = &d.repr.unwrap_or(true);
+        let init = &d.init();
+        let repr = &d.repr();
         let default = quote!(MISSING);
         let default_factory = &d.default.as_ref().map_or(quote!(MISSING), |_| {
             let pyname = &d.pyname;
@@ -55,7 +55,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             quote! ( #struct_name{}.into_py(py) )
         });
         // once kw_only, always kw_only
-        if let Some(true) = &d.kw_only {
+        if d.kw_only() {
             kw_only = true;
         }
 

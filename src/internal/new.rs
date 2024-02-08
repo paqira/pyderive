@@ -29,14 +29,14 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     signature.extend(
         data.iter()
-            .take_while(|d| !d.kw_only.unwrap_or(false))
-            .filter(|d| d.init.unwrap_or(true))
+            .take_while(|d| !d.kw_only())
+            .filter(|d| d.init())
             .map(signiture),
     );
 
     let rest_args = data
         .iter()
-        .skip_while(|d| !d.kw_only.unwrap_or(false))
+        .skip_while(|d| !d.kw_only())
         .map(signiture)
         .collect::<Vec<_>>();
 
@@ -48,7 +48,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     // constructor arguments
     let init_args = data
         .iter()
-        .filter(|d| d.init.unwrap_or(true))
+        .filter(|d| d.init())
         .map(|d| {
             let ty = d.field.ty.to_owned();
             let pyident = d.pyident.to_owned();
@@ -65,12 +65,13 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             let ident = d.field.ident.as_ref().unwrap();
             let pyident = d.pyident.to_owned();
 
-            match &d.init {
-                Some(false) => match &d.default {
+            if d.init() {
+                quote! { #ident: #pyident }
+            } else {
+                match &d.default {
                     Some(expr) => quote! { #ident: #expr },
                     None => quote! { #ident: #ty::default() },
-                },
-                _ => quote! { #ident: #pyident },
+                }
             }
         })
         .collect::<Vec<_>>();

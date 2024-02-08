@@ -13,7 +13,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     // args of foramt!(..)
     let args = data
         .iter()
-        .filter(|d| d.str.unwrap_or(d.get || d.set))
+        .filter(|d| d.str())
         .map(|d| {
             let ident = d.field.ident.to_owned().unwrap();
             let name = d.pyname.to_owned();

@@ -8,7 +8,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = &input.ident;
     let data = FieldData::try_from_input(&input)?;
 
-    let length = data.iter().filter(|d| d.len.unwrap_or(d.get)).count();
+    let length = data.iter().filter(|d| d.len()).count();
 
     let expanded = quote! {
         #[pymethods]

@@ -12,7 +12,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let args = data
         .iter()
-        .filter(|d| d.iter.unwrap_or(d.get))
+        .filter(|d| d.iter())
         .map(|d| {
             let ident = &d.field.ident;
 

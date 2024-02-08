@@ -38,19 +38,44 @@ pub struct FieldData {
     pub pyname: String,
     // String -> Some(Ident) to support Tuple struct
     pub pyident: Ident,
-    pub init: Option<bool>,
-    pub match_args: Option<bool>,
-    pub repr: Option<bool>,
-    pub str: Option<bool>,
-    pub iter: Option<bool>,
-    pub len: Option<bool>,
-    pub kw_only: Option<bool>,
-    pub dataclass_field: Option<bool>,
+    init: Option<bool>,
+    match_args: Option<bool>,
+    repr: Option<bool>,
+    str: Option<bool>,
+    iter: Option<bool>,
+    len: Option<bool>,
+    kw_only: Option<bool>,
+    dataclass_field: Option<bool>,
     pub default: Option<Expr>,
     pub annotation: Option<String>,
 }
 
 impl FieldData {
+    pub fn init(&self) -> bool {
+        self.init.unwrap_or(true)
+    }
+    pub fn match_args(&self) -> bool {
+        self.match_args.unwrap_or(self.get)
+    }
+    pub fn repr(&self) -> bool {
+        self.repr.unwrap_or(self.get || self.set)
+    }
+    pub fn str(&self) -> bool {
+        self.str.unwrap_or(self.get || self.set)
+    }
+    pub fn iter(&self) -> bool {
+        self.iter.unwrap_or(self.get)
+    }
+    pub fn len(&self) -> bool {
+        self.len.unwrap_or(self.get)
+    }
+    pub fn kw_only(&self) -> bool {
+        self.kw_only.unwrap_or(false)
+    }
+    pub fn dataclass_field(&self) -> bool {
+        self.dataclass_field.unwrap_or(true)
+    }
+
     pub fn try_from_input(input: &DeriveInput) -> Result<Vec<Self>> {
         let pyo3_struct_op = Pyo3StructOption::try_from(&input.attrs)?;
 
