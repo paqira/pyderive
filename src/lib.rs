@@ -127,6 +127,9 @@
 //!    the field is included in the string that the `__repr__()` method returns;
 //!    if `repr=false`, it isn't.
 //!
+//!    The derive macro [`PyDataclassFields`] reads this attribute also,
+//!    see [`PyDataclassFields`] for detail.
+//!
 //! - `#[pyderive(str=<bool>)]`
 //!
 //!    If `str=true`,
@@ -138,6 +141,9 @@
 //!    If `init=false`,
 //!    the field is excluded from the arguments of the `__new__()` method.
 //!    Notes, `init=true` has not effect.
+//!
+//!    The derive macro [`PyDataclassFields`] reads this attribute also,
+//!    see [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(default=<expr>)]`
 //!
@@ -163,52 +169,62 @@
 //!        Pseudo-code:
 //!
 //!        ```python
-//!        def __init__(self, field): self.field = field
+//!        def __new__(cls, field):
+//!             self = super().__new__(cls)
+//!             self.field = field
+//!             return self
 //!        ```
 //!
 //!     2. `#[pyderive(init=false)]`
 //!        
 //!        The field is excluded from the arguments,
-//!        and initialized by [`Default::default()`] in the `__new__()` method.         
+//!        and initialized by [`Default::default()`] in the `__new__()` method.
+//!        We note that it is evaluated on every `__new__()` call.
 //!
 //!        Pseudo-code:
 //!
 //!        ```python
-//!        def __init__(self): self.field = field::default()  # call rust fn
+//!        def __new__(cls):
+//!             self = super().__new__(cls)
+//!             self.field = field::default()  # call rust fn
+//!             return self
 //!        ```
-//!
-//!        We note that `field::default()` (rust code) is evaluated on every `__new__()` call.
 //!
 //!     3. `#[pyderive(default=<expr>)]`
 //!
 //!        The field is included to the arguments with default value `<expr>`.
+//!        We note that `<expr>` (rust code) is evaluated on every `__new__()` call (PyO3 feature).
 //!
 //!        Pseudo-code:
 //!
 //!        ```python
-//!        def __init__(self, field=<expr>): self.field = field
+//!        def __new__(cls, field=<expr>):
+//!             self = super().__new__(cls)
+//!             self.field = field
+//!             return self
 //!        ```
-//!
-//!        We note that `<expr>` (rust code) is evaluated on every `__new__()` call (PyO3 feature).
 //!
 //!     4. `#[pyderive(init=false, default=<expr>)]`
 //!
 //!        The field is excluded from the arguments,
 //!        and initialized with `<expr>` in the `__new__()` method.
+//!        We note that `<expr>` (rust code) is evaluated on every `__new__()` call.
 //!
 //!        Pseudo-code:
 //!
 //!        ```python
-//!        def __init__(self): self.field = <expr>
+//!        def __new__(cls):
+//!             self = super().__new__(cls)
+//!             self.field = <expr>
+//!             return self
 //!        ```
-//!
-//!        We note that `<expr>` (rust code) is evaluated on every `__new__()` call.
 //!
 //! - `#[pyderive(kw_only=true)]`
 //!
 //!    If `kw_only=true`,
 //!    the following fields are keyword only arguments in the `__new__()` method,
 //!    like [`dataclasses.KW_ONLY`][KW_ONLY]. Note, `kw_only=false` has no effect.
+//!
 //!    The derive macro [`PyDataclassFields`] reads this attribute also,
 //!    see [`PyDataclassFields`] for detail.
 //!
@@ -247,7 +263,9 @@
 //!    If the field is marked by `annotation=<str>`,
 //!    the field is included to the `__annotations__` dict with an annotation `<str>`;
 //!    if it is not, the field is excluded.
-//!    The derive macro [`PyDataclassFields`] reads this attribute also, see [`PyDataclassFields`] for detail.
+//!
+//!    The derive macro [`PyDataclassFields`] reads this attribute also,
+//!    see [`PyDataclassFields`] for detail.
 //!
 //! [KW_ONLY]: https://docs.python.org/3/library/dataclasses.html#dataclasses.KW_ONLY
 extern crate proc_macro;
