@@ -194,6 +194,10 @@ astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['s
             init_defualt: i64,
             #[pyderive(init = false, default = 1)]
             class_defualt: i64,
+            #[pyderive(default = 1, default_factory = true)]
+            init_defualt_factory: i64,
+            #[pyderive(init = false, default = 1, default_factory = true)]
+            class_defualt_factory: i64,
             #[pyderive(dataclass_field = false)]
             ommit: i64,
             #[pyderive(repr = true)]
@@ -213,6 +217,8 @@ astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['s
                 class_: i64,
                 init_defualt: i64,
                 class_defualt: i64,
+                init_defualt_factory: i64,
+                class_defualt_factory: i64,
                 ommit: i64,
                 repr: i64,
                 no_repr: i64,
@@ -224,6 +230,8 @@ astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['s
                     class_,
                     init_defualt,
                     class_defualt,
+                    init_defualt_factory,
+                    class_defualt_factory,
                     ommit,
                     repr,
                     no_repr,
@@ -244,7 +252,7 @@ astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['s
 import sys
 from dataclasses import _FIELD, _FIELD_CLASSVAR, MISSING, fields
 
-a = py_class(0, 0, 0, 0, 0, 0, 0, 0, 0)
+a = py_class(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 for field in fields(a):
     if field.name == "field":
@@ -259,12 +267,26 @@ for field in fields(a):
             assert field.kw_only is False, field.name
     elif field.name == "init_defualt":
         assert field.type is None
+        assert field.default == 1, field.name
+        assert field.default_factory is MISSING, field.name
+        assert field._field_type is _FIELD, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False, field.name
+    elif field.name == "class_defualt":
+        assert field.type is None
+        assert field.default == 1, field.name
+        assert field.default_factory is MISSING, field.name
+        assert field._field_type is _FIELD_CLASSVAR, field.name
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False, field.name
+    elif field.name == "init_defualt_factory":
+        assert field.type is None
         assert field.default is MISSING, field.name
         assert field.default_factory() == 1, field.name
         assert field._field_type is _FIELD, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
-    elif field.name == "class_defualt":
+    elif field.name == "class_defualt_factory":
         assert field.type is None
         assert field.default is MISSING, field.name
         assert field.default_factory() == 1, field.name
@@ -389,6 +411,7 @@ for field in fields(py_class(10)):
         struct PyClass {
             #[pyderive(
                 default=(|| {let r: Vec<i64> = Vec::new();r})(),
+                default_factory=true,
             )]
             field: Vec<i64>,
         }

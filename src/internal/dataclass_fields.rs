@@ -1,13 +1,8 @@
 use proc_macro::TokenStream;
-use proc_macro2::Ident;
 use quote::{format_ident, quote};
 use syn::DeriveInput;
 
 use crate::common::FieldData;
-
-fn factory_name(struct_name: &Ident, pyname: &String) -> Ident {
-    format_ident!("__pyderive_internal_{}_{}_factory", struct_name, pyname)
-}
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = &input.ident;
@@ -18,42 +13,22 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .filter(|d| d.dataclass_field())
         .collect::<Vec<_>>();
 
-    // Make a struct impls only __call__ returns default value
-    let impl_factory = fields.iter().filter(|d| d.default.is_some()).map(|d| {
-        let pyname = &d.pyname;
-        let struct_name = factory_name(struct_name, pyname);
-
-        let default = &d.default.as_ref().unwrap();
-
-        quote! {
-            #[pyclass]
-            #[pyo3(name="default_factory", module="pyderive")]
-            #[doc(hidden)]
-            #[allow(non_camel_case_types)]
-            struct #struct_name();
-            #[pymethods]
-            impl #struct_name {
-                #[pyo3(signature = ())]
-                fn __call__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyObject {
-                    let py = slf.py();
-                    #default.into_py(py)
-                }
-            }
-        }
-    });
-
     let mut kw_only = false;
     let assingments = fields.iter().map(|d| {
         let pyname = &d.pyname;
         let init = &d.init();
         let repr = &d.repr();
-        let default = quote!(MISSING);
-        let default_factory = &d.default.as_ref().map_or(quote!(MISSING), |_| {
-            let pyname = &d.pyname;
-            let struct_name = factory_name(struct_name, pyname);
 
-            quote! ( #struct_name{}.into_py(py) )
-        });
+        let (default, default_factory) = match &d.default {
+            Some(default) => if d.default_factory() {
+                let name = format!("__pyderive_internal_{}_{}_factory", struct_name, pyname);
+                (quote!(MISSING), quote!(::pyo3::types::PyCFunction::new_closure(py, Some(#name), None, |_, _| #default)?))
+            } else {
+                (quote!(#default), quote!(MISSING))
+            },
+            None => (quote!(MISSING), quote!(MISSING)),
+        };
+
         // once kw_only, always kw_only
         if d.kw_only() {
             kw_only = true;
@@ -134,8 +109,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     });
 
     let expanded = quote! {
-        #(#impl_factory)*
-
         #[pymethods]
         impl #struct_name {
             // namely class getter,

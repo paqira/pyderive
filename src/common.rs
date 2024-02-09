@@ -47,6 +47,7 @@ pub struct FieldData {
     kw_only: Option<bool>,
     dataclass_field: Option<bool>,
     pub default: Option<Expr>,
+    default_factory: Option<bool>,
     pub annotation: Option<String>,
 }
 
@@ -74,6 +75,9 @@ impl FieldData {
     }
     pub fn dataclass_field(&self) -> bool {
         self.dataclass_field.unwrap_or(true)
+    }
+    pub fn default_factory(&self) -> bool {
+        self.default_factory.unwrap_or(false)
     }
 
     pub fn try_from_input(input: &DeriveInput) -> Result<Vec<Self>> {
@@ -140,6 +144,7 @@ impl FieldData {
                     kw_only: pyderive_field_opt.kw_only,
                     dataclass_field: pyderive_field_opt.dataclass_field,
                     default: pyderive_field_opt.default,
+                    default_factory: pyderive_field_opt.default_factory,
                     annotation: pyderive_field_opt.annotation,
                 })
             })

@@ -219,6 +219,16 @@
 //!             self.field = <expr>
 //!             return self
 //!        ```
+//! - `#[pyderive(default_factory=true)]`
+//!
+//!    If `default_factory=true`,
+//!    let the `default_factory` attribute of the obj returned by `__dataclass_fields__`
+//!    be `lambda: <expr>`, and let the `default` attribute be [`MISSING`],
+//!    where `<expr>` is given by `#[pyderive(default=<expr>)]`.
+//!    Notes, `default_factory=false` has no effect,
+//!    and if the field is not marked by `#[pyderive(default=<expr>)]`, this ignores.
+//!    
+//!    See [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(kw_only=true)]`
 //!
@@ -1006,7 +1016,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// | ----------------------------- | ---------------------------------- |
 /// | `name`                        | ✅                                 |
 /// | `type`                        | ❌ (✅ if `annotation` given)      |
-/// | `default`                     | ✅ (`MISSING` for pyderive)        |
+/// | `default`                     | ✅ (`<expr>` or `MISSING`)         |
 /// | `default_factory`             | ✅ (`lambda: <expr>` or `MISSING`) |
 /// | `init`                        | ✅                                 |
 /// | `repr`                        | ✅                                 |
@@ -1018,11 +1028,15 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// 1. The `type` attribute of `Field` is `None` as default.
 ///    If the field is marked by `#[pyderive(annotation=<type>)]`,
 ///    this uses the given `<type>` as `type` attribute.
-/// 2. This uses `default_factory` attribute of `Field` instead of `default` attribute,
-///    `default` is [`dataclasses.MISSING`][MISSING].
-///    The `default_factory` attribute is, roughly, `lambda: <expr>`
-///    where `<expr>` is given by `#[pyderive(default=<expr>)]`, if the field is marked by.
-///    The `<expr>` (rust code) is evaluated on every `default_factory` call.
+/// 2. If the field is marked by `#[pyderive(default_factory=true)]`,
+///    the `default` attribute of the resulting `Field` obj is [`MISSING`][MISSING]
+///    and the `default_factory` is `lambda: <expr>`.
+///    Notes, it evaluates `<expr>` on every `Field.default_factory` call.
+///
+///    | Rust Field Attribute                | Python `default` Attribute | Python `default_factory` Attribute |
+///    | ----------------------------------- | -------------------------- | ---------------------------------- |
+///    | `#[pyderive(default_factory=true)]` | `MISSING`                  | `lambda: <expr>`                   |
+///    | Other                               | `<expr>`                   | `MISSING`                          |
 /// 3. Attributes `hash` and `compare` are `None`.
 /// 4. This marks `init=false` field as a [`ClassVar` field][dataclass_ClassVar].
 ///
