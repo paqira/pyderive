@@ -6,6 +6,29 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_rename() {
+        #[derive(PyAnnotations)]
+        #[pyclass(get_all, name = "new_name", rename_all = "camelCase")]
+        struct PyClass {
+            #[pyderive(annotation = "int")]
+            #[pyo3(name = "renamed_field")]
+            field_a: i64,
+            #[pyderive(annotation = "str")]
+            field_the_name: String,
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class = py.get_type::<PyClass>();
+            pyo3::py_run!(
+                py,
+                py_class,
+                r#"assert py_class.__annotations__ == {'renamed_field': "'int'", 'fieldTheName': "'str'"}"#
+            );
+        });
+    }
+
+    #[test]
     fn test_noannotations() {
         #[derive(PyAnnotations)]
         #[pyclass]

@@ -7,6 +7,48 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_rename() {
+        #[derive(PyDataclassFields)]
+        #[pyclass(get_all, name = "new_name", rename_all = "camelCase")]
+        struct PyClass {
+            #[pyo3(name = "renamed_field")]
+            field_a: i64,
+            field_the_name: String,
+        }
+
+        #[pymethods]
+        impl PyClass {
+            #[new]
+            fn new(field_a: i64, field_the_name: String) -> Self {
+                Self {
+                    field_a,
+                    field_the_name,
+                }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class = py.get_type::<PyClass>();
+            pyo3::py_run!(
+                py,
+                py_class,
+                r#"
+from dataclasses import fields
+
+for field in fields(py_class(0, "")):
+    if field.name == "renamed_field":
+        pass
+    elif field.name == "fieldTheName":
+        pass
+    else:
+        raise AssertionError
+"#
+            );
+        });
+    }
+
+    #[test]
     fn test_on_class() {
         #[derive(PyDataclassFields)]
         #[pyclass(get_all)]
