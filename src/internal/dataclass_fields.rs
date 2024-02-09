@@ -114,7 +114,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             // namely class getter,
             // it does not use field values
             #[getter]
-            fn __dataclass_fields__<'p>(slf: ::pyo3::PyRef<'p, Self>) -> ::pyo3::PyResult<&'p ::pyo3::types::PyDict> {
+            fn __dataclass_fields__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyResult<&::pyo3::types::PyDict> {
                 let py = slf.py();
 
                 // To support __set_name__ protocol
