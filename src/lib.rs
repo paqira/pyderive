@@ -70,7 +70,7 @@
 //! | [`PyIter`]            | `__iter__()` returns an iterator of `get` fields       |
 //! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields   |
 //! | [`PyLen`]             | `__len__()` returns number of `get` fields             |
-//! | [`PyDataclassFields`] | `__dataclass_fields__` getter with all fields          |
+//! | [`PyDataclassFields`] | `__dataclass_fields__` class attr. with all fields     |
 //! | [`PyAnnotations`]     | `__annotations__` class attr. with annotated fields    |
 //!
 //! We call the field is *`get` (or `set`) field*
@@ -219,11 +219,12 @@
 //!             self.field = <expr>
 //!             return self
 //!        ```
+//!
 //! - `#[pyderive(default_factory=true)]`
 //!
 //!    If `default_factory=true`,
-//!    let the `default_factory` attribute of the obj returned by `__dataclass_fields__`
-//!    be `lambda: <expr>`, and let the `default` attribute be [`MISSING`],
+//!    let the `default_factory` attribute of `Field`obj be `lambda: <expr>`,
+//!    and let the `default` attribute be [`dataclasses.MISSING`][MISSING],
 //!    where `<expr>` is given by `#[pyderive(default=<expr>)]`.
 //!    Notes, `default_factory=false` has no effect,
 //!    and if the field is not marked by `#[pyderive(default=<expr>)]`, this ignores.
@@ -263,10 +264,10 @@
 //!    the field is counted by the `__len__()`;
 //!    if `len=false`, it isn't.
 //!
-//! - `#[pyderive(dataclass_field=<bool>)]`
+//! - `#[pyderive(dataclass_field=false)]`
 //!
 //!    If `dataclass_field=false`,
-//!    the field is excluded from the dict that  `__dataclass_fields__` getter returns.
+//!    the field is excluded from the `__dataclass_fields__` dict.
 //!    Notes, `dataclass_field=true` has not effect. See [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(annotation=<str>)]`
@@ -279,6 +280,7 @@
 //!    see [`PyDataclassFields`] for detail.
 //!
 //! [KW_ONLY]: https://docs.python.org/3/library/dataclasses.html#dataclasses.KW_ONLY
+//! [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
 extern crate proc_macro;
 
 use syn::{parse_macro_input, DeriveInput};
@@ -943,7 +945,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     }
 }
 
-/// Derive macro generating a `__dataclass_fields__` fn/getter.
+/// Derive macro generating a `__dataclass_fields__` fn/Python class attribute.
 ///
 /// It returns a [`dataclasses.Field`][Field] dict that helper functions of the [dataclasses] module read.
 /// It supportes [`is_dataclass()`][is_dataclass], [`fields()`][fields],
@@ -1040,11 +1042,15 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// 3. Attributes `hash` and `compare` are `None`.
 /// 4. This marks `init=false` field as a [`ClassVar` field][dataclass_ClassVar].
 ///
-/// | Field Attribute        | Result                                 |
-/// | ---------------------- | -------------------------------------- |
-/// |`init=true` (default)   | Dataclass field                        |
-/// |`init=false`            | [`ClassVar` field][dataclass_ClassVar] |
-/// |`dataclass_field=false` | Exclude from `__dataclass_fields__`    |
+///    | Field Attribute        | Result                                 |
+///    | ---------------------- | -------------------------------------- |
+///    |`init=true` (default)   | Dataclass field                        |
+///    |`init=false`            | [`ClassVar` field][dataclass_ClassVar] |
+///    |`dataclass_field=false` | Exclude from `__dataclass_fields__`    |
+/// 5. The [PEP 487][PEP487] ([`__set_name__()`][set_name] hook) is not supported
+///    (the default value of `__new__()` and of `__dataclass_fields__` are different objs,
+///    that is, have different IDs. This calls `__set_name__()` of `__dataclass_fields__` only,
+///    but not `__new__()`'s one).
 ///
 /// [dataclasses]: https://docs.python.org/3/library/dataclasses.html
 /// [dataclass]: https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass
@@ -1057,6 +1063,8 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// [ClassVar]: https://docs.python.org/3/library/typing.html#typing.ClassVar
 /// [dataclass_ClassVar]: https://docs.python.org/3/library/dataclasses.html#class-variables
 /// [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
+/// [PEP487]: https://peps.python.org/pep-0487/
+/// [set_name]: https://docs.python.org/3/reference/datamodel.html#object.__set_name__
 #[proc_macro_derive(PyDataclassFields, attributes(pyderive))]
 pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -1066,7 +1074,7 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-/// Derive macro generating a `__annotations__` fn/class attribute.
+/// Derive macro generating a `__annotations__` fn/Python class attribute.
 ///
 /// The generated `__annotations__` dict contains all fields
 /// marked by `#[pyderive(annotation=<str>)]`

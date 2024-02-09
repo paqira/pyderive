@@ -86,6 +86,12 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             field.setattr(pystr_type, #annotation)?;
             field.setattr(pystr_field_type, #field_type)?;
 
+            // FIXME:
+            // It is not support PEP 487,
+            // it is required that the default value of `__new__()`
+            // and of `__dataclass_fields__` must be same objs,
+            // that is, must have different IDs.
+            //
             // From dataclasses.Field (to support the PEP 487 __set_name__ protocol) at
             // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L341-L354
             field.call_method1(pystr_set_name, (&cls, field_name))?;
