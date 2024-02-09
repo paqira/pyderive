@@ -270,7 +270,7 @@
 //!    If `dataclass_field=false`,
 //!    the field is excluded from the `__dataclass_fields__` dict.
 //!    Notes, `dataclass_field=true` has not effect.
-//! 
+//!
 //!    See [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(annotation=<str>)]`
@@ -1083,7 +1083,7 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// The generated `__annotations__` dict contains all fields
 /// marked by `#[pyderive(annotation=<str>)]`
 /// where `<str>` is a Python type hints string.
-/// 
+///
 /// - It should place `#[derive(PyAnnotations)]` before `#[pyclass]`.
 ///
 /// # Example
