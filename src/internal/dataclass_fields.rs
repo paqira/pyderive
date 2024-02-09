@@ -21,7 +21,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
         let (default, default_factory) = match &d.default {
             Some(default) => if d.default_factory() {
-                let name = format!("__pyderive_internal_{}_{}_factory", struct_name, pyname);
+                let name = format!("pyderive_internal_{}_{}_factory", struct_name, pyname);
                 (quote!(MISSING), quote!(::pyo3::types::PyCFunction::new_closure(py, Some(#name), None, |_, _| #default)?))
             } else {
                 (quote!(#default), quote!(MISSING))

@@ -151,7 +151,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
             };
         }
 
-        macro_rules! is_true {
+        macro_rules! take_bool {
             ($value:ident) => {
                 match $value {
                     OptionFieldAttr::Ident { .. } => true,
@@ -170,7 +170,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         return Err(syn::Error::new(extract_ident!(v).span(), "duplicated new"));
                     }
                     None => {
-                        new.new = Some(is_true!(v));
+                        new.new = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::MatchArgs(v) => match new.match_args {
@@ -181,7 +181,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         ));
                     }
                     None => {
-                        new.match_args = Some(is_true!(v));
+                        new.match_args = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::Repr(v) => match new.repr {
@@ -189,7 +189,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         return Err(syn::Error::new(extract_ident!(v).span(), "duplicated repr"));
                     }
                     None => {
-                        new.repr = Some(is_true!(v));
+                        new.repr = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::Str(v) => match new.str {
@@ -197,7 +197,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         return Err(syn::Error::new(extract_ident!(v).span(), "duplicated str"));
                     }
                     None => {
-                        new.str = Some(is_true!(v));
+                        new.str = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::Iter(v) => match new.iter {
@@ -205,7 +205,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         return Err(syn::Error::new(extract_ident!(v).span(), "duplicated iter"));
                     }
                     None => {
-                        new.iter = Some(is_true!(v));
+                        new.iter = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::Len(v) => match new.len {
@@ -213,7 +213,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         return Err(syn::Error::new(extract_ident!(v).span(), "duplicated len"));
                     }
                     None => {
-                        new.len = Some(is_true!(v));
+                        new.len = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::KwOnly(v) => match new.kw_only {
@@ -224,7 +224,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         ));
                     }
                     None => {
-                        new.kw_only = Some(is_true!(v));
+                        new.kw_only = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::DataclassField(v) => match new.dataclass_field {
@@ -235,7 +235,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         ));
                     }
                     None => {
-                        new.dataclass_field = Some(is_true!(v));
+                        new.dataclass_field = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::Default(v) => match new.default {
@@ -254,7 +254,7 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
                         ));
                     }
                     None => {
-                        new.default_factory = Some(is_true!(v));
+                        new.default_factory = Some(take_bool!(v));
                     }
                 },
                 PyderiveFieldAttr::Annotation(v) => match new.annotation {
