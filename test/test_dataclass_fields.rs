@@ -417,6 +417,62 @@ astuple(a) == ((1, ), )
     }
 
     #[test]
+    fn test_set_name() {
+        #[derive(PyDataclassFields)]
+        #[pyclass(get_all)]
+        struct PyClassA {
+            #[pyderive(default = PyClassB{ field: 1 })]
+            field: PyClassB,
+        }
+
+        #[derive(PyDataclassFields, Clone)]
+        #[pyclass(get_all)]
+        struct PyClassB {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClassA {
+            #[new]
+            #[pyo3(signature = ( field=PyClassB{ field: 1 } ))]
+            fn new(field: PyClassB) -> Self {
+                Self { field }
+            }
+        }
+
+        #[pymethods]
+        impl PyClassB {
+            #[new]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        impl ToPyObject for PyClassB {
+            fn to_object(&self, py: Python<'_>) -> PyObject {
+                self.clone().into_py(py)
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class_a = py.get_type::<PyClassA>();
+            let py_class_b = py.get_type::<PyClassB>();
+            pyo3::py_run!(
+                py,
+                py_class_a py_class_b,
+                r#"
+from dataclasses import fields
+
+a = py_class_a().field
+b = next(iter(tuple(fields(py_class_a)))).default
+assert id(a) != id(b)
+"#
+            );
+        });
+    }
+
+    #[test]
     fn test_annotation() {
         #[derive(PyDataclassFields)]
         #[pyclass(get_all)]
