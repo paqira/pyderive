@@ -6,12 +6,12 @@ use crate::common::FieldData;
 
 // #[pyderive]                          -> __new__(field):     ...
 // #[pyderive(default=xxx)]             -> __new__(field=xxx): ...
-// #[pyderive(init=true)]               -> __new__(field):     ...
-// #[pyderive(init=false)]              -> __new__():          field=default()
-// #[pyderive(init=true, default=xxx)]  -> __new__(field=xxx): ...
-// #[pyderive(init=false, default=xxx)] -> __new__():          field=xxx
+// #[pyderive(new=true)]               -> __new__(field):     ...
+// #[pyderive(new=false)]              -> __new__():          field=default()
+// #[pyderive(new=true, default=xxx)]  -> __new__(field=xxx): ...
+// #[pyderive(new=false, default=xxx)] -> __new__():          field=xxx
 
-// For init=true
+// For new=true
 fn signiture(d: &FieldData) -> proc_macro2::TokenStream {
     let pyident = &d.pyident;
     match &d.default {
@@ -30,7 +30,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     signature.extend(
         data.iter()
             .take_while(|d| !d.kw_only())
-            .filter(|d| d.init())
+            .filter(|d| d.new())
             .map(signiture),
     );
 
@@ -46,9 +46,9 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     }
 
     // constructor arguments
-    let init_args = data
+    let new_args = data
         .iter()
-        .filter(|d| d.init())
+        .filter(|d| d.new())
         .map(|d| {
             let ty = d.field.ty.to_owned();
             let pyident = d.pyident.to_owned();
@@ -65,7 +65,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             let ident = d.field.ident.as_ref().unwrap();
             let pyident = d.pyident.to_owned();
 
-            if d.init() {
+            if d.new() {
                 quote! { #ident: #pyident }
             } else {
                 match &d.default {
@@ -83,7 +83,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             #[pyo3(signature = ( #( #signature ),* ))]
             #[allow(non_snake_case)]
             pub fn __pyderive_internal_py_new(
-                #(#init_args),*
+                #(#new_args),*
             ) -> Self {
                 Self { #(#self_args),* }
             }

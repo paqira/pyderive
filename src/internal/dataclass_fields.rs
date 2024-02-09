@@ -16,7 +16,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let mut kw_only = false;
     let assingments = fields.iter().map(|d| {
         let pyname = &d.pyname;
-        let init = &d.init();
+        let new = &d.new();
         let repr = &d.repr();
 
         let (default, default_factory) = match &d.default {
@@ -43,8 +43,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             None => quote!(py.None()),
         };
 
-        // init=false -> ClassVar
-        let field_type = if *init {
+        // new=false -> ClassVar
+        let field_type = if *new {
             format_ident!("{}", "_FIELD")
         } else {
             format_ident!("{}", "_FIELD_CLASSVAR")
@@ -57,7 +57,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let args = (
                     #default, // default
                     #default_factory, // default_factory
-                    ::pyo3::types::PyBool::new(py, #init), // init
+                    ::pyo3::types::PyBool::new(py, #new), // new
                     ::pyo3::types::PyBool::new(py, #repr), // repr
                     py.None(), // hash
                     py.None(), // compare
@@ -69,7 +69,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let args = (
                     #default, // default
                     #default_factory, // default_factory
-                    ::pyo3::types::PyBool::new(py, #init), // init
+                    ::pyo3::types::PyBool::new(py, #new), // new
                     ::pyo3::types::PyBool::new(py, #repr), // repr
                     py.None(), // hash
                     py.None(), // compare

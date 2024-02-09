@@ -125,7 +125,7 @@ impl TryFrom<&Vec<Attribute>> for Pyo3FieldOption {
 
 #[derive(Debug, Default, Clone)]
 pub struct PyderiveFieldOption {
-    pub init: Option<bool>,
+    pub new: Option<bool>,
     pub match_args: Option<bool>,
     pub repr: Option<bool>,
     pub str: Option<bool>,
@@ -165,12 +165,12 @@ impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
 
         for opt in iter {
             match opt {
-                PyderiveFieldAttr::Init(v) => match new.init {
+                PyderiveFieldAttr::Init(v) => match new.new {
                     Some(_) => {
-                        return Err(syn::Error::new(extract_ident!(v).span(), "duplicated init"));
+                        return Err(syn::Error::new(extract_ident!(v).span(), "duplicated new"));
                     }
                     None => {
-                        new.init = Some(is_true!(v));
+                        new.new = Some(is_true!(v));
                     }
                 },
                 PyderiveFieldAttr::MatchArgs(v) => match new.match_args {
@@ -486,7 +486,7 @@ pub mod pyderive_field {
     use super::*;
 
     mod kw {
-        syn::custom_keyword!(init);
+        syn::custom_keyword!(new);
         syn::custom_keyword!(match_args);
         syn::custom_keyword!(repr);
         syn::custom_keyword!(str);
@@ -534,7 +534,7 @@ pub mod pyderive_field {
 
     #[derive(Debug)]
     pub enum PyderiveFieldAttr {
-        Init(OptionFieldAttr<kw::init, LitBool>),
+        Init(OptionFieldAttr<kw::new, LitBool>),
         MatchArgs(OptionFieldAttr<kw::match_args, LitBool>),
         Repr(OptionFieldAttr<kw::repr, LitBool>),
         Str(OptionFieldAttr<kw::str, LitBool>),
@@ -550,7 +550,7 @@ pub mod pyderive_field {
     impl Parse for PyderiveFieldAttr {
         fn parse(input: ParseStream) -> Result<Self> {
             let lookahead = input.lookahead1();
-            if lookahead.peek(kw::init) {
+            if lookahead.peek(kw::new) {
                 Ok(Self::Init(input.parse()?))
             } else if lookahead.peek(kw::match_args) {
                 Ok(Self::MatchArgs(input.parse()?))

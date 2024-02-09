@@ -277,15 +277,15 @@ astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['s
         #[pyclass(get_all)]
         struct PyClass {
             field: i64,
-            #[pyderive(init = false)]
+            #[pyderive(new = false)]
             class_: i64,
             #[pyderive(default = 1)]
-            init_defualt: i64,
-            #[pyderive(init = false, default = 1)]
+            new_defualt: i64,
+            #[pyderive(new = false, default = 1)]
             class_defualt: i64,
             #[pyderive(default = 1, default_factory = true)]
-            init_defualt_factory: i64,
-            #[pyderive(init = false, default = 1, default_factory = true)]
+            new_defualt_factory: i64,
+            #[pyderive(new = false, default = 1, default_factory = true)]
             class_defualt_factory: i64,
             #[pyderive(dataclass_field = false)]
             ommit: i64,
@@ -304,9 +304,9 @@ astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['s
             fn new(
                 field: i64,
                 class_: i64,
-                init_defualt: i64,
+                new_defualt: i64,
                 class_defualt: i64,
-                init_defualt_factory: i64,
+                new_defualt_factory: i64,
                 class_defualt_factory: i64,
                 ommit: i64,
                 repr: i64,
@@ -317,9 +317,9 @@ astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['s
                 Self {
                     field,
                     class_,
-                    init_defualt,
+                    new_defualt,
                     class_defualt,
-                    init_defualt_factory,
+                    new_defualt_factory,
                     class_defualt_factory,
                     ommit,
                     repr,
@@ -354,7 +354,7 @@ for field in fields(a):
         assert field._field_type is _FIELD_CLASSVAR, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
-    elif field.name == "init_defualt":
+    elif field.name == "new_defualt":
         assert field.type is None
         assert field.default == 1, field.name
         assert field.default_factory is MISSING, field.name
@@ -368,7 +368,7 @@ for field in fields(a):
         assert field._field_type is _FIELD_CLASSVAR, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
-    elif field.name == "init_defualt_factory":
+    elif field.name == "new_defualt_factory":
         assert field.type is None
         assert field.default is MISSING, field.name
         assert field.default_factory() == 1, field.name

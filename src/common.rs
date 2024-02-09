@@ -38,7 +38,7 @@ pub struct FieldData {
     pub pyname: String,
     // String -> Some(Ident) to support Tuple struct
     pub pyident: Ident,
-    init: Option<bool>,
+    new: Option<bool>,
     match_args: Option<bool>,
     repr: Option<bool>,
     str: Option<bool>,
@@ -52,8 +52,10 @@ pub struct FieldData {
 }
 
 impl FieldData {
-    pub fn init(&self) -> bool {
-        self.init.unwrap_or(true)
+    #[allow(clippy::wrong_self_convention)]
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(&self) -> bool {
+        self.new.unwrap_or(true)
     }
     pub fn match_args(&self) -> bool {
         self.match_args.unwrap_or(self.get)
@@ -135,7 +137,7 @@ impl FieldData {
                     set,
                     pyname: pyname.clone(),
                     pyident: format_ident!("{}", pyname),
-                    init: pyderive_field_opt.init,
+                    new: pyderive_field_opt.new,
                     match_args: pyderive_field_opt.match_args,
                     repr: pyderive_field_opt.repr,
                     str: pyderive_field_opt.str,

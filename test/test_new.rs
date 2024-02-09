@@ -143,7 +143,7 @@ fd_name_vec_opt_pystr=[None], fd_name_vec_opt_pyint=[None],
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            #[pyderive(init = false)]
+            #[pyderive(new = false)]
             field: i64,
         }
 
@@ -343,19 +343,19 @@ except TypeError: pass"
         #[pyclass(get_all)]
         #[derive(Default)]
         struct PyClass {
-            #[pyderive(init = false, default = true)]
+            #[pyderive(new = false, default = true)]
             fd_name_bool: bool,
-            #[pyderive(init = false, default = "str".to_string())]
+            #[pyderive(new = false, default = "str".to_string())]
             fd_name_str: String,
-            #[pyderive(init = false, default = 1)]
+            #[pyderive(new = false, default = 1)]
             fd_name_int: i64,
-            #[pyderive(init = false, default = 1.0)]
+            #[pyderive(new = false, default = 1.0)]
             fd_name_float: f64,
-            #[pyderive(init = false, default = None)]
+            #[pyderive(new = false, default = None)]
             fd_name_opt: Option<i64>,
-            #[pyderive(init = false, default = Some("str".to_string()))]
+            #[pyderive(new = false, default = Some("str".to_string()))]
             fd_name_opt_str: Option<String>,
-            #[pyderive(init = false, default = Some(10))]
+            #[pyderive(new = false, default = Some(10))]
             fd_name_opt_int: Option<i64>,
         }
 

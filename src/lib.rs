@@ -137,11 +137,11 @@
 //!    the field is included in the string that the `__str__()` method returns;
 //!    if `str=false`, it isn't.
 //!
-//! - `#[pyderive(init=<bool>)]`
+//! - `#[pyderive(new=<bool>)]`
 //!
-//!    If `init=false`,
+//!    If `new=false`,
 //!    the field is excluded from the arguments of the `__new__()` method.
-//!    Notes, `init=true` has not effect.
+//!    Notes, `new=true` has not effect.
 //!
 //!    The derive macro [`PyDataclassFields`] reads this attribute also,
 //!    see [`PyDataclassFields`] for detail.
@@ -176,7 +176,7 @@
 //!             return self
 //!        ```
 //!
-//!     2. `#[pyderive(init=false)]`
+//!     2. `#[pyderive(new=false)]`
 //!        
 //!        The field is excluded from the arguments,
 //!        and initialized by [`Default::default()`] in the `__new__()` method.
@@ -205,7 +205,7 @@
 //!             return self
 //!        ```
 //!
-//!     4. `#[pyderive(init=false, default=<expr>)]`
+//!     4. `#[pyderive(new=false, default=<expr>)]`
 //!
 //!        The field is excluded from the arguments,
 //!        and initialized with `<expr>` in the `__new__()` method.
@@ -601,9 +601,9 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// It has all fields as the argumetns as default,
 /// in the order of declaration.
 ///
-/// If the filed is marked by `#[pyderive(init=false)]` attribute,
+/// If the filed is marked by `#[pyderive(new=false)]` attribute,
 /// the field is excluded from the arguments of the `__new__()` method.
-/// Notes, `init=true` has no effect.
+/// Notes, `new=true` has no effect.
 ///
 /// - It should place `#[derive(PyNew)]` before `#[pyclass]`.
 ///
@@ -626,7 +626,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     float: f64,
 ///     tuple: (String, i64, f64),
 ///     option: Option<String>,
-///     #[pyderive(init=false)]
+///     #[pyderive(new=false)]
 ///     excluded: String,
 /// }
 ///
@@ -1024,7 +1024,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// | `type`                        | ❌ (✅ if `annotation` given)      |
 /// | `default`                     | ✅ (`<expr>` or `MISSING`)         |
 /// | `default_factory`             | ✅ (`lambda: <expr>` or `MISSING`) |
-/// | `init`                        | ✅                                 |
+/// | `new`                         | ✅                                 |
 /// | `repr`                        | ✅                                 |
 /// | `hash`                        | ❌ (`None` for pyderive)           |
 /// | `compare`                     | ❌ (`None` for pyderive)           |
@@ -1044,12 +1044,12 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///    | `#[pyderive(default_factory=true)]` | `MISSING`                  | `lambda: <expr>`                   |
 ///    | Other                               | `<expr>`                   | `MISSING`                          |
 /// 3. Attributes `hash` and `compare` are `None`.
-/// 4. This marks `init=false` field as a [`ClassVar` field][dataclass_ClassVar].
+/// 4. This marks `new=false` field as a [`ClassVar` field][dataclass_ClassVar].
 ///
 ///    | Field Attribute        | Result                                 |
 ///    | ---------------------- | -------------------------------------- |
-///    |`init=true` (default)   | Dataclass field                        |
-///    |`init=false`            | [`ClassVar` field][dataclass_ClassVar] |
+///    |`new=true` (default)    | Dataclass field                        |
+///    |`new=false`             | [`ClassVar` field][dataclass_ClassVar] |
 ///    |`dataclass_field=false` | Exclude from `__dataclass_fields__`    |
 /// 5. The [PEP 487][PEP487] ([`__set_name__()`][set_name] hook) is not supported
 ///    (the default value of `__new__()` and of `__dataclass_fields__` are different objs,
