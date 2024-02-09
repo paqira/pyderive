@@ -61,17 +61,17 @@
 //!
 //! We list the default implementations that the macros generate.
 //!
-//! | Derive Macro          | Derives                                                |
-//! | --------------------- | ------------------------------------------------------ |
-//! | [`PyNew`]             | `__new__()` with all fields                            |
-//! | [`PyMatchArgs`]       | `__match_args__` attr. with `get` fields               |
-//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields            |
-//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields             |
-//! | [`PyIter`]            | `__iter__()` returns an iterator of `get` fields       |
-//! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields   |
-//! | [`PyLen`]             | `__len__()` returns number of `get` fields             |
-//! | [`PyDataclassFields`] | `__dataclass_fields__` class attr. with all fields     |
-//! | [`PyAnnotations`]     | `__annotations__` class attr. with annotated fields    |
+//! | Derive Macro          | Derives                                              |
+//! | --------------------- | ---------------------------------------------------- |
+//! | [`PyNew`]             | `__new__()` with all fields                          |
+//! | [`PyMatchArgs`]       | `__match_args__` class attr. with `get` fields       |
+//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields          |
+//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields           |
+//! | [`PyIter`]            | `__iter__()` returns an iterator of `get` fields     |
+//! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields |
+//! | [`PyLen`]             | `__len__()` returns number of `get` fields           |
+//! | [`PyDataclassFields`] | `__dataclass_fields__` class attr. with all fields   |
+//! | [`PyAnnotations`]     | `__annotations__` class attr. with annotated fields  |
 //!
 //! We call the field is *`get` (or `set`) field*
 //! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
@@ -227,7 +227,7 @@
 //!    and let the `default` attribute be [`dataclasses.MISSING`][MISSING],
 //!    where `<expr>` is given by `#[pyderive(default=<expr>)]`.
 //!    Notes, `default_factory=false` has no effect,
-//!    and if the field is not marked by `#[pyderive(default=<expr>)]`, this ignores.
+//!    If the field is not marked by `#[pyderive(default=<expr>)]`, this ignores.
 //!    
 //!    See [`PyDataclassFields`] for detail.
 //!
@@ -235,7 +235,8 @@
 //!
 //!    If `kw_only=true`,
 //!    the following fields are keyword only arguments in the `__new__()` method,
-//!    like [`dataclasses.KW_ONLY`][KW_ONLY]. Note, `kw_only=false` has no effect.
+//!    like [`*`][keyword-only-arguments] and [`dataclasses.KW_ONLY`][KW_ONLY].
+//!    Note, `kw_only=false` has no effect.
 //!
 //!    The derive macro [`PyDataclassFields`] reads this attribute also,
 //!    see [`PyDataclassFields`] for detail.
@@ -268,7 +269,9 @@
 //!
 //!    If `dataclass_field=false`,
 //!    the field is excluded from the `__dataclass_fields__` dict.
-//!    Notes, `dataclass_field=true` has not effect. See [`PyDataclassFields`] for detail.
+//!    Notes, `dataclass_field=true` has not effect.
+//! 
+//!    See [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(annotation=<str>)]`
 //!     
@@ -279,6 +282,7 @@
 //!    The derive macro [`PyDataclassFields`] reads this attribute also,
 //!    see [`PyDataclassFields`] for detail.
 //!
+//! [keyword-only-arguments]: https://docs.python.org/3/tutorial/controlflow.html#keyword-only-arguments
 //! [KW_ONLY]: https://docs.python.org/3/library/dataclasses.html#dataclasses.KW_ONLY
 //! [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
 extern crate proc_macro;
@@ -1079,6 +1083,8 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// The generated `__annotations__` dict contains all fields
 /// marked by `#[pyderive(annotation=<str>)]`
 /// where `<str>` is a Python type hints string.
+/// 
+/// - It should place `#[derive(PyAnnotations)]` before `#[pyclass]`.
 ///
 /// # Example
 ///
