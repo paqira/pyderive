@@ -1052,8 +1052,9 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///    |`new=false`             | [`ClassVar` field][dataclass_ClassVar] |
 ///    |`dataclass_field=false` | Exclude from `__dataclass_fields__`    |
 /// 5. The [PEP 487][PEP487] ([`__set_name__()`][set_name] hook) is not supported
-///    (the default value of `__new__()` and of `__dataclass_fields__` are different objs,
-///    that is, have different IDs. This calls `__set_name__()` of `__dataclass_fields__` only,
+///    (The default value of `__dataclass_fields__` is a different object
+///    from `__new__()`'s one, that is, they have different object IDs.
+///    This calls `__set_name__()` of `__dataclass_fields__` only,
 ///    but not `__new__()`'s one).
 ///
 /// [dataclasses]: https://docs.python.org/3/library/dataclasses.html
