@@ -7,6 +7,53 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_on_class() {
+        #[derive(PyDataclassFields)]
+        #[pyclass(get_all)]
+        struct PyClass {
+            field: i64,
+        }
+
+        #[pymethods]
+        impl PyClass {
+            #[new]
+            fn new(field: i64) -> Self {
+                Self { field }
+            }
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class = py.get_type::<PyClass>();
+            pyo3::py_run!(
+                py,
+                py_class,
+                r#"
+from dataclasses import is_dataclass, fields, MISSING, _FIELD
+import sys
+
+assert is_dataclass(py_class) is True
+for field in fields(py_class):
+    if field.name == "field":
+        assert field.type is None
+        assert field.default is MISSING
+        assert field.default_factory is MISSING
+        assert field.init is True
+        assert field.repr is True
+        assert field.hash is None
+        assert field.compare is None
+        assert field.metadata == {}
+        assert field._field_type is _FIELD
+        if sys.version_info >= (3, 10):
+            assert field.kw_only is False
+    else:
+        raise AssertionError
+"#
+            );
+        });
+    }
+
+    #[test]
     fn test_variation() {
         #[derive(PyDataclassFields)]
         #[pyclass(get_all)]

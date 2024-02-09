@@ -111,15 +111,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
-            // namely class getter,
-            // it does not use field values
-            #[getter]
-            fn __dataclass_fields__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyResult<&::pyo3::types::PyDict> {
-                let py = slf.py();
-
-                // To support __set_name__ protocol
-                let cls = slf.into_py(py);
-                let cls = cls.as_ref(py).get_type();
+            #[classattr]
+            fn __dataclass_fields__(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<&::pyo3::types::PyDict> {
+                // For supporting __set_name__ protocol
+                let cls = py.get_type::<Self>();
 
                 let dataclasses = ::pyo3::types::PyModule::import(py, "dataclasses")?;
 
