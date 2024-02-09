@@ -1,6 +1,6 @@
 # pyderive
 
-`pyderive` provides derive macros for Python spacial methods and a class attribute for [PyO3].
+`pyderive` provides derive macros for Python spacial methods and a class attributes for [PyO3].
 
 [PyO3]: https://github.com/PyO3/pyo3
 

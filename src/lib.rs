@@ -1,4 +1,4 @@
-//! This library provides derive macros of Python spacial methods and a class attribute for [PyO3].
+//! This library provides derive macros of Python spacial methods and a class attributes for [PyO3].
 //!
 //! The field attribute `#[pyderive(..)]` helps to costomize implementations,
 //! like [`dataclasses.field()`][dataclasses-field] of Python.
