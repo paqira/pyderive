@@ -37,6 +37,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let rest_args = data
         .iter()
         .skip_while(|d| !d.kw_only())
+        .filter(|d| d.new())
         .map(signiture)
         .collect::<Vec<_>>();
 

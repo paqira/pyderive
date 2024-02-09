@@ -425,6 +425,71 @@ except TypeError: pass"
     }
 
     #[test]
+    fn test_pyderive_kw_only_no_trailing_new_field() {
+        #[derive(PyNew)]
+        #[pyclass(get_all)]
+        #[derive(Default)]
+        struct PyClass {
+            fd_a: i64,
+            #[pyderive(kw_only)]
+            #[pyderive(new = false)]
+            fd_b: i64,
+            #[pyderive(new = false)]
+            fd_c: i64,
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class = py.get_type::<PyClass>();
+            pyo3::py_run!(py, py_class, "assert py_class(1).fd_a == 1");
+            pyo3::py_run!(py, py_class, "assert py_class(0).fd_b == 0");
+            pyo3::py_run!(py, py_class, "assert py_class(0).fd_c == 0");
+
+            pyo3::py_run!(
+                py,
+                py_class,
+                "
+try: py_class(0, 1)
+except TypeError: pass
+else: raise AssertionError
+"
+            );
+        });
+    }
+
+    #[test]
+    fn test_pyderive_kw_only_trailing_new_field() {
+        #[derive(PyNew)]
+        #[pyclass(get_all)]
+        #[derive(Default)]
+        struct PyClass {
+            fd_a: i64,
+            #[pyderive(kw_only)]
+            #[pyderive(new = false)]
+            fd_b: i64,
+            fd_c: i64,
+        }
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let py_class = py.get_type::<PyClass>();
+            pyo3::py_run!(py, py_class, "assert py_class(1, fd_c=1).fd_a == 1");
+            pyo3::py_run!(py, py_class, "assert py_class(0, fd_c=1).fd_b == 0");
+            pyo3::py_run!(py, py_class, "assert py_class(0, fd_c=1).fd_c == 1");
+
+            pyo3::py_run!(
+                py,
+                py_class,
+                "
+try: py_class(0, 1)
+except TypeError: pass
+else: raise AssertionError
+"
+            );
+        });
+    }
+
+    #[test]
     fn test_nest_pyclass() {
         #[derive(PyNew)]
         #[pyclass(get_all)]
