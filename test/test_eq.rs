@@ -7,9 +7,9 @@ mod test {
 
     #[test]
     fn test_eq() {
-        #[derive(PyEq)]
         #[pyclass]
         #[derive(Default, PartialEq, Eq)]
+        #[derive(PyEq)]
         #[allow(dead_code)]
         struct PyClass {
             fd_name_a: i64,
@@ -26,9 +26,9 @@ mod test {
 
     #[test]
     fn test_patial_ord() {
-        #[derive(PyEq)]
         #[pyclass]
         #[derive(Default, PartialEq)]
+        #[derive(PyEq)]
         #[allow(dead_code)]
         struct PyClass {
             f: f64,
@@ -50,16 +50,16 @@ except TypeError: pass");
 
     #[test]
     fn test_nest_pyclass() {
-        #[derive(PyEq)]
         #[pyclass(get_all)]
         #[derive(PartialEq)]
+        #[derive(PyEq)]
         struct PyClassA {
             field: PyClassB,
         }
 
-        #[derive(PyEq, Clone)]
         #[pyclass(get_all)]
         #[derive(PartialEq)]
+        #[derive(PyEq, Clone)]
         struct PyClassB {
             field: i64,
         }
