@@ -26,8 +26,7 @@ mod test {
     #[test]
     fn test_get_set() {
         #[pyclass]
-        #[derive(Default, Hash)]
-        #[derive(PyHash)]
+        #[derive(Default, Hash, PyHash)]
         struct PyClass {
             #[pyo3(get)]
             fd_name_a: i64,
@@ -45,8 +44,7 @@ mod test {
     #[test]
     fn test_get_all() {
         #[pyclass(get_all)]
-        #[derive(Default, Hash)]
-        #[derive(PyHash)]
+        #[derive(Default, Hash, PyHash)]
         struct PyClass {
             fd_name_a: i64,
             fd_name_b: String,
@@ -62,8 +60,7 @@ mod test {
     #[test]
     fn test_set_all() {
         #[pyclass(set_all)]
-        #[derive(Default, Hash)]
-        #[derive(PyHash)]
+        #[derive(Default, Hash, PyHash)]
         struct PyClass {
             #[pyo3(get)]
             fd_name_a: i64,
@@ -80,8 +77,7 @@ mod test {
     #[test]
     fn test_name_rename_all() {
         #[pyclass(get_all, name = "PyClass", rename_all = "camelCase")]
-        #[derive(Default, Hash)]
-        #[derive(PyHash)]
+        #[derive(Default, Hash, PyHash)]
         struct PyClass {
             #[pyo3(name = "new_name")]
             fd_name_a: i64,
@@ -98,8 +94,7 @@ mod test {
     #[test]
     fn test_nest_pyclass() {
         #[pyclass(get_all)]
-        #[derive(Hash)]
-        #[derive(PyHash)]
+        #[derive(Hash, PyHash)]
         struct PyClassA {
             field: PyClassB,
         }

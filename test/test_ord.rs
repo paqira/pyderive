@@ -8,8 +8,7 @@ mod test {
     #[test]
     fn test_ord() {
         #[pyclass]
-        #[derive(Default, PartialOrd, PartialEq, Eq, Ord)]
-        #[derive(PyOrd)]
+        #[derive(Default, PartialOrd, PartialEq, Eq, Ord, PyOrd)]
         #[allow(dead_code)]
         struct PyClass {
             fa: i64,
@@ -41,8 +40,7 @@ except TypeError: pass");
     #[test]
     fn test_patial_ord() {
         #[pyclass]
-        #[derive(Default, PartialOrd, PartialEq)]
-        #[derive(PyOrd)]
+        #[derive(Default, PartialOrd, PartialEq, PyOrd)]
         #[allow(dead_code)]
         struct PyClass {
             f: f64,
@@ -66,8 +64,7 @@ except TypeError: pass");
     #[test]
     fn test_nest_pyclass() {
         #[pyclass(get_all)]
-        #[derive(PartialOrd, PartialEq)]
-        #[derive(PyOrd)]
+        #[derive(PartialOrd, PartialEq, PyOrd)]
         struct PyClassA {
             field: PyClassB,
         }
