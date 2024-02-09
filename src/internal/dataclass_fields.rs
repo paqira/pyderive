@@ -35,7 +35,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         }
 
         // annotation or None
-        let field_type = match d.annotation.as_ref() {
+        let annotation = match d.annotation.as_ref() {
             Some(ty) => {
                 let ty = format!("'{}'", ty);
                 quote!( #ty )
@@ -44,7 +44,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         };
 
         // init=false -> ClassVar
-        let dc_field_type = if *init {
+        let field_type = if *init {
             format_ident!("{}", "_FIELD")
         } else {
             format_ident!("{}", "_FIELD_CLASSVAR")
@@ -52,42 +52,28 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
         quote! {
             let field_name = ::pyo3::intern!(py, #pyname);
+            // python <= 3.9 does not have kw_only
             let field = if py.version_info() >= (3, 10) {
                 let args = (
-                    // default
-                    #default,
-                    // default_factory
-                    #default_factory,
-                    // init
-                    ::pyo3::types::PyBool::new(py, #init),
-                    // repr
-                    ::pyo3::types::PyBool::new(py, #repr),
-                    // hash
-                    py.None(),
-                    // compare
-                    py.None(),
-                    // metadata
-                    py.None(),
-                    // kw_only for python >= 3.10
-                    ::pyo3::types::PyBool::new(py, #kw_only),
+                    #default, // default
+                    #default_factory, // default_factory
+                    ::pyo3::types::PyBool::new(py, #init), // init
+                    ::pyo3::types::PyBool::new(py, #repr), // repr
+                    py.None(), // hash
+                    py.None(), // compare
+                    py.None(), // metadata
+                    ::pyo3::types::PyBool::new(py, #kw_only), // kw_only
                 );
                 Field.call1(args)
             } else {
                 let args = (
-                    // default
-                    #default,
-                    // default_factory
-                    #default_factory,
-                    // init
-                    ::pyo3::types::PyBool::new(py, #init),
-                    // repr
-                    ::pyo3::types::PyBool::new(py, #repr),
-                    // hash
-                    py.None(),
-                    // compare
-                    py.None(),
-                    // metadata
-                    py.None(),
+                    #default, // default
+                    #default_factory, // default_factory
+                    ::pyo3::types::PyBool::new(py, #init), // init
+                    ::pyo3::types::PyBool::new(py, #repr), // repr
+                    py.None(), // hash
+                    py.None(), // compare
+                    py.None(), // metadata
                 );
                 Field.call1(args)
             }?;
@@ -97,8 +83,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             // From dataclasses._get_field at
             // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L760-855
             field.setattr(pystr_name, field_name)?;
-            field.setattr(pystr_type, #field_type)?;
-            field.setattr(pystr_field_type, #dc_field_type)?;
+            field.setattr(pystr_type, #annotation)?;
+            field.setattr(pystr_field_type, #field_type)?;
 
             // From dataclasses.Field (to support the PEP 487 __set_name__ protocol) at
             // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L341-L354
