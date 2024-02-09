@@ -405,10 +405,9 @@ for field in fields(a):
                 py,
                 py_class_a py_class_b,
                 r#"
-a = py_class_a(py_class_b(1))
-
 from dataclasses import is_dataclass, asdict, astuple
 
+a = py_class_a(py_class_b(1))
 assert is_dataclass(a) is True
 assert asdict(a) == {'field': {'field': 1}}
 astuple(a) == ((1, ), )
