@@ -13,7 +13,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
-            pub fn __len__(&self) -> usize { #length }
+            pub fn __len__(&self) -> ::std::primitive::usize { #length }
         }
     };
 

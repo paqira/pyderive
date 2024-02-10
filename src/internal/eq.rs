@@ -8,8 +8,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
-            pub fn __eq__(&self, other: &Self) -> bool { self.eq(other) }
-            pub fn __ne__(&self, other: &Self) -> bool { self.ne(other) }
+            pub fn __eq__(&self, other: &Self) -> ::std::primitive::bool { self.eq(other) }
+            pub fn __ne__(&self, other: &Self) -> ::std::primitive::bool { self.ne(other) }
         }
     };
 

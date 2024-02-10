@@ -8,7 +8,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
-            pub fn __hash__(&self) -> u64 {
+            pub fn __hash__(&self) -> ::std::primitive::u64 {
                 use ::std::collections::hash_map::DefaultHasher;
                 use ::std::hash::{Hash, Hasher};
 

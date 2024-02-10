@@ -16,7 +16,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .map(|d| d.pyname.to_owned())
         .collect::<Vec<_>>();
 
-    let types = iter::repeat(quote! { &'static str }).take(names.len());
+    let types = iter::repeat(quote! { &'static ::std::primitive::str }).take(names.len());
 
     let expanded = if names.is_empty() {
         quote! {}
