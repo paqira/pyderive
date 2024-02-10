@@ -798,7 +798,8 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// except TypeError:
 ///     pass
 /// else:
-///     raise AssertionError";
+///     raise AssertionError
+/// ";
 ///     py_run!(py, a, test);
 ///
 ///     Ok(())
