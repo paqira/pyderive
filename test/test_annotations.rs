@@ -13,7 +13,6 @@ fn test_rename() {
         field_the_name: String,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
@@ -34,7 +33,6 @@ fn test_noannotations() {
         field_b: String,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         if py.version_info() >= (3, 10) {
@@ -63,7 +61,6 @@ fn test_annotations() {
         field_b: String,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
@@ -87,7 +84,6 @@ fn test_renamed() {
         field_b: String,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(

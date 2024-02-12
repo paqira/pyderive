@@ -330,7 +330,6 @@ mod internal;
 ///     excluded: String,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
@@ -392,7 +391,6 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     excluded: String,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
@@ -447,7 +445,6 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     excluded: String,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
@@ -508,7 +505,6 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     excluded: String,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
@@ -571,7 +567,6 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     excluded: String,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
@@ -614,7 +609,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// use pyo3::prelude::*;
+/// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
 ///
 /// // Place before `#[pyclass]`
@@ -630,17 +625,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     excluded: String,
 /// }
 ///
-/// #[pymodule]
-/// fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-///    m.add_class::<PyClass>()?;
-///    Ok(())
-/// }
-/// pyo3::append_to_inittab!(rust_module);
-/// # pyo3::prepare_freethreaded_python();
-///
 /// let test = "
-/// from rust_module import PyClass
-///
 /// a = PyClass('s', 1, 1.0, ('s', 1, 1.0), None)
 /// assert a.string == 's'
 /// assert a.integer == 1
@@ -650,9 +635,11 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert a.excluded == ''
 /// ";
 ///
-/// assert!(
-///     Python::with_gil(|py| Python::run(py, test, None, None)).is_ok()
-/// );
+/// Python::with_gil(|py| {
+///     let PyClass = py.get_type::<PyClass>();
+///
+///     py_run!(py, PyClass, test)
+/// });
 /// ```
 #[proc_macro_derive(PyNew, attributes(pyderive))]
 pub fn py_new(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -707,7 +694,6 @@ pub fn py_new(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     field: f64,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass { field: 0.0 })?;
 ///     let b = PyCell::new(py, PyClass { field: 1.0 })?;
@@ -780,7 +766,6 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     field: f64,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass { field: 0.0 })?;
 ///     let b = PyCell::new(py, PyClass { field: 1.0 })?;
@@ -856,7 +841,6 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     integer: i64,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
@@ -893,7 +877,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// # Example
 ///
 /// ```
-/// use pyo3::prelude::*;
+/// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
 ///
 /// // Place before `#[pyclass]`
@@ -909,17 +893,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     excluded: String,
 /// }
 ///
-/// #[pymodule]
-/// fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-///    m.add_class::<PyClass>()?;
-///    Ok(())
-/// }
-/// pyo3::append_to_inittab!(rust_module);
-/// # pyo3::prepare_freethreaded_python();
-///
 /// let test = "
-/// from rust_module import PyClass
-///
 /// match PyClass('s', 1, 1.0, ('s', 1, 1.0), None, 's'):
 ///     case PyClass(a, b, c, d, e):
 ///         assert a == 's'
@@ -931,15 +905,13 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         raise AssertionError
 /// ";
 ///
-/// assert!(
-///     Python::with_gil(|py|
-///         if py.version_info() >= (3, 10) {
-///             Python::run(py, test, None, None).is_ok()
-///         } else {
-///             true
-///         }
-///     )
-/// )
+/// Python::with_gil(|py| {
+///     if py.version_info() >= (3, 10) {
+///         let PyClass = py.get_type::<PyClass>();
+///
+///         py_run!(py, PyClass, test)
+///     }
+/// });
 /// ```
 #[proc_macro_derive(PyMatchArgs, attributes(pyderive))]
 pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -993,7 +965,6 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///     excluded: String,
 /// }
 ///
-/// # pyo3::prepare_freethreaded_python();
 /// Python::with_gil(|py| -> PyResult<()> {
 ///     let a = PyCell::new(py, PyClass {
 ///         string: "s".to_string(),
@@ -1105,30 +1076,22 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     excluded: String,
 /// }
 ///
-/// #[pymodule]
-/// fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-///    m.add_class::<PyClass>()?;
-///    Ok(())
-/// }
-/// pyo3::append_to_inittab!(rust_module);
-/// # pyo3::prepare_freethreaded_python();
-///
 /// let test = r#"
-/// from typing import get_type_hints, Optional
 /// import sys
-///
-/// from rust_module import PyClass
+/// from typing import get_type_hints, Optional
 ///
 /// if sys.version_info >= (3, 9):
-///     assert get_type_hints(PyClass, globalns=globals()) == {'string': int, 'option': Optional[str]}
+///     assert get_type_hints(PyClass, localns=locals()) == {'string': int, 'option': Optional[str]}
 /// else:
 ///     from typing import ForwardRef
-///     assert get_type_hints(PyClass, globalns=globals()) == {'string': ForwardRef('int'), 'option': ForwardRef('Optional[str]')}
+///     assert get_type_hints(PyClass, localns=locals()) == {'string': ForwardRef('int'), 'option': ForwardRef('Optional[str]')}
 /// "#;
 ///
-/// assert!(
-///     Python::with_gil(|py| Python::run(py, test, None, None)).is_ok()
-/// );
+/// Python::with_gil(|py| {
+///     let PyClass = py.get_type::<PyClass>();
+///
+///     py_run!(py, PyClass, test)
+/// });
 /// ```
 #[proc_macro_derive(PyAnnotations, attributes(pyderive))]
 pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -1165,7 +1128,7 @@ pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 /// # Example
 ///
 /// ```
-/// use pyo3::prelude::*;
+/// use pyo3::{prelude::*, py_run};
 /// use pyderive::*;
 ///
 /// #[derive(PyNew, PyRepr)]
@@ -1182,26 +1145,18 @@ pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 ///     field: i64,
 /// }
 ///
-/// #[pymodule]
-/// fn rust_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-///    m.add_class::<PyClass>()?;
-///    m.add_class::<Child>()?;
-///    Ok(())
-/// }
-/// pyo3::append_to_inittab!(rust_module);
-/// # pyo3::prepare_freethreaded_python();
-///
 /// let test = r#"
-/// from rust_module import PyClass, Child
-///
 /// a = PyClass(Child(10))
 ///
 /// assert repr(a) == "PyClass(child=Child(field=10))"
 /// "#;
 ///
-/// assert!(
-///     Python::with_gil(|py| Python::run(py, test, None, None)).is_ok()
-/// );
+/// Python::with_gil(|py| {
+///     let PyClass = py.get_type::<PyClass>();
+///     let Child = py.get_type::<Child>();
+///
+///     py_run!(py, PyClass Child, test)
+/// });
 /// ```
 #[proc_macro_derive(ToPyObject)]
 pub fn py_to_py_object(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

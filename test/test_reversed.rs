@@ -12,7 +12,6 @@ fn test_no_get_set() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert tuple(reversed(data)) == ()")
@@ -31,7 +30,6 @@ fn test_get_set() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert tuple(reversed(data)) == (0, )")
@@ -48,7 +46,6 @@ fn test_get_all() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert tuple(reversed(data)) == (0, 0.0)")
@@ -66,7 +63,6 @@ fn test_set_all() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert tuple(reversed(data)) == (0, )")
@@ -84,7 +80,6 @@ fn test_name_rename_all() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert tuple(reversed(data)) == (0.0, 0)")
@@ -100,7 +95,6 @@ fn test_pyderive_true() {
         field: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert tuple(reversed(data)) == (0, )")
@@ -116,7 +110,6 @@ fn test_pyderive_false() {
         field: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert tuple(reversed(data)) == tuple()")
@@ -167,7 +160,6 @@ fn test_nest_pyclass() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();

@@ -11,7 +11,6 @@ fn test_ord() {
         fb: String,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data1 = PyCell::new(py, PyClass::default()).unwrap();
         let data2 = PyCell::new(
@@ -42,7 +41,6 @@ fn test_patial_ord() {
         f: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data1 = PyCell::new(py, PyClass::default()).unwrap();
         let data2 = PyCell::new(py, PyClass { f: f64::NAN }).unwrap();
@@ -88,7 +86,6 @@ fn test_nest_pyclass() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();

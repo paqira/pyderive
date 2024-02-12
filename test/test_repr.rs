@@ -155,7 +155,6 @@ fn test_variation() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -219,7 +218,6 @@ fn test_nest_pyclass() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
@@ -248,7 +246,6 @@ fn test_no_get_set() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, r#"assert repr(data) == "PyClass()""#)
@@ -267,7 +264,6 @@ fn test_get_set() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(
@@ -288,7 +284,6 @@ fn test_get_all() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(
@@ -309,7 +304,6 @@ fn test_set_all() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(
@@ -331,7 +325,6 @@ fn test_name_rename_all() {
         fd_name_b: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(
@@ -352,7 +345,6 @@ fn test_pyderive_true() {
         field: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, r#"assert repr(data) == "PyClass(field=0)""#)
@@ -370,7 +362,6 @@ fn test_pyderive_false() {
         field: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, r#"assert repr(data) == "PyClass()""#)

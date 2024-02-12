@@ -22,7 +22,6 @@ fn test_no_get_set() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -62,7 +61,6 @@ fn test_get_set() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -107,7 +105,6 @@ fn test_name_rename_all() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("renamedClass", py_class.name().unwrap().to_string());
@@ -162,7 +159,6 @@ fn test_pyderive_true() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -204,7 +200,6 @@ fn test_pyderive_false_empty() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -235,7 +230,6 @@ fn test_pyderive_false() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -277,7 +271,6 @@ fn test_nest_pyclass() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();

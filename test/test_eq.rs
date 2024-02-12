@@ -11,7 +11,6 @@ fn test_eq() {
         fd_name_b: String,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data = PyCell::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert data == data");
@@ -28,7 +27,6 @@ fn test_patial_ord() {
         f: f64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let data1 = PyCell::new(py, PyClass::default()).unwrap();
         let data2 = PyCell::new(py, PyClass::default()).unwrap();
@@ -72,7 +70,6 @@ fn test_nest_pyclass() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();

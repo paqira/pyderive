@@ -23,7 +23,6 @@ fn test_rename() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
@@ -60,7 +59,6 @@ fn test_on_class() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
@@ -237,7 +235,6 @@ fn test_variation() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -326,7 +323,6 @@ fn test_options() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -435,7 +431,6 @@ fn test_nest_pyclass() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
@@ -492,7 +487,6 @@ fn test_set_name() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
@@ -527,7 +521,6 @@ fn test_annotation() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
@@ -564,7 +557,6 @@ fn test_default_factory() {
         }
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(

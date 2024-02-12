@@ -44,7 +44,6 @@ fn test_no_get_set() {
         fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -95,7 +94,6 @@ fn test_get_set() {
         fd_name_b: String,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
@@ -114,7 +112,6 @@ fn test_name_rename_all() {
         fd_name_b: String,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("renamedClass", py_class.name().unwrap().to_string());
@@ -143,7 +140,6 @@ fn test_pyderive_a() {
         field: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class().field == 0");
@@ -182,7 +178,6 @@ fn test_pyderive_b() {
         fd_name_opt_pyint: Option<Py<PyLong>>,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class().fd_name_bool is True");
@@ -355,7 +350,6 @@ fn test_pyderive_c() {
         fd_name_opt_int: Option<i64>,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class().fd_name_bool is True");
@@ -386,7 +380,6 @@ fn test_pyderive_kw_only() {
         fd_b: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class(0, fd_b=1).fd_a == 0");
@@ -412,7 +405,6 @@ fn test_pyderive_kw_only_default() {
         fd_b: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class(fd_b=0).fd_a == 100");
@@ -434,7 +426,6 @@ fn test_pyderive_kw_only_no_trailing_new_field() {
         fd_c: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class(1).fd_a == 1");
@@ -466,7 +457,6 @@ fn test_pyderive_kw_only_trailing_new_field() {
         fd_c: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class(1, fd_c=1).fd_a == 1");
@@ -499,7 +489,6 @@ fn test_nest_pyclass() {
         field: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();

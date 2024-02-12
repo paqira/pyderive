@@ -10,7 +10,6 @@ fn test() {
         field: i64,
     }
 
-    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         let e = PyClass { field: 0 };
         let a = e.to_object(py).extract::<PyClass>(py).unwrap();
