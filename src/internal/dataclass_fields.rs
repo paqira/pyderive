@@ -26,7 +26,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                     (
                         quote! { MISSING.as_unbound() },
                         quote! {
-                            ::pyo3::types::PyCFunction::new_closure(
+                            ::pyo3::types::PyCFunction::new_closure_bound(
                                 py,
                                 ::std::option::Option::Some(#name),
                                 ::std::option::Option::None,
