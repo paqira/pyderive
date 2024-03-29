@@ -19,10 +19,10 @@ fn take_meta_list(a: &Attribute) -> Option<&MetaList> {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Pyo3StructOption {
-    pub get: bool,
-    pub set: bool,
-    pub rename: RenamingRule,
+pub(crate) struct Pyo3StructOption {
+    pub(crate) get: bool,
+    pub(crate) set: bool,
+    pub(crate) rename: RenamingRule,
 }
 
 impl FromIterator<Pyo3StructAttr> for Pyo3StructOption {
@@ -77,10 +77,10 @@ impl TryFrom<&Vec<Attribute>> for Pyo3StructOption {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Pyo3FieldOption {
-    pub get: bool,
-    pub set: bool,
-    pub name: Option<String>,
+pub(crate) struct Pyo3FieldOption {
+    pub(crate) get: bool,
+    pub(crate) set: bool,
+    pub(crate) name: Option<String>,
 }
 
 impl FromIterator<Pyo3FieldAttr> for Pyo3FieldOption {
@@ -124,18 +124,18 @@ impl TryFrom<&Vec<Attribute>> for Pyo3FieldOption {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct PyderiveFieldOption {
-    pub new: Option<bool>,
-    pub match_args: Option<bool>,
-    pub repr: Option<bool>,
-    pub str: Option<bool>,
-    pub iter: Option<bool>,
-    pub len: Option<bool>,
-    pub kw_only: Option<bool>,
-    pub dataclass_field: Option<bool>,
-    pub default: Option<Expr>,
-    pub default_factory: Option<bool>,
-    pub annotation: Option<String>,
+pub(crate) struct PyderiveFieldOption {
+    pub(crate) new: Option<bool>,
+    pub(crate) match_args: Option<bool>,
+    pub(crate) repr: Option<bool>,
+    pub(crate) str: Option<bool>,
+    pub(crate) iter: Option<bool>,
+    pub(crate) len: Option<bool>,
+    pub(crate) kw_only: Option<bool>,
+    pub(crate) dataclass_field: Option<bool>,
+    pub(crate) default: Option<Expr>,
+    pub(crate) default_factory: Option<bool>,
+    pub(crate) annotation: Option<String>,
 }
 
 impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
@@ -325,10 +325,10 @@ impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
 }
 
 // pyo3 struct
-pub mod pyo3_struct {
+pub(crate) mod pyo3_struct {
     use super::*;
 
-    pub mod kw {
+    pub(crate) mod kw {
         // all of supporting option
         syn::custom_keyword!(get_all);
         syn::custom_keyword!(set_all);
@@ -336,7 +336,7 @@ pub mod pyo3_struct {
     }
 
     #[derive(Debug, Clone)]
-    pub enum RenamingRule {
+    pub(crate) enum RenamingRule {
         CamelCase,
         KebabCase,
         Lowercase,
@@ -349,7 +349,7 @@ pub mod pyo3_struct {
     }
 
     impl RenamingRule {
-        pub fn rename(&self, name: &str) -> String {
+        pub(crate) fn rename(&self, name: &str) -> String {
             use heck::*;
 
             match self {
@@ -391,11 +391,13 @@ pub mod pyo3_struct {
     }
 
     #[derive(Debug)]
-    pub enum Pyo3StructAttr {
+    pub(crate) enum Pyo3StructAttr {
         Get(kw::get_all),
         Set(kw::set_all),
         Rename {
+            #[allow(dead_code)]
             path: kw::rename_all,
+            #[allow(dead_code)]
             eq_token: Token![=],
             value: RenamingRule,
         },
@@ -431,10 +433,10 @@ pub mod pyo3_struct {
 }
 
 // pyo3 field
-pub mod pyo3_field {
+pub(crate) mod pyo3_field {
     use super::*;
 
-    pub mod kw {
+    pub(crate) mod kw {
         // all of supporting option
         syn::custom_keyword!(get);
         syn::custom_keyword!(set);
@@ -442,11 +444,13 @@ pub mod pyo3_field {
     }
 
     #[derive(Debug)]
-    pub enum Pyo3FieldAttr {
+    pub(crate) enum Pyo3FieldAttr {
         Get(kw::get),
         Set(kw::set),
         Name {
+            #[allow(dead_code)]
             path: kw::name,
+            #[allow(dead_code)]
             eq_token: Token![=],
             value: LitStr,
         },
@@ -482,7 +486,7 @@ pub mod pyo3_field {
 }
 
 // pyderive field
-pub mod pyderive_field {
+pub(crate) mod pyderive_field {
     use super::*;
 
     mod kw {
@@ -500,10 +504,11 @@ pub mod pyderive_field {
     }
 
     #[derive(Debug)]
-    pub struct ExprAssignGeneric<T, K> {
-        pub left: T,
-        pub eq_token: syn::token::Eq,
-        pub right: K,
+    pub(crate) struct ExprAssignGeneric<T, K> {
+        pub(crate) left: T,
+        #[allow(dead_code)]
+        pub(crate) eq_token: syn::token::Eq,
+        pub(crate) right: K,
     }
 
     impl<T: Parse, K: Parse> Parse for ExprAssignGeneric<T, K> {
@@ -517,7 +522,7 @@ pub mod pyderive_field {
     }
 
     #[derive(Debug)]
-    pub enum OptionFieldAttr<T: Parse, K: Parse> {
+    pub(crate) enum OptionFieldAttr<T: Parse, K: Parse> {
         Ident(T),
         ExprAssign(ExprAssignGeneric<T, K>),
     }
@@ -533,7 +538,7 @@ pub mod pyderive_field {
     }
 
     #[derive(Debug)]
-    pub enum PyderiveFieldAttr {
+    pub(crate) enum PyderiveFieldAttr {
         Init(OptionFieldAttr<kw::new, LitBool>),
         MatchArgs(OptionFieldAttr<kw::match_args, LitBool>),
         Repr(OptionFieldAttr<kw::repr, LitBool>),

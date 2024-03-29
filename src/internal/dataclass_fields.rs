@@ -24,7 +24,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 if d.default_factory() {
                     let name = format!("pyderive_internal_{}_{}_factory", struct_name, pyname);
                     (
-                        quote!(MISSING),
+                        quote! { MISSING },
                         quote! {
                             ::pyo3::types::PyCFunction::new_closure(
                                 py,
@@ -35,10 +35,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                         },
                     )
                 } else {
-                    (quote!(#default), quote!(MISSING))
+                    (quote! { #default }, quote! { MISSING })
                 }
             }
-            None => (quote!(MISSING), quote!(MISSING)),
+            None => (quote! { MISSING }, quote! { MISSING }),
         };
 
         // once kw_only, always kw_only
@@ -50,9 +50,9 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         let annotation = match d.annotation.as_ref() {
             Some(ty) => {
                 let ty = format!("'{}'", ty);
-                quote!( #ty )
+                quote! { #ty }
             }
-            None => quote!(py.None()),
+            None => quote! { py.None() },
         };
 
         // new=false -> ClassVar
@@ -116,7 +116,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pymethods]
         impl #struct_name {
             #[classattr]
-            fn __dataclass_fields__(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<&::pyo3::types::PyDict> {
+            pub fn __dataclass_fields__(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<&::pyo3::types::PyDict> {
                 // For supporting __set_name__ protocol
                 let cls = py.get_type::<Self>();
 

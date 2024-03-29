@@ -26,7 +26,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 impl #struct_name {
                     #[classattr]
                     #[allow(non_upper_case_globals)]
-                    const __match_args__: (#(#types),* ,) = (#(#names),* ,);
+                    pub const __match_args__: (#(#types),* ,) = (#(#names),* ,);
                 }
         }
     };

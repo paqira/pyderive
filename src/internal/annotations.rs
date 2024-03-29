@@ -34,7 +34,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             #[pymethods]
             impl #struct_name {
                 #[classattr]
-                fn __annotations__(py: ::pyo3::Python<'_>) -> &::pyo3::types::PyDict {
+                pub fn __annotations__(py: ::pyo3::Python<'_>) -> &::pyo3::types::PyDict {
                     let annotations = ::pyo3::types::PyDict::new(py);
                     #(#assigns)*
                     annotations

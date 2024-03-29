@@ -8,7 +8,7 @@ use crate::attr::{
     pyo3_struct::RenamingRule, PyderiveFieldOption, Pyo3FieldOption, Pyo3StructOption,
 };
 
-pub fn is_py(ty: &Type) -> bool {
+pub(crate) fn is_py(ty: &Type) -> bool {
     match &ty {
         Type::Path(TypePath {
             path: Path { ref segments, .. },
@@ -29,15 +29,16 @@ pub fn is_py(ty: &Type) -> bool {
 }
 
 #[derive(Debug, Clone)]
-pub struct FieldData {
-    pub index: usize,
-    pub field: Field,
-    pub get: bool,
-    pub set: bool,
+pub(crate) struct FieldData {
+    #[allow(dead_code)]
+    pub(crate) index: usize,
+    pub(crate) field: Field,
+    pub(crate) get: bool,
+    pub(crate) set: bool,
     // String -> Some(String) to support Tuple struct
-    pub pyname: String,
+    pub(crate) pyname: String,
     // String -> Some(Ident) to support Tuple struct
-    pub pyident: Ident,
+    pub(crate) pyident: Ident,
     new: Option<bool>,
     match_args: Option<bool>,
     repr: Option<bool>,
@@ -46,43 +47,43 @@ pub struct FieldData {
     len: Option<bool>,
     kw_only: Option<bool>,
     dataclass_field: Option<bool>,
-    pub default: Option<Expr>,
+    pub(crate) default: Option<Expr>,
     default_factory: Option<bool>,
-    pub annotation: Option<String>,
+    pub(crate) annotation: Option<String>,
 }
 
 impl FieldData {
     #[allow(clippy::wrong_self_convention)]
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(&self) -> bool {
+    pub(crate) fn new(&self) -> bool {
         self.new.unwrap_or(true)
     }
-    pub fn match_args(&self) -> bool {
+    pub(crate) fn match_args(&self) -> bool {
         self.match_args.unwrap_or(self.get)
     }
-    pub fn repr(&self) -> bool {
+    pub(crate) fn repr(&self) -> bool {
         self.repr.unwrap_or(self.get || self.set)
     }
-    pub fn str(&self) -> bool {
+    pub(crate) fn str(&self) -> bool {
         self.str.unwrap_or(self.get || self.set)
     }
-    pub fn iter(&self) -> bool {
+    pub(crate) fn iter(&self) -> bool {
         self.iter.unwrap_or(self.get)
     }
-    pub fn len(&self) -> bool {
+    pub(crate) fn len(&self) -> bool {
         self.len.unwrap_or(self.get)
     }
-    pub fn kw_only(&self) -> bool {
+    pub(crate) fn kw_only(&self) -> bool {
         self.kw_only.unwrap_or(false)
     }
-    pub fn dataclass_field(&self) -> bool {
+    pub(crate) fn dataclass_field(&self) -> bool {
         self.dataclass_field.unwrap_or(true)
     }
-    pub fn default_factory(&self) -> bool {
+    pub(crate) fn default_factory(&self) -> bool {
         self.default_factory.unwrap_or(false)
     }
 
-    pub fn try_from_input(input: &DeriveInput) -> Result<Vec<Self>> {
+    pub(crate) fn try_from_input(input: &DeriveInput) -> Result<Vec<Self>> {
         let pyo3_struct_op = Pyo3StructOption::try_from(&input.attrs)?;
 
         let empty = Punctuated::<Field, Token![,]>::new();
@@ -137,6 +138,7 @@ impl FieldData {
                     set,
                     pyname: pyname.clone(),
                     pyident: format_ident!("{}", pyname),
+                    //
                     new: pyderive_field_opt.new,
                     match_args: pyderive_field_opt.match_args,
                     repr: pyderive_field_opt.repr,
