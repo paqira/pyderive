@@ -24,7 +24,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 if d.default_factory() {
                     let name = format!("pyderive_internal_{}_{}_factory", struct_name, pyname);
                     (
-                        quote! { MISSING },
+                        quote! { MISSING.as_unbound() },
                         quote! {
                             ::pyo3::types::PyCFunction::new_closure(
                                 py,
@@ -35,10 +35,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                         },
                     )
                 } else {
-                    (quote! { #default }, quote! { MISSING })
+                    (quote! { #default }, quote! { MISSING.as_unbound() })
                 }
             }
-            None => (quote! { MISSING }, quote! { MISSING }),
+            None => (quote! { MISSING.as_unbound() }, quote! { MISSING.as_unbound() }),
         };
 
         // once kw_only, always kw_only
@@ -69,20 +69,20 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let args = (
                     #default, // default
                     #default_factory, // default_factory
-                    ::pyo3::types::PyBool::new(py, #new), // new
-                    ::pyo3::types::PyBool::new(py, #repr), // repr
+                    ::pyo3::types::PyBool::new_bound(py, #new), // new
+                    ::pyo3::types::PyBool::new_bound(py, #repr), // repr
                     py.None(), // hash
                     py.None(), // compare
                     py.None(), // metadata
-                    ::pyo3::types::PyBool::new(py, #kw_only), // kw_only
+                    ::pyo3::types::PyBool::new_bound(py, #kw_only), // kw_only
                 );
                 Field.call1(args)
             } else {
                 let args = (
                     #default, // default
                     #default_factory, // default_factory
-                    ::pyo3::types::PyBool::new(py, #new), // new
-                    ::pyo3::types::PyBool::new(py, #repr), // repr
+                    ::pyo3::types::PyBool::new_bound(py, #new), // new
+                    ::pyo3::types::PyBool::new_bound(py, #repr), // repr
                     py.None(), // hash
                     py.None(), // compare
                     py.None(), // metadata
@@ -96,7 +96,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             // https://github.com/python/cpython/blob/ee66c333493105e014678be118850e138e3c62a8/Lib/dataclasses.py#L760-855
             field.setattr(pystr_name, field_name)?;
             field.setattr(pystr_type, #annotation)?;
-            field.setattr(pystr_field_type, #field_type)?;
+            field.setattr(pystr_field_type, #field_type.as_unbound())?;
 
             // FIXME:
             // It is not support PEP 487,
@@ -116,11 +116,11 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pymethods]
         impl #struct_name {
             #[classattr]
-            pub fn __dataclass_fields__(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<&::pyo3::types::PyDict> {
+            pub fn __dataclass_fields__(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::types::PyDict>> {
                 // For supporting __set_name__ protocol
-                let cls = py.get_type::<Self>();
+                let cls = py.get_type_bound::<Self>();
 
-                let dataclasses = ::pyo3::types::PyModule::import(py, "dataclasses")?;
+                let dataclasses = ::pyo3::types::PyModule::import_bound(py, "dataclasses")?;
 
                 #[allow(non_snake_case)]
                 let Field = dataclasses.getattr("Field")?;
@@ -137,7 +137,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let pystr_field_type = ::pyo3::intern!(py, "_field_type");
                 let pystr_set_name = ::pyo3::intern!(py, "__set_name__");
 
-                let fields = ::pyo3::types::PyDict::new(py);
+                let fields = ::pyo3::types::PyDict::new_bound(py);
 
                 #(#assingments)*
 

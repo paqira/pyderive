@@ -24,7 +24,7 @@ fn test_rename() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
@@ -60,7 +60,7 @@ fn test_on_class() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
@@ -236,8 +236,8 @@ fn test_variation() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
-        assert_eq!("PyClass", py_class.name().unwrap().to_string());
+        let py_class = py.get_type_bound::<PyClass>();
+        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
         pyo3::py_run!(
                 py,
                 py_class,
@@ -324,8 +324,8 @@ fn test_options() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
-        assert_eq!("PyClass", py_class.name().unwrap().to_string());
+        let py_class = py.get_type_bound::<PyClass>();
+        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
         pyo3::py_run!(
             py,
             py_class,
@@ -432,8 +432,8 @@ fn test_nest_pyclass() {
     }
 
     Python::with_gil(|py| {
-        let py_class_a = py.get_type::<PyClassA>();
-        let py_class_b = py.get_type::<PyClassB>();
+        let py_class_a = py.get_type_bound::<PyClassA>();
+        let py_class_b = py.get_type_bound::<PyClassB>();
         pyo3::py_run!(
             py,
             py_class_a py_class_b,
@@ -488,8 +488,8 @@ fn test_set_name() {
     }
 
     Python::with_gil(|py| {
-        let py_class_a = py.get_type::<PyClassA>();
-        let py_class_b = py.get_type::<PyClassB>();
+        let py_class_a = py.get_type_bound::<PyClassA>();
+        let py_class_b = py.get_type_bound::<PyClassB>();
         pyo3::py_run!(
             py,
             py_class_a py_class_b,
@@ -522,7 +522,7 @@ fn test_annotation() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
@@ -558,7 +558,7 @@ fn test_default_factory() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
