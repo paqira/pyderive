@@ -19,9 +19,9 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             let name = d.pyname.to_owned();
 
             if is_py(&d.field.ty) {
-                quote! { #name, this.#ident.as_ref(py).repr()? }
+                quote! { #name, this.#ident.bind(py).repr()? }
             } else {
-                quote! { #name, this.#ident.to_object(py).as_ref(py).repr()? }
+                quote! { #name, this.#ident.to_object(py).bind(py).repr()? }
             }
         })
         .collect::<Vec<_>>();
@@ -36,10 +36,13 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
-            pub fn __str__(slf: &::pyo3::PyCell<Self>) -> ::pyo3::PyResult<::std::string::String> {
-                let py = slf.py();
-                let name = slf.get_type().name()?;
+            pub fn __str__(slf: &::pyo3::Bound<'_, Self>) -> ::pyo3::PyResult<::std::string::String> {
+                let t = slf.get_type();
+                let name = t.name()?;
+                
                 let this = slf.borrow();
+                let py = slf.py();
+
                 let s = format!(#fmt, name, #(#args),*);
                 ::pyo3::PyResult::Ok(s)
             }

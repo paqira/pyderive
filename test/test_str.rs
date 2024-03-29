@@ -156,8 +156,9 @@ fn test_variation() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
-        assert_eq!("PyClass", py_class.name().unwrap().to_string());
+        let py_class = py.get_type_bound::<PyClass>();
+        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
+        
         pyo3::py_run!(
             py,
             py_class,
@@ -175,7 +176,7 @@ fn test_variation() {
     'str',
 )
 
-assert str(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=[115, 116, 114], fd_name_opt_str='str', fd_name_opt_int=1, fd_name_vec_str=['str'], fd_name_vec_int=[1], fd_name_vec_opt_str=['str'], fd_name_vec_opt_int=[1], fd_name_hs_str={'str'}, fd_name_js_int={1}, fd_name_hm_str={'str': 'str'}, fd_name_hm_int={1: 1}, fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0, fd_name_opt_pystr='str', fd_name_opt_pyint=1, fd_name_vec_pystr=['str'], fd_name_vec_pyint=[1], fd_name_vec_opt_pystr=['str'], fd_name_vec_opt_pyint=[1], fd_name_pystr_abspath='str')""#
+assert str(a) == "builtins.PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=[115, 116, 114], fd_name_opt_str='str', fd_name_opt_int=1, fd_name_vec_str=['str'], fd_name_vec_int=[1], fd_name_vec_opt_str=['str'], fd_name_vec_opt_int=[1], fd_name_hs_str={'str'}, fd_name_js_int={1}, fd_name_hm_str={'str': 'str'}, fd_name_hm_int={1: 1}, fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0, fd_name_opt_pystr='str', fd_name_opt_pyint=1, fd_name_vec_pystr=['str'], fd_name_vec_pyint=[1], fd_name_vec_opt_pystr=['str'], fd_name_vec_opt_pyint=[1], fd_name_pystr_abspath='str')""#
         );
     });
 }
@@ -220,17 +221,18 @@ fn test_nest_pyclass() {
     }
 
     Python::with_gil(|py| {
-        let py_class_a = py.get_type::<PyClassA>();
-        let py_class_b = py.get_type::<PyClassB>();
-        assert_eq!("PyClassA", py_class_a.name().unwrap().to_string());
-        assert_eq!("PyClassB", py_class_b.name().unwrap().to_string());
+        let py_class_a = py.get_type_bound::<PyClassA>();
+        let py_class_b = py.get_type_bound::<PyClassB>();
+        assert_eq!("builtins.PyClassA", py_class_a.name().unwrap().to_string());
+        assert_eq!("builtins.PyClassB", py_class_b.name().unwrap().to_string());
+
         pyo3::py_run!(
             py,
             py_class_a py_class_b,
             r#"
 a = py_class_a(py_class_b(1))
 
-assert str(a) == "PyClassA(field=PyClassB(field=1))"
+assert str(a) == "builtins.PyClassA(field=builtins.PyClassB(field=1))"
 "#
         );
     });
@@ -248,8 +250,8 @@ fn test_no_get_set() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, r#"assert str(data) == "PyClass()""#)
+        let data = Py::new(py, PyClass::default()).unwrap();
+        py_run!(py, data, r#"assert str(data) == "builtins.PyClass()""#)
     });
 }
 
@@ -266,11 +268,11 @@ fn test_get_set() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(
             py,
             data,
-            r#"assert str(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
+            r#"assert str(data) == "builtins.PyClass(fd_name_a=0, fd_name_b=0.0)""#
         )
     });
 }
@@ -286,11 +288,11 @@ fn test_get_all() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(
             py,
             data,
-            r#"assert str(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
+            r#"assert str(data) == "builtins.PyClass(fd_name_a=0, fd_name_b=0.0)""#
         )
     });
 }
@@ -306,11 +308,11 @@ fn test_set_all() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(
             py,
             data,
-            r#"assert str(data) == "PyClass(fd_name_a=0, fd_name_b=0.0)""#
+            r#"assert str(data) == "builtins.PyClass(fd_name_a=0, fd_name_b=0.0)""#
         )
     });
 }
@@ -327,11 +329,11 @@ fn test_name_rename_all() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(
             py,
             data,
-            r#"assert str(data) == "PyClass(new_name=0, fdNameB=0.0)""#
+            r#"assert str(data) == "builtins.PyClass(new_name=0, fdNameB=0.0)""#
         )
     });
 }
@@ -347,8 +349,8 @@ fn test_pyderive_true() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, r#"assert str(data) == "PyClass(field=0)""#)
+        let data = Py::new(py, PyClass::default()).unwrap();
+        py_run!(py, data, r#"assert str(data) == "builtins.PyClass(field=0)""#)
     });
 }
 
@@ -364,7 +366,7 @@ fn test_pyderive_false() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, r#"assert str(data) == "PyClass()""#)
+        let data = Py::new(py, PyClass::default()).unwrap();
+        py_run!(py, data, r#"assert str(data) == "builtins.PyClass()""#)
     });
 }
