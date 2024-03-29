@@ -45,8 +45,9 @@ fn test_no_get_set() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
-        assert_eq!("PyClass", py_class.name().unwrap().to_string());
+        let py_class = py.get_type_bound::<PyClass>();
+        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
+
         pyo3::py_run!(
             py,
             py_class,
@@ -95,8 +96,9 @@ fn test_get_set() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
-        assert_eq!("PyClass", py_class.name().unwrap().to_string());
+        let py_class = py.get_type_bound::<PyClass>();
+        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
+
         pyo3::py_run!(py, py_class, "assert py_class(0, '').fd_name_a == 0")
     })
 }
@@ -113,8 +115,9 @@ fn test_name_rename_all() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
-        assert_eq!("renamedClass", py_class.name().unwrap().to_string());
+        let py_class = py.get_type_bound::<PyClass>();
+        assert_eq!("builtins.renamedClass", py_class.name().unwrap().to_string());
+        
         pyo3::py_run!(py, py_class, "assert py_class(0, '').new_name == 0");
         pyo3::py_run!(py, py_class, "assert py_class(0, '').fdNameB == ''");
         pyo3::py_run!(
@@ -141,7 +144,7 @@ fn test_pyderive_a() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class().field == 0");
         pyo3::py_run!(
             py,
@@ -179,7 +182,7 @@ fn test_pyderive_b() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class().fd_name_bool is True");
         pyo3::py_run!(py, py_class, "assert py_class().fd_name_str == 'str'");
         pyo3::py_run!(py, py_class, "assert py_class().fd_name_int == 1");
@@ -351,7 +354,7 @@ fn test_pyderive_c() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class().fd_name_bool is True");
         pyo3::py_run!(py, py_class, "assert py_class().fd_name_str == 'str'");
         pyo3::py_run!(py, py_class, "assert py_class().fd_name_int == 1");
@@ -381,7 +384,7 @@ fn test_pyderive_kw_only() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class(0, fd_b=1).fd_a == 0");
         pyo3::py_run!(py, py_class, "assert py_class(0, fd_b=1).fd_b == 1");
 
@@ -406,7 +409,7 @@ fn test_pyderive_kw_only_default() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class(fd_b=0).fd_a == 100");
         pyo3::py_run!(py, py_class, "assert py_class(fd_b=0).fd_b == 0");
     });
@@ -427,7 +430,7 @@ fn test_pyderive_kw_only_no_trailing_new_field() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class(1).fd_a == 1");
         pyo3::py_run!(py, py_class, "assert py_class(0).fd_b == 0");
         pyo3::py_run!(py, py_class, "assert py_class(0).fd_c == 0");
@@ -458,7 +461,7 @@ fn test_pyderive_kw_only_trailing_new_field() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(py, py_class, "assert py_class(1, fd_c=1).fd_a == 1");
         pyo3::py_run!(py, py_class, "assert py_class(0, fd_c=1).fd_b == 0");
         pyo3::py_run!(py, py_class, "assert py_class(0, fd_c=1).fd_c == 1");
@@ -490,8 +493,8 @@ fn test_nest_pyclass() {
     }
 
     Python::with_gil(|py| {
-        let py_class_a = py.get_type::<PyClassA>();
-        let py_class_b = py.get_type::<PyClassB>();
+        let py_class_a = py.get_type_bound::<PyClassA>();
+        let py_class_b = py.get_type_bound::<PyClassB>();
         pyo3::py_run!(
             py,
             py_class_a py_class_b,
