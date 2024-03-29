@@ -12,8 +12,8 @@ fn test_ord() {
     }
 
     Python::with_gil(|py| {
-        let data1 = PyCell::new(py, PyClass::default()).unwrap();
-        let data2 = PyCell::new(
+        let data1 = Py::new(py, PyClass::default()).unwrap();
+        let data2 = Py::new(
             py,
             PyClass {
                 fa: 1,
@@ -42,8 +42,8 @@ fn test_patial_ord() {
     }
 
     Python::with_gil(|py| {
-        let data1 = PyCell::new(py, PyClass::default()).unwrap();
-        let data2 = PyCell::new(py, PyClass { f: f64::NAN }).unwrap();
+        let data1 = Py::new(py, PyClass::default()).unwrap();
+        let data2 = Py::new(py, PyClass { f: f64::NAN }).unwrap();
         py_run!(py, data1 data2,  "assert not data1 < data2");
         py_run!(py, data1 data2,  "assert not data1 <= data2");
         py_run!(py, data1 data2,  "assert not data2 <= data2");
@@ -87,8 +87,8 @@ fn test_nest_pyclass() {
     }
 
     Python::with_gil(|py| {
-        let py_class_a = py.get_type::<PyClassA>();
-        let py_class_b = py.get_type::<PyClassB>();
+        let py_class_a = py.get_type_bound::<PyClassA>();
+        let py_class_b = py.get_type_bound::<PyClassB>();
         pyo3::py_run!(
             py,
             py_class_a py_class_b,

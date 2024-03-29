@@ -13,7 +13,7 @@ fn test() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert hash(data) == -9000812902462168605")
     });
 }
@@ -30,7 +30,7 @@ fn test_get_set() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert hash(data) == -9000812902462168605")
     });
 }
@@ -45,7 +45,7 @@ fn test_get_all() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert hash(data) == -9000812902462168605")
     });
 }
@@ -61,7 +61,7 @@ fn test_set_all() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert hash(data) == -9000812902462168605")
     });
 }
@@ -77,7 +77,7 @@ fn test_name_rename_all() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert hash(data) == -9000812902462168605")
     });
 }
@@ -114,8 +114,8 @@ fn test_nest_pyclass() {
     }
 
     Python::with_gil(|py| {
-        let py_class_a = py.get_type::<PyClassA>();
-        let py_class_b = py.get_type::<PyClassB>();
+        let py_class_a = py.get_type_bound::<PyClassA>();
+        let py_class_b = py.get_type_bound::<PyClassB>();
         pyo3::py_run!(
             py,
             py_class_a py_class_b,

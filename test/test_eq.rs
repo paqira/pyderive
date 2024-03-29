@@ -12,7 +12,7 @@ fn test_eq() {
     }
 
     Python::with_gil(|py| {
-        let data = PyCell::new(py, PyClass::default()).unwrap();
+        let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert data == data");
         py_run!(py, data, "assert data != 1");
     });
@@ -28,9 +28,9 @@ fn test_patial_ord() {
     }
 
     Python::with_gil(|py| {
-        let data1 = PyCell::new(py, PyClass::default()).unwrap();
-        let data2 = PyCell::new(py, PyClass::default()).unwrap();
-        let data3 = PyCell::new(py, PyClass { f: f64::NAN }).unwrap();
+        let data1 = Py::new(py, PyClass::default()).unwrap();
+        let data2 = Py::new(py, PyClass::default()).unwrap();
+        let data3 = Py::new(py, PyClass { f: f64::NAN }).unwrap();
         py_run!(py, data1 data2 data3, "assert data1 == data2");
         py_run!(py, data1 data2 data3, "assert data1 != data3");
         py_run!(py, data1 data2 data3, "assert not data3 == data3");
@@ -71,8 +71,8 @@ fn test_nest_pyclass() {
     }
 
     Python::with_gil(|py| {
-        let py_class_a = py.get_type::<PyClassA>();
-        let py_class_b = py.get_type::<PyClassB>();
+        let py_class_a = py.get_type_bound::<PyClassA>();
+        let py_class_b = py.get_type_bound::<PyClassB>();
         pyo3::py_run!(
             py,
             py_class_a py_class_b,
