@@ -44,8 +44,8 @@
 //!         raise AssertionError
 //!
 //! # Derives __repr__()
-//! assert str(m) == "MyClass(string='a', integer=1, option=None)"
-//! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
+//! assert str(m) == "builtins.MyClass(string='a', integer=1, option=None)"
+//! assert repr(m) == "builtins.MyClass(string='a', integer=1, option=None)"
 //!
 //! # Derives __eq__() based on PartialEq/Eq trait
 //! assert m == MyClass("a", 1, None)
@@ -340,7 +340,7 @@ mod internal;
 ///         excluded: "excluded".to_string(),
 ///     })?;
 ///
-///     py_run!(py, a, r#"assert repr(a) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///     py_run!(py, a, r#"assert repr(a) == "builtins.PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
 ///
 ///     Ok(())
 /// });
@@ -401,7 +401,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         excluded: "excluded".to_string(),
 ///     })?;
 ///
-///     py_run!(py, a, r#"assert str(a) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///     py_run!(py, a, r#"assert str(a) == "builtins.PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
 ///
 ///     Ok(())
 /// });
@@ -1148,12 +1148,12 @@ pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 /// let test = r#"
 /// a = PyClass(Child(10))
 ///
-/// assert repr(a) == "PyClass(child=Child(field=10))"
+/// assert repr(a) == "builtins.PyClass(child=builtins.Child(field=10))"
 /// "#;
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type::<PyClass>();
-///     let Child = py.get_type::<Child>();
+///     let PyClass = py.get_type_bound::<PyClass>();
+///     let Child = py.get_type_bound::<Child>();
 ///
 ///     py_run!(py, PyClass Child, test)
 /// });
