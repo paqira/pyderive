@@ -392,7 +392,9 @@ pub(crate) mod pyo3_struct {
 
     #[derive(Debug)]
     pub(crate) enum Pyo3StructAttr {
+        #[allow(dead_code)]
         Get(kw::get_all),
+        #[allow(dead_code)]
         Set(kw::set_all),
         Rename {
             #[allow(dead_code)]
@@ -445,7 +447,9 @@ pub(crate) mod pyo3_field {
 
     #[derive(Debug)]
     pub(crate) enum Pyo3FieldAttr {
+        #[allow(dead_code)]
         Get(kw::get),
+        #[allow(dead_code)]
         Set(kw::set),
         Name {
             #[allow(dead_code)]
