@@ -14,7 +14,7 @@ fn test_rename() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
@@ -34,7 +34,7 @@ fn test_noannotations() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         if py.version_info() >= (3, 10) {
             pyo3::py_run!(py, py_class, "assert py_class.__annotations__ == {}");
         } else {
@@ -62,7 +62,7 @@ fn test_annotations() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
@@ -85,7 +85,7 @@ fn test_renamed() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type::<PyClass>();
+        let py_class = py.get_type_bound::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
