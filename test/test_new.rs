@@ -116,8 +116,11 @@ fn test_name_rename_all() {
 
     Python::with_gil(|py| {
         let py_class = py.get_type_bound::<PyClass>();
-        assert_eq!("builtins.renamedClass", py_class.name().unwrap().to_string());
-        
+        assert_eq!(
+            "builtins.renamedClass",
+            py_class.name().unwrap().to_string()
+        );
+
         pyo3::py_run!(py, py_class, "assert py_class(0, '').new_name == 0");
         pyo3::py_run!(py, py_class, "assert py_class(0, '').fdNameB == ''");
         pyo3::py_run!(

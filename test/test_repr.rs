@@ -349,7 +349,11 @@ fn test_pyderive_true() {
 
     Python::with_gil(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, r#"assert repr(data) == "builtins.PyClass(field=0)""#)
+        py_run!(
+            py,
+            data,
+            r#"assert repr(data) == "builtins.PyClass(field=0)""#
+        )
     });
 }
 

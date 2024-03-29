@@ -39,7 +39,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             pub fn __repr__(slf: &::pyo3::PyCell<Self>) -> ::pyo3::PyResult<::std::string::String> {
                 let t = slf.get_type();
                 let name = t.name()?;
-                
+
                 let this = slf.borrow();
                 let py = slf.py();
 

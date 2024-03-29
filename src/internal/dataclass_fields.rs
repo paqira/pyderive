@@ -38,7 +38,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                     (quote! { #default }, quote! { MISSING.as_unbound() })
                 }
             }
-            None => (quote! { MISSING.as_unbound() }, quote! { MISSING.as_unbound() }),
+            None => (
+                quote! { MISSING.as_unbound() },
+                quote! { MISSING.as_unbound() },
+            ),
         };
 
         // once kw_only, always kw_only
