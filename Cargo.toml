@@ -23,9 +23,9 @@ path = "test/test.rs"
 
 [dependencies]
 heck = "0.5.0"
-proc-macro2 = "1.0.78"
+proc-macro2 = "1.0.79"
 quote = "1.0.35"
-syn = { version = "2.0.48", features = ["derive", "extra-traits", "full"] }
+syn = { version = "2.0.57", features = ["derive", "extra-traits", "full"] }
 
 [dev-dependencies]
 pyo3 = { version = "0.21.0", features = [
