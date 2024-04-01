@@ -331,7 +331,7 @@ mod internal;
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass {
+///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
@@ -356,7 +356,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Derive macro generating a [`__str__()`][__str__] fn/Python method.
 ///
-/// It returns the string that contains `get` and `set` fileds as default,
+/// It returns the string that contains `get` and `set` fields as default,
 /// in the order of declaration.
 ///
 /// If the filed is marked by `#[pyderive(str=true)]` attribute,
@@ -392,7 +392,7 @@ pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass {
+///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
@@ -446,7 +446,7 @@ pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass {
+///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
@@ -471,11 +471,11 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Derive macro generating a [`__iter__()`][__iter__] fn/Python method.
 ///
-/// It returns an iterator of `get` fileds as default,
+/// It returns an iterator of `get` fields as default,
 /// in the order of declaration.
 ///
 /// If the filed is marked by `#[pyderive(iter=true)]` attribute,
-/// the field is included to the iterartor that `__iter__()` returns;
+/// the field is included to the iterator that `__iter__()` returns;
 /// if `#[pyderive(iter=false)]`, it isn't.
 ///
 /// - It should place `#[derive(PyIter)]` before `#[pyclass]`.
@@ -506,7 +506,7 @@ pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass {
+///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
@@ -531,13 +531,13 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Derive macro generating a [`__reversed__()`][__reversed__] fn/Python method.
 ///
-/// It returns an iterator of `get` fileds as default,
+/// It returns an iterator of `get` fields as default,
 /// in the reverse order of declaration.
 ///
 /// This is a reversed one of a derive macro, [`PyIter`].
 ///
 /// If the filed is marked by `#[pyderive(iter=true)]` attribute,
-/// the field is included to the iterartor that `__reversed__()` returns;
+/// the field is included to the iterator that `__reversed__()` returns;
 /// if `#[pyderive(iter=false)]`, it isn't.
 ///
 /// - It should place `#[derive(PyReversed)]` before `#[pyclass]`.
@@ -568,7 +568,7 @@ pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass {
+///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
@@ -593,7 +593,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Derive macro generating a [`__new__()`][__new__] Python method.
 ///
-/// It has all fields as the argumetns as default,
+/// It has all fields as the arguments as default,
 /// in the order of declaration.
 ///
 /// If the filed is marked by `#[pyderive(new=false)]` attribute,
@@ -636,7 +636,7 @@ pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type::<PyClass>();
+///     let PyClass = py.get_type_bound::<PyClass>();
 ///
 ///     py_run!(py, PyClass, test)
 /// });
@@ -695,9 +695,9 @@ pub fn py_new(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass { field: 0.0 })?;
-///     let b = PyCell::new(py, PyClass { field: 1.0 })?;
-///     let c = PyCell::new(py, PyClass { field: f64::NAN })?;
+///     let a = Py::new(py, PyClass { field: 0.0 })?;
+///     let b = Py::new(py, PyClass { field: 1.0 })?;
+///     let c = Py::new(py, PyClass { field: f64::NAN })?;
 ///
 ///     py_run!(py, a b, "assert a == a");
 ///     py_run!(py, a b, "assert a != b");
@@ -767,9 +767,9 @@ pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass { field: 0.0 })?;
-///     let b = PyCell::new(py, PyClass { field: 1.0 })?;
-///     let c = PyCell::new(py, PyClass { field: f64::NAN })?;
+///     let a = Py::new(py, PyClass { field: 0.0 })?;
+///     let b = Py::new(py, PyClass { field: 1.0 })?;
+///     let c = Py::new(py, PyClass { field: f64::NAN })?;
 ///
 ///     py_run!(py, a b, "assert a < b");
 ///     py_run!(py, a b, "assert a <= b");
@@ -842,7 +842,7 @@ pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass {
+///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///     })?;
@@ -907,7 +907,7 @@ pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// Python::with_gil(|py| {
 ///     if py.version_info() >= (3, 10) {
-///         let PyClass = py.get_type::<PyClass>();
+///         let PyClass = py.get_type_bound::<PyClass>();
 ///
 ///         py_run!(py, PyClass, test)
 ///     }
@@ -925,7 +925,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// Derive macro generating a `__dataclass_fields__` fn/Python class attribute.
 ///
 /// It returns a [`dataclasses.Field`][Field] dict that helper functions of the [dataclasses] module read.
-/// It supportes [`is_dataclass()`][is_dataclass], [`fields()`][fields],
+/// It supports [`is_dataclass()`][is_dataclass], [`fields()`][fields],
 /// [`asdict()`][asdict] (include nest), [`astuple()`][astuple] (include nest)
 /// and [`replace()`][replace] of the dataclasses module.
 ///
@@ -966,7 +966,7 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// }
 ///
 /// Python::with_gil(|py| -> PyResult<()> {
-///     let a = PyCell::new(py, PyClass {
+///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
 ///         float: 1.0,
@@ -1088,7 +1088,7 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// "#;
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type::<PyClass>();
+///     let PyClass = py.get_type_bound::<PyClass>();
 ///
 ///     py_run!(py, PyClass, test)
 /// });
