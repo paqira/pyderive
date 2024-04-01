@@ -49,7 +49,7 @@ assert hash(m) == 3289857268557676066
 This provides deriving following special methods and attributes;
 
 | Derive Macro        | Python Method/Attribute                           |
-| ------------------- | ------------------------------------------------- |
+|---------------------|---------------------------------------------------|
 | `PyNew`             | `__new__()`                                       |
 | `PyMatchArgs`       | `__match_args__`                                  |
 | `PyRepr`            | `__repr__()`                                      |
@@ -66,7 +66,7 @@ This provides deriving following special methods and attributes;
 In addition, this provides a helper derive macro:
 
 | Derive Macro | Impl                                                         |
-| ------------ | ------------------------------------------------------------ |
+|--------------|--------------------------------------------------------------|
 | `ToPyObject` | `ToPyObject` trait by `IntoPy<PyObject>` trait for `pyclass` |
 
 The field attributes `#[pyderive(..)]` is used to customize the implementation,

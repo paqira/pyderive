@@ -12,7 +12,7 @@ use crate::common::FieldData;
 // #[pyderive(new=false, default=xxx)] -> __new__():          field=xxx
 
 // For new=true
-fn signiture(d: &FieldData) -> proc_macro2::TokenStream {
+fn fn_signature(d: &FieldData) -> proc_macro2::TokenStream {
     let pyident = &d.pyident;
     match &d.default {
         Some(expr) => quote! { #pyident=#expr },
@@ -31,14 +31,14 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         data.iter()
             .take_while(|d| !d.kw_only())
             .filter(|d| d.new())
-            .map(signiture),
+            .map(fn_signature),
     );
 
     let rest_args = data
         .iter()
         .skip_while(|d| !d.kw_only())
         .filter(|d| d.new())
-        .map(signiture)
+        .map(fn_signature)
         .collect::<Vec<_>>();
 
     if !rest_args.is_empty() {

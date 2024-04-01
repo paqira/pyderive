@@ -19,7 +19,7 @@ fn test_eq() {
 }
 
 #[test]
-fn test_patial_ord() {
+fn test_partial_ord() {
     #[pyclass]
     #[derive(Default, PartialEq, PyEq)]
     #[allow(dead_code)]

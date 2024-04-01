@@ -24,7 +24,7 @@ fn test_rename() {
 }
 
 #[test]
-fn test_noannotations() {
+fn test_no_annotations() {
     #[derive(PyAnnotations)]
     #[pyclass]
     #[allow(dead_code)]

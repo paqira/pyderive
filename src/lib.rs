@@ -1,6 +1,6 @@
 //! This library provides derive macros of Python spacial methods and a class attributes for [PyO3].
 //!
-//! The field attribute `#[pyderive(..)]` helps to costomize implementations,
+//! The field attribute `#[pyderive(..)]` helps to customize implementations,
 //! like [`dataclasses.field()`][dataclasses-field] of Python.
 //!
 //! It requires to enable `multiple-pymethods` feature of PyO3
@@ -85,7 +85,7 @@
 //! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //!
-//! In addition, this prodieves a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
+//! In addition, this provides a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
 //! that required by [`PyRepr`], [`PyStr`], [`PyIter`] and [`PyDataclassFields`] derive macros.
 //!
 //! | Derive Macro   | Impl                                                                                                           |
@@ -119,7 +119,7 @@
 //!
 //! It allows to omit the right-hand side,
 //! and it evaluates to the right-hand as `true`
-//! expcept `default` and `annotation`, for example,
+//! except `default` and `annotation`, for example,
 //! `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
 //!
 //! - `#[pyderive(repr=<bool>)]`
@@ -141,14 +141,14 @@
 //!
 //!    If `new=false`,
 //!    the field is excluded from the arguments of the `__new__()` method.
-//!    Notes, `new=true` has not effect.
+//!    Notes, `new=true` has no effect.
 //!
 //!    The derive macro [`PyDataclassFields`] reads this attribute also,
 //!    see [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(default=<expr>)]`
 //!
-//!    This is used to costomize default value for the the `__new__()` method.
+//!    This is used to customize default value for the `__new__()` method.
 //!    It supports any rust expression which PyO3 supports, e.g.,
 //!
 //!    ```
@@ -163,11 +163,11 @@
 //!    }
 //!    ```
 //!
-//!    We note that this internally produces `#[pyo3(signiture = ..)]` attribute.
+//!    We note that this internally produces `#[pyo3(signature = ..)]` attribute.
 //!
 //!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
 //!
-//!        Pseudo-code:
+//!        Pseudocode:
 //!
 //!        ```python
 //!        def __new__(cls, field):
@@ -182,7 +182,7 @@
 //!        and initialized by [`Default::default()`] in the `__new__()` method.
 //!        We note that it is evaluated on every `__new__()` call.
 //!
-//!        Pseudo-code:
+//!        Pseudocode:
 //!
 //!        ```python
 //!        def __new__(cls):
@@ -196,7 +196,7 @@
 //!        The field is included to the arguments with default value `<expr>`.
 //!        We note that `<expr>` (rust code) is evaluated on every `__new__()` call (PyO3 feature).
 //!
-//!        Pseudo-code:
+//!        Pseudocode:
 //!
 //!        ```python
 //!        def __new__(cls, field=<expr>):
@@ -211,7 +211,7 @@
 //!        and initialized with `<expr>` in the `__new__()` method.
 //!        We note that `<expr>` (rust code) is evaluated on every `__new__()` call.
 //!
-//!        Pseudo-code:
+//!        Pseudocode:
 //!
 //!        ```python
 //!        def __new__(cls):
@@ -269,7 +269,7 @@
 //!
 //!    If `dataclass_field=false`,
 //!    the field is excluded from the `__dataclass_fields__` dict.
-//!    Notes, `dataclass_field=true` has not effect.
+//!    Notes, `dataclass_field=true` has no effect.
 //!
 //!    See [`PyDataclassFields`] for detail.
 //!
@@ -295,7 +295,7 @@ mod internal;
 
 /// Derive macro generating a [`__repr__()`][__repr__] fn/Python method.
 ///
-/// It returns the string that contains `get` and `set` fileds as default,
+/// It returns the string that contains `get` and `set` fields as default,
 /// in the order of declaration.
 ///
 /// If the filed is marked by `#[pyderive(repr=true)]` attribute,

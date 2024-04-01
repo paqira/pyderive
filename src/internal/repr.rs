@@ -10,7 +10,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = &input.ident;
     let data = FieldData::try_from_input(&input)?;
 
-    // args of foramt!(..)
+    // args of format!(..)
     let args = data
         .iter()
         .filter(|d| d.repr())
@@ -26,7 +26,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         })
         .collect::<Vec<_>>();
 
-    // fmt of fotmat!(..)
+    // fmt of format!(..)
     let fmt = iter::repeat("{}={}")
         .take(args.len())
         .collect::<Vec<_>>()

@@ -33,7 +33,7 @@ except TypeError: pass");
 }
 
 #[test]
-fn test_patial_ord() {
+fn test_partial_ord() {
     #[pyclass]
     #[derive(Default, PartialOrd, PartialEq, PyOrd)]
     #[allow(dead_code)]

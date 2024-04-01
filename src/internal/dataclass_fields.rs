@@ -14,7 +14,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .collect::<Vec<_>>();
 
     let mut kw_only = false;
-    let assingments = fields.iter().map(|d| {
+    let assignments = fields.iter().map(|d| {
         let pyname = &d.pyname;
         let new = &d.new();
         let repr = &d.repr();
@@ -134,7 +134,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 #[allow(non_snake_case)]
                 let _FIELD_CLASSVAR = dataclasses.getattr("_FIELD_CLASSVAR")?;
 
-                // cashe attr. names
+                // cache attr. names
                 let pystr_name = ::pyo3::intern!(py, "name");
                 let pystr_type = ::pyo3::intern!(py, "type");
                 let pystr_field_type = ::pyo3::intern!(py, "_field_type");
@@ -142,7 +142,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
                 let fields = ::pyo3::types::PyDict::new_bound(py);
 
-                #(#assingments)*
+                #(#assignments)*
 
                 Ok(fields)
             }

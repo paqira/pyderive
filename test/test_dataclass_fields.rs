@@ -273,15 +273,15 @@ fn test_options() {
         #[pyderive(new = false)]
         class_: i64,
         #[pyderive(default = 1)]
-        new_defualt: i64,
+        new_default: i64,
         #[pyderive(new = false, default = 1)]
-        class_defualt: i64,
+        class_default: i64,
         #[pyderive(default = 1, default_factory = true)]
-        new_defualt_factory: i64,
+        new_default_factory: i64,
         #[pyderive(new = false, default = 1, default_factory = true)]
-        class_defualt_factory: i64,
+        class_default_factory: i64,
         #[pyderive(dataclass_field = false)]
-        ommit: i64,
+        omit: i64,
         #[pyderive(repr = true)]
         repr: i64,
         #[pyderive(repr = false)]
@@ -297,11 +297,11 @@ fn test_options() {
         fn new(
             field: i64,
             class_: i64,
-            new_defualt: i64,
-            class_defualt: i64,
-            new_defualt_factory: i64,
-            class_defualt_factory: i64,
-            ommit: i64,
+            new_default: i64,
+            class_default: i64,
+            new_default_factory: i64,
+            class_default_factory: i64,
+            omit: i64,
             repr: i64,
             no_repr: i64,
             kw_only: i64,
@@ -310,11 +310,11 @@ fn test_options() {
             Self {
                 field,
                 class_,
-                new_defualt,
-                class_defualt,
-                new_defualt_factory,
-                class_defualt_factory,
-                ommit,
+                new_default,
+                class_default,
+                new_default_factory,
+                class_default_factory,
+                omit,
                 repr,
                 no_repr,
                 kw_only,
@@ -346,28 +346,28 @@ for field in fields(a):
         assert field._field_type is _FIELD_CLASSVAR, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
-    elif field.name == "new_defualt":
+    elif field.name == "new_default":
         assert field.type is None
         assert field.default == 1, field.name
         assert field.default_factory is MISSING, field.name
         assert field._field_type is _FIELD, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
-    elif field.name == "class_defualt":
+    elif field.name == "class_default":
         assert field.type is None
         assert field.default == 1, field.name
         assert field.default_factory is MISSING, field.name
         assert field._field_type is _FIELD_CLASSVAR, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
-    elif field.name == "new_defualt_factory":
+    elif field.name == "new_default_factory":
         assert field.type is None
         assert field.default is MISSING, field.name
         assert field.default_factory() == 1, field.name
         assert field._field_type is _FIELD, field.name
         if sys.version_info >= (3, 10):
             assert field.kw_only is False, field.name
-    elif field.name == "class_defualt_factory":
+    elif field.name == "class_default_factory":
         assert field.type is None
         assert field.default is MISSING, field.name
         assert field.default_factory() == 1, field.name

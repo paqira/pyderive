@@ -282,14 +282,14 @@ impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
             .iter()
             .filter(|a| a.path().is_ident("pyderive"))
             // FIXME:
-            // Shoud it raise Error when #[pyderive]?
+            // Should it raise Error when #[pyderive]?
             // If not, uncomment the following filter_map.
             // .filter_map(|a| match &a.meta {
             //     Meta::List(_) => Some(a),
             //     _ => None,
             // })
             // FIXME:
-            // Shoud it raise Error when #[pyderive]?
+            // Should it raise Error when #[pyderive]?
             // If not, comment out the following filter_map.
             .map(|a| match &a.meta {
                 Meta::List(m) => Ok(m),
@@ -303,7 +303,7 @@ impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
             .map(|m| {
                 m.parse_args_with(Attr::parse_terminated)
                     // FIXME:
-                    // Shoud it raise Error when #[pyderive()]?
+                    // Should it raise Error when #[pyderive()]?
                     // If not, remove the following and_then.
                     .and_then(|r| {
                         if r.is_empty() {
@@ -329,7 +329,7 @@ pub(crate) mod pyo3_struct {
     use super::*;
 
     pub(crate) mod kw {
-        // all of supporting option
+        // all supporting option
         syn::custom_keyword!(get_all);
         syn::custom_keyword!(set_all);
         syn::custom_keyword!(rename_all);
@@ -418,7 +418,7 @@ pub(crate) mod pyo3_struct {
                     eq_token: input.parse()?,
                     value: input.parse()?,
                 })
-            // ommit others
+            // omit others
             } else if input.peek2(Token![=]) {
                 // assigment
                 let _: Ident = input.parse()?;
@@ -439,7 +439,7 @@ pub(crate) mod pyo3_field {
     use super::*;
 
     pub(crate) mod kw {
-        // all of supporting option
+        // all supporting option
         syn::custom_keyword!(get);
         syn::custom_keyword!(set);
         syn::custom_keyword!(name);
@@ -473,7 +473,7 @@ pub(crate) mod pyo3_field {
                     eq_token: input.parse()?,
                     value: input.parse()?,
                 })
-            // ommit others
+            // omit others
             } else if input.peek2(Token![=]) {
                 // assigment
                 let _: Ident = input.parse()?;
