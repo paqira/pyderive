@@ -152,6 +152,6 @@ impl FieldData {
                     annotation: pyderive_field_opt.annotation,
                 })
             })
-            .collect::<syn::Result<Vec<_>>>()
+            .collect::<Result<Vec<_>>>()
     }
 }

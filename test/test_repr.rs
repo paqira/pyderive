@@ -42,7 +42,7 @@ fn test_variation() {
         fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
         fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
 
-        fd_name_pystr_abspath: ::pyo3::Py<PyString>,
+        fd_name_pystr_abspath: Py<PyString>,
     }
 
     #[pymethods]
@@ -122,7 +122,7 @@ fn test_variation() {
             fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
             fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
 
-            fd_name_pystr_abspath: ::pyo3::Py<PyString>,
+            fd_name_pystr_abspath: Py<PyString>,
         ) -> Self {
             Self {
                 fd_name_bool,
@@ -159,7 +159,7 @@ fn test_variation() {
         let py_class = py.get_type_bound::<PyClass>();
         assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
 
-        pyo3::py_run!(
+        py_run!(
             py,
             py_class,
             r#"a = py_class(
@@ -225,7 +225,7 @@ fn test_nest_pyclass() {
         assert_eq!("builtins.PyClassA", py_class_a.name().unwrap().to_string());
         assert_eq!("builtins.PyClassB", py_class_b.name().unwrap().to_string());
 
-        pyo3::py_run!(
+        py_run!(
             py,
             py_class_a py_class_b,
             r#"

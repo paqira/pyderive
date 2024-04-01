@@ -154,7 +154,7 @@ fn test_nest_pyclass() {
     Python::with_gil(|py| {
         let py_class_a = py.get_type_bound::<PyClassA>();
         let py_class_b = py.get_type_bound::<PyClassB>();
-        pyo3::py_run!(
+        py_run!(
             py,
             py_class_a py_class_b,
             r#"

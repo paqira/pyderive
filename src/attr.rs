@@ -138,7 +138,7 @@ pub(crate) struct PyderiveFieldOption {
     pub(crate) annotation: Option<String>,
 }
 
-impl FromIterator<PyderiveFieldAttr> for syn::Result<PyderiveFieldOption> {
+impl FromIterator<PyderiveFieldAttr> for Result<PyderiveFieldOption> {
     fn from_iter<T: IntoIterator<Item = PyderiveFieldAttr>>(iter: T) -> Self {
         let mut new = PyderiveFieldOption::default();
 
