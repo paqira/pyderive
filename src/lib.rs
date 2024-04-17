@@ -71,7 +71,6 @@
 //! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields |
 //! | [`PyLen`]             | `__len__()` returns number of `get` fields           |
 //! | [`PyDataclassFields`] | `__dataclass_fields__` class attr. with all fields   |
-//! | [`PyAnnotations`]     | `__annotations__` class attr. with annotated fields  |
 //!
 //! We call the field is *`get` (or `set`) field*
 //! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
@@ -119,7 +118,7 @@
 //!
 //! It allows to omit the right-hand side,
 //! and it evaluates to the right-hand as `true`
-//! except `default` and `annotation`, for example,
+//! except `default` , for example,
 //! `#[pyderive(repr)]` is equivalent to `#[pyderive(repr=true)]`.
 //!
 //! - `#[pyderive(repr=<bool>)]`
@@ -274,12 +273,8 @@
 //!    See [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(annotation=<str>)]`
-//!     
-//!    If the field is marked by `annotation=<str>`,
-//!    the field is included to the `__annotations__` dict with an annotation `<str>`;
-//!    if it is not, the field is excluded.
 //!
-//!    The derive macro [`PyDataclassFields`] reads this attribute also,
+//!    The derive macro [`PyDataclassFields`] reads this attribute,
 //!    see [`PyDataclassFields`] for detail.
 //!
 //! [keyword-only-arguments]: https://docs.python.org/3/tutorial/controlflow.html#keyword-only-arguments
@@ -1046,57 +1041,6 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     match internal::dataclass_fields::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a `__annotations__` fn/Python class attribute.
-///
-/// The generated `__annotations__` dict contains all fields
-/// marked by `#[pyderive(annotation=<str>)]`
-/// where `<str>` is a Python type hints string.
-///
-/// - It should place `#[derive(PyAnnotations)]` before `#[pyclass]`.
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// // Place before `#[pyclass]`
-/// #[derive(PyNew, PyAnnotations)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     #[pyderive(annotation="int")]
-///     string: i64,
-///     #[pyderive(annotation="Optional[str]")]
-///     option: Option<String>,
-///     excluded: String,
-/// }
-///
-/// let test = r#"
-/// import sys
-/// from typing import get_type_hints, Optional
-///
-/// if sys.version_info >= (3, 9):
-///     assert get_type_hints(PyClass, localns=locals()) == {'string': int, 'option': Optional[str]}
-/// else:
-///     from typing import ForwardRef
-///     assert get_type_hints(PyClass, localns=locals()) == {'string': ForwardRef('int'), 'option': ForwardRef('Optional[str]')}
-/// "#;
-///
-/// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
-///
-///     py_run!(py, PyClass, test)
-/// });
-/// ```
-#[proc_macro_derive(PyAnnotations, attributes(pyderive))]
-pub fn py_annotations(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::annotations::implementation(input) {
         Ok(r) => r,
         Err(e) => e.into_compile_error().into(),
     }

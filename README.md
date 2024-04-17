@@ -61,7 +61,6 @@ This provides deriving following special methods and attributes;
 | `PyReversed`        | `__reversed__()`                                  |
 | `PyLen`             | `__len__()`                                       |
 | `PyDataclassFields` | `__dataclass_fields__`                            |
-| `PyAnnotations`     | `__annotations__`                                 |
 
 In addition, this provides a helper derive macro:
 

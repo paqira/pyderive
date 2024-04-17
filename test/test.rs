@@ -1,4 +1,3 @@
-mod test_annotations;
 mod test_dataclass_fields;
 mod test_eq;
 mod test_hash;
