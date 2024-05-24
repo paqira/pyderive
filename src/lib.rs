@@ -280,8 +280,6 @@
 //! [keyword-only-arguments]: https://docs.python.org/3/tutorial/controlflow.html#keyword-only-arguments
 //! [KW_ONLY]: https://docs.python.org/3/library/dataclasses.html#dataclasses.KW_ONLY
 //! [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
-extern crate proc_macro;
-
 use syn::{parse_macro_input, DeriveInput};
 
 mod attr;
