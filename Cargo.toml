@@ -22,10 +22,10 @@ name = "test"
 path = "test/test.rs"
 
 [dependencies]
-heck = "0.5"
-proc-macro2 = "1"
-quote = "1"
-syn = { version = "2", features = ["derive", "extra-traits", "full"] }
+heck = { version = "0.5" }
+proc-macro2 = { version = "1" }
+quote = { version = "1" }
+syn = { version = "2", features = ["extra-traits", "derive", "full"] }
 
 [dev-dependencies]
 pyo3 = { version = "0.21", features = [
