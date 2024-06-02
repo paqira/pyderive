@@ -352,25 +352,33 @@ pub fn py_rdivmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 // convert
 
-#[proc_macro_derive(PyBool)]
-pub fn py_bool(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    use quote::quote;
+macro_rules! impl_convert {
+    ($derive:ident, $name:ident, $pyname:ident, $ty:ty) => {
+        #[proc_macro_derive($derive)]
+        pub fn $name(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+            use quote::quote;
 
-    let input = parse_macro_input!(input as DeriveInput);
+            let input = parse_macro_input!(input as DeriveInput);
 
-    let struct_name = &input.ident;
+            let struct_name = &input.ident;
 
-    let expanded = quote! {
-        #[pymethods]
-        impl #struct_name {
-            fn __bool__(&self) -> bool {
-                Into::into(self)
-            }
+            let expanded = quote! {
+                #[pymethods]
+                impl #struct_name {
+                    fn $pyname(&self) -> $ty {
+                        Into::into(self)
+                    }
+                }
+            };
+            expanded.into()
         }
     };
-
-    expanded.into()
 }
+
+impl_convert!(PyBool, py_bool, __bool__, bool);
+impl_convert!(PyInt, py_int, __int__, i64);
+impl_convert!(PyIndex, py_index, __index__, isize);
+impl_convert!(PyFloat, py_float, __float__, f64);
 
 #[proc_macro_derive(PyBytes)]
 pub fn py_bytes(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -385,66 +393,6 @@ pub fn py_bytes(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         impl #struct_name {
             fn __bytes__(&self) -> Cow<[u8]> {
                 use ::std::borrow::Cow;
-                Into::into(self)
-            }
-        }
-    };
-
-    expanded.into()
-}
-
-#[proc_macro_derive(PyInt)]
-pub fn py_int(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    use quote::quote;
-
-    let input = parse_macro_input!(input as DeriveInput);
-
-    let struct_name = &input.ident;
-
-    let expanded = quote! {
-        #[pymethods]
-        impl #struct_name {
-            fn __int__(&self) -> i64 {
-                Into::into(self)
-            }
-        }
-    };
-
-    expanded.into()
-}
-
-#[proc_macro_derive(PyIndex)]
-pub fn py_inex(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    use quote::quote;
-
-    let input = parse_macro_input!(input as DeriveInput);
-
-    let struct_name = &input.ident;
-
-    let expanded = quote! {
-        #[pymethods]
-        impl #struct_name {
-            fn __index__(&self) -> isize {
-                Into::into(self)
-            }
-        }
-    };
-
-    expanded.into()
-}
-
-#[proc_macro_derive(PyFloat)]
-pub fn py_float(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    use quote::quote;
-
-    let input = parse_macro_input!(input as DeriveInput);
-
-    let struct_name = &input.ident;
-
-    let expanded = quote! {
-        #[pymethods]
-        impl #struct_name {
-            fn __float__(&self) -> f64 {
                 Into::into(self)
             }
         }
