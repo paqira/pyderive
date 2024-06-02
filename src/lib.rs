@@ -1008,3 +1008,1292 @@ pub use pyderive_macros::PyStr;
 /// });
 /// ```
 pub use pyderive_macros::ToPyObject;
+
+/// Provides derive macros that implements enumeration of numeric type.
+pub mod ops {
+    /// Derive macro generating an impl of [`__add__`][py] method by [`Add`][std::ops::Add] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Add;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Add for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn add(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __add__(&self, other: &Self) -> Self {
+    ///         Add::add(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Add;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyAdd;
+    ///
+    /// #[derive(PyNew, PyAdd)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Add for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn add(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: Add::add(self.field, rhs.field) }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(1) + PyClass(2)
+    /// assert actual.field == 3
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     if py.version_info() >= (3, 10) {
+    ///         let PyClass = py.get_type_bound::<PyClass>();
+    ///         py_run!(py, PyClass, test)
+    ///     }
+    /// });
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__add__
+    pub use pyderive_macros::PyAdd;
+    /// Derive macro generating an impl of [`__iadd__`][py] method by [`AddAssign<&Self>`][std::ops::AddAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::AddAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl AddAssign<&Self> for PyClass {
+    /// #    fn add_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __iadd__(&mut self, other: &Self) {
+    ///         AddAssign::add_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__iadd__
+    pub use pyderive_macros::PyAddAssign;
+    /// Derive macro generating an impl of [`__and__`][py] method by [`BitAnd`][std::ops::BitAnd] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitAnd;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitAnd for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn bitand(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __and__(&self, other: &Self) -> Self {
+    ///         BitAnd::bitand(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__and__
+    pub use pyderive_macros::PyAnd;
+    /// Derive macro generating an impl of [`__iand__`][py] method by [`BitAndAssign`][std::ops::BitAndAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitAndAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitAndAssign<&Self> for PyClass {
+    /// #    fn bitand_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __iand__(&mut self, other: &Self) {
+    ///         BitAndAssign::bitand_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__iand__
+    pub use pyderive_macros::PyAndAssign;
+    /// Derive macro generating an impl of [`__divmod__`][py] method by [`Div`][std::ops::Div] and [`Rem`][std::ops::Rem] traits.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::{Div, Rem};
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Div for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn div(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// # impl Rem for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn rem(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __divmod__(&self, other: &Self) -> (Self, Self) {
+    ///         (Div::div(self, other), Rem::rem(self, other))
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__divmod__
+    pub use pyderive_macros::PyDivMod;
+    /// Derive macro generating an impl of [`__floordiv__`][py] method by [`Div`][std::ops::Div] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Div;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Div for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn div(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __floordiv__(&self, other: &Self) -> Self {
+    ///         Div::div(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__floordiv__
+    pub use pyderive_macros::PyFloorDiv;
+    /// Derive macro generating an impl of [`__ifloordiv__`][py] method by [`DivAssign`][std::ops::DivAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::DivAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl DivAssign<&Self> for PyClass {
+    /// #    fn div_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __ifloordiv__(&mut self, other: &Self) {
+    ///         DivAssign::div_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ifloordiv__
+    pub use pyderive_macros::PyFloorDivAssign;
+    /// Derive macro generating an impl of [`__invert__`][py] method by [`Not`][std::ops::Not] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Not;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Not for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn not(self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __invert__(&self) -> Self {
+    ///         Not::not(self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__invert__
+    pub use pyderive_macros::PyInvert;
+    /// Derive macro generating an impl of [`__lshift__`][py] method by [`Shl`][std::ops::Shl] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Shl;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Shl for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn shl(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __lshift__(&self, other: &Self) -> Self {
+    ///         Shl::shl(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__lshift__
+    pub use pyderive_macros::PyLeftShift;
+    /// Derive macro generating an impl of [`__ilshift__`][py] method by [`ShlAssign`][std::ops::ShlAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::ShlAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl ShlAssign<&Self> for PyClass {
+    /// #    fn shl_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __ilshift__(&mut self, other: &Self) {
+    ///         ShlAssign::shl_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ilshift__
+    pub use pyderive_macros::PyLeftShiftAssign;
+    /// Derive macro generating an impl of [`__matmul__`][py] method by [`Mul`][std::ops::Mul] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Mul;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Mul for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn mul(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __matmul__(&self, other: &Self) -> Self {
+    ///         Mul::mul(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__matmul__
+    pub use pyderive_macros::PyMatMul;
+    /// Derive macro generating an impl of [`__imatmul__`][py] method by [`MulAssign`][std::ops::MulAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::MulAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl MulAssign<&Self> for PyClass {
+    /// #    fn mul_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __imatmul__(&mut self, other: &Self) {
+    ///         MulAssign::mul_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__imatmul__
+    pub use pyderive_macros::PyMatMulAssign;
+    /// Derive macro generating an impl of [`__mod__`][py] method by [`Rem`][std::ops::Rem] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Rem;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Rem for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn rem(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __mod__(&self, other: &Self) -> Self {
+    ///         Rem::rem(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__mod__
+    pub use pyderive_macros::PyMod;
+    /// Derive macro generating an impl of [`__imod__`][py] method by [`RemAssign`][std::ops::RemAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::RemAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl RemAssign<&Self> for PyClass {
+    /// #    fn rem_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __imod__(&mut self, other: &Self) {
+    ///         RemAssign::rem_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__imod__
+    pub use pyderive_macros::PyModAssign;
+    /// Derive macro generating an impl of [`__mul__`][py] method by [`Mul`][std::ops::Mul] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Mul;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Mul for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn mul(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __mul__(&self, other: &Self) -> Self {
+    ///         Mul::mul(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__mul__
+    pub use pyderive_macros::PyMul;
+    /// Derive macro generating an impl of [`__imul__`][py] method by [`MulAssign`][std::ops::MulAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::MulAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl MulAssign<&Self> for PyClass {
+    /// #    fn mul_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __imul__(&mut self, other: &Self) {
+    ///         MulAssign::mul_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__imul__
+    pub use pyderive_macros::PyMulAssign;
+    /// Derive macro generating an impl of [`__neg__`][py] method by [`Neg`][std::ops::Neg] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Neg;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Neg for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn neg(self) -> Self::Output { PyClass {} }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __neg__(&self) -> Self {
+    ///         Neg::neg(self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Neg;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyNeg;
+    ///
+    /// #[derive(PyNew, PyNeg, Clone)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Neg for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn neg(self) -> Self::Output {
+    ///         PyClass { field: Neg::neg(self.field) }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = -PyClass(1)
+    /// assert actual.field == -1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     if py.version_info() >= (3, 10) {
+    ///         let PyClass = py.get_type_bound::<PyClass>();
+    ///
+    ///         py_run!(py, PyClass, test)
+    ///     }
+    /// });
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__neg__
+    pub use pyderive_macros::PyNeg;
+    /// Derive macro generating an impl of [`__or__`][py] method by [`BitOr`][std::ops::BitOr] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitOr;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitOr for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn bitor(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __or__(&self, other: &Self) -> Self {
+    ///         BitOr::bitor(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__or__
+    pub use pyderive_macros::PyOr;
+    /// Derive macro generating an impl of [`__ior__`][py] method by [`BitOrAssign`][std::ops::BitOrAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitOrAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitOrAssign<&Self> for PyClass {
+    /// #    fn bitor_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __ior__(&mut self, other: &Self) {
+    ///         BitOrAssign::bitor_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ior__
+    pub use pyderive_macros::PyOrAssign;
+    /// Derive macro generating an impl of [`__pos__`][py] method (an identity method).
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use pyo3::prelude::*;
+    /// # #[derive(Clone)]
+    /// # #[pyclass]
+    /// # struct PyClass {}
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __pos__(self_: PyRef<'_, Self>) -> PyRef<'_, Self> {
+    ///         self_
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__pos__
+    pub use pyderive_macros::PyPos;
+    /// Derive macro generating an impl of [`__radd__`][py] method by [`Add`][std::ops::Add] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Add;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Add for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn add(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __radd__(&self, other: &Self) -> Self {
+    ///         Add::add(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__radd__
+    pub use pyderive_macros::PyReflectedAdd;
+    /// Derive macro generating an impl of [`__rand__`][py] method by [`BitAnd`][std::ops::BitAnd] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitAnd;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitAnd for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn bitand(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rand__(&self, other: &Self) -> Self {
+    ///         BitAnd::bitand(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rand__
+    pub use pyderive_macros::PyReflectedAnd;
+    /// Derive macro generating an impl of [`__rdivmod__`][py] method by [`Div`][std::ops::Div] and [`Rem`][std::ops::Rem] traits.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::{Div, Rem};
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Div for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn div(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// # impl Rem for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn rem(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rdivmod__(&self, other: &Self) -> (Self, Self) {
+    ///         (Div::div(other, self), Rem::rem(other, self))
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rdivmod__
+    pub use pyderive_macros::PyReflectedDivMod;
+    /// Derive macro generating an impl of [`__rfloordiv__`][py] method by [`Div`][std::ops::Div] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Div;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Div for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn div(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rfloordiv__(&self, other: &Self) -> Self {
+    ///         Div::div(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rfloordiv__
+    pub use pyderive_macros::PyReflectedFloorDiv;
+    /// Derive macro generating an impl of [`__rlshift__`][py] method by [`Shl`][std::ops::Shl] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Shl;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Shl for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn shl(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rlshift__(&self, other: &Self) -> Self {
+    ///         Shl::shl(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rlshift__
+    pub use pyderive_macros::PyReflectedLeftShift;
+    /// Derive macro generating an impl of [`__rmatmul__`][py] method by [`Mul`][std::ops::Mul] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Mul;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Mul for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn mul(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rmatmul__(&self, other: &Self) -> Self {
+    ///         Mul::mul(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rmatmul__
+    pub use pyderive_macros::PyReflectedMatMul;
+    /// Derive macro generating an impl of [`__rmod__`][py] method by [`Rem`][std::ops::Rem] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Rem;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Rem for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn rem(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rmod__(&self, other: &Self) -> Self {
+    ///         Rem::rem(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rmod__
+    pub use pyderive_macros::PyReflectedMod;
+    /// Derive macro generating an impl of [`__rmul__`][py] method by [`Mul`][std::ops::Mul] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Mul;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Mul for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn mul(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rmul__(&self, other: &Self) -> Self {
+    ///         Mul::mul(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rmul__
+    pub use pyderive_macros::PyReflectedMul;
+    /// Derive macro generating an impl of [`__ror__`][py] method by [`BitOr`][std::ops::BitOr] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitOr;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitOr for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn bitor(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __ror__(&self, other: &Self) -> Self {
+    ///         BitOr::bitor(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ror__
+    pub use pyderive_macros::PyReflectedOr;
+    /// Derive macro generating an impl of [`__rrshift__`][py] method by [`Shr`][std::ops::Shr] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Shr;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Shr for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn shr(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rrshift__(&self, other: &Self) -> Self {
+    ///         Shr::shr(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rrshift__
+    pub use pyderive_macros::PyReflectedRightShift;
+    /// Derive macro generating an impl of [`__rsub__`][py] method by [`Sub`][std::ops::Sub] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Sub;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Sub for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn sub(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rsub__(&self, other: &Self) -> Self {
+    ///         Sub::sub(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rsub__
+    pub use pyderive_macros::PyReflectedSub;
+    /// Derive macro generating an impl of [`__rtruediv__`][py] method by [`Div`][std::ops::Div] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Div;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Div for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn div(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rtruediv__(&self, other: &Self) -> Self {
+    ///         Div::div(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rtruediv__
+    pub use pyderive_macros::PyReflectedTrueDiv;
+    /// Derive macro generating an impl of [`__rxor__`][py] method by [`BitXor`][std::ops::BitXor] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitXor;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitXor for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn bitxor(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rxor__(&self, other: &Self) -> Self {
+    ///         BitXor::bitxor(other, self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rxor__
+    pub use pyderive_macros::PyReflectedXor;
+    /// Derive macro generating an impl of [`__rshift__`][py] method by [`Shr`][std::ops::Shr] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Shr;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Shr for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn shr(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __rshift__(&self, other: &Self) -> Self {
+    ///         Shr::shr(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rshift__
+    pub use pyderive_macros::PyRightShift;
+    /// Derive macro generating an impl of [`__irshift__`][py] method by [`ShrAssign`][std::ops::ShrAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::ShrAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl ShrAssign<&Self> for PyClass {
+    /// #    fn shr_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __irshift__(&mut self, other: &Self) {
+    ///         ShrAssign::shr_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__irshift__
+    pub use pyderive_macros::PyRightShiftAssign;
+    /// Derive macro generating an impl of [`__sub__`][py] method by [`Sub`][std::ops::Sub] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Sub;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Sub for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn sub(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __sub__(&self, other: &Self) -> Self {
+    ///         Sub::sub(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__sub__
+    pub use pyderive_macros::PySub;
+    /// Derive macro generating an impl of [`__isub__`][py] method by [`SubAssign`][std::ops::SubAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::SubAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl SubAssign<&Self> for PyClass {
+    /// #    fn sub_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __isub__(&mut self, other: &Self) {
+    ///         SubAssign::sub_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__isub__
+    pub use pyderive_macros::PySubAssign;
+    /// Derive macro generating an impl of [`__truediv__`][py] method by [`Div`][std::ops::Div] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::Div;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl Div for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn div(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __truediv__(&self, other: &Self) -> Self {
+    ///         Div::div(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__truediv__
+    pub use pyderive_macros::PyTrueDiv;
+    /// Derive macro generating an impl of [`__itruediv__`][py] method by [`Div`][std::ops::Div] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::DivAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl DivAssign<&Self> for PyClass {
+    /// #    fn div_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __itruediv__(&mut self, other: &Self) {
+    ///         DivAssign::div_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__itruediv__
+    pub use pyderive_macros::PyTrueDivAssign;
+    /// Derive macro generating an impl of [`__xor__`][py] method by [`BitXor`][std::ops::BitXor] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitXor;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitXor for &PyClass {
+    /// #    type Output = PyClass;
+    /// #    fn bitxor(self, rhs: Self) -> Self::Output { self.clone() }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __xor__(&self, other: &Self) -> Self {
+    ///         BitXor::bitxor(self, other)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__xor__
+    pub use pyderive_macros::PyXor;
+    /// Derive macro generating an impl of [`__ixor__`][py] method by [`BitXorAssign`][std::ops::BitXorAssign] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::ops::BitXorAssign;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # #[derive(Clone)]
+    /// # struct PyClass {}
+    /// # impl BitXorAssign<&Self> for PyClass {
+    /// #    fn bitxor_assign(&mut self, rhs: &Self) {}
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __ixor__(&mut self, other: &Self) {
+    ///         BitXorAssign::bitxor_assign(self, other);
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ixor__
+    pub use pyderive_macros::PyXorAssign;
+}
+
+/// Provides derive macros that implements conversion by built-in functions.
+pub mod convert {
+    /// Derive macro generating an impl of [`__bool__`][py] method by [`Into<bool>`] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements, for example:
+    ///
+    /// ```
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # struct PyClass {}
+    /// # impl From<&PyClass> for bool {
+    /// #    fn from(v: &PyClass) -> bool { true }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __bool__(&self) -> bool {
+    ///         Into::into(self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__bool__
+    pub use pyderive_macros::PyBool;
+    /// Derive macro generating an impl of [`__bytes__`][py] method by [`Into<Cow<[u8]>>`][core::convert::Into] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements:
+    ///
+    /// ```
+    /// # use std::borrow::Cow;
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # struct PyClass {}
+    /// # impl From<&PyClass> for Cow<'_, [u8]> {
+    /// # fn from(_value: &PyClass) -> Self {
+    /// #     vec![].into()
+    /// #     }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __bytes__(&self) -> Cow<[u8]> {
+    ///         Into::into(self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__bytes__
+    pub use pyderive_macros::PyBytes;
+    /// Derive macro generating an impl of [`__float__`][py] method by [`Into<f64>`] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements, for example:
+    ///
+    /// ```
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # struct PyClass {}
+    /// # impl From<&PyClass> for f64 {
+    /// #    fn from(v: &PyClass) -> f64 { 0.0 }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __float__(&self) -> f64 {
+    ///         Into::<f64>::into(self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::{PyNew, convert::PyFloat};
+    ///
+    /// #[derive(PyNew, PyFloat)]
+    /// #[pyclass]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl From<&PyClass> for f64 {
+    ///     fn from(v: &PyClass) -> f64 {
+    ///         v.field as f64
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = float(PyClass(1))
+    /// assert isinstance(actual, float)
+    /// assert actual == 1.0
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__float__
+    pub use pyderive_macros::PyFloat;
+    /// Derive macro generating an impl of [`__index__`][py] method by [`Into<isize>`] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements, for example:
+    ///
+    /// ```
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # struct PyClass {}
+    /// # impl From<&PyClass> for isize {
+    /// #    fn from(v: &PyClass) -> isize { 0 }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __index__(&self) -> isize {
+    ///         Into::into(self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__index__
+    pub use pyderive_macros::PyIndex;
+    /// Derive macro generating an impl of [`__int__`][py] method by [`Into<i64>`] trait.
+    ///
+    /// # Expansion
+    ///
+    /// This implements, for example:
+    ///
+    /// ```
+    /// # use pyo3::prelude::*;
+    /// # #[pyclass]
+    /// # struct PyClass {}
+    /// # impl From<&PyClass> for i64 {
+    /// #    fn from(v: &PyClass) -> i64 { 0 }
+    /// # }
+    /// #[pymethods]
+    /// impl PyClass {
+    ///     fn __int__(&self) -> i64 {
+    ///         Into::into(self)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__int__
+    pub use pyderive_macros::PyInt;
+}
