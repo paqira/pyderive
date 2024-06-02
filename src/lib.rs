@@ -84,6 +84,10 @@
 //! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //!
+//! Module [`pyderive::ops`](mod@ops) and [`pyderive::convert`](mod@convert) provides
+//! derive macros that implement method that enumerating numeric type (`__add__` etc.) and
+//! called by builtin functions (`__int__` etc.).
+//!
 //! In addition, this provides a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
 //! that required by [`PyRepr`], [`PyStr`], [`PyIter`] and [`PyDataclassFields`] derive macros.
 //!

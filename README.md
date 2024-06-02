@@ -62,16 +62,20 @@ This provides deriving following special methods and attributes;
 | `PyLen`             | `__len__()`                                       |
 | `PyDataclassFields` | `__dataclass_fields__`                            |
 
+The field attributes `#[pyderive(..)]` is used to customize the implementation,
+like [`dataclasses.field()`][dataclasses-field] of Python.
+
+[dataclasses-field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
+
+Module `pyderive::ops` and `pyderive::convert` provides
+derive macros that implement method that enumerating numeric type (`__add__` etc.) and
+called by builtin functions (`__int__` etc.).
+
 In addition, this provides a helper derive macro:
 
 | Derive Macro | Impl                                                         |
 |--------------|--------------------------------------------------------------|
 | `ToPyObject` | `ToPyObject` trait by `IntoPy<PyObject>` trait for `pyclass` |
-
-The field attributes `#[pyderive(..)]` is used to customize the implementation,
-like [`dataclasses.field()`][dataclasses-field] of Python.
-
-[dataclasses-field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
 
 It requires to enable `multiple-pymethods` feature of PyO3 because this may produce multiple `#[pymethods]`.
 
