@@ -1078,7 +1078,7 @@ pub mod ops {
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__add__
     pub use pyderive_macros::PyAdd;
-    /// Derive macro generating an impl of [`__iadd__`][py] method by [`AddAssign<&Self>`][std::ops::AddAssign] trait.
+    /// Derive macro generating an impl of [`__iadd__`][py] method by [`AddAssign`] trait.
     ///
     /// # Expansion
     ///
