@@ -3049,7 +3049,7 @@ pub mod ops {
     ///     py_run!(py, PyClass, test)
     /// });
     /// ```
-    /// 
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rshift__
     pub use pyderive_macros::PyRightShift;
     /// Derive macro generating an impl of [`__irshift__`][py] method by [`ShrAssign`][std::ops::ShrAssign] trait.
@@ -3228,7 +3228,7 @@ pub mod ops {
     ///     py_run!(py, PyClass, test)
     /// });
     /// ```
-    /// 
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__isub__
     pub use pyderive_macros::PySubAssign;
     /// Derive macro generating an impl of [`__truediv__`][py] method by [`Div`][std::ops::Div] trait.
@@ -3374,7 +3374,7 @@ pub mod ops {
     ///     }
     /// }
     /// ```
-    /// 
+    ///
     /// # Example
     ///
     /// ```
@@ -3393,7 +3393,7 @@ pub mod ops {
     ///
     /// impl BitXor for &PyClass {
     ///     type Output = PyClass;
-    /// 
+    ///
     ///     fn bitxor(self, rhs: Self) -> Self::Output {
     ///         PyClass { field: self.field ^ rhs.field }
     ///     }
@@ -3467,7 +3467,7 @@ pub mod ops {
     ///     py_run!(py, PyClass, test)
     /// });
     /// ```
-    /// 
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ixor__
     pub use pyderive_macros::PyXorAssign;
 }
