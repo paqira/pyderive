@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 //! This library provides derive macros of Python spacial methods and a class attributes for [PyO3].
 //!
 //! The field attribute `#[pyderive(..)]` helps to customize implementations,

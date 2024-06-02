@@ -176,3 +176,43 @@ assert actual == 1.0
         );
     });
 }
+
+#[test]
+#[cfg(feature = "num-complex")]
+fn complex() {
+    use num_complex::Complex64;
+
+    #[derive(PyComplex)]
+    #[pyclass(get_all)]
+    struct PyClass {
+        field: Complex64,
+    }
+
+    #[pymethods]
+    impl PyClass {
+        #[new]
+        fn new(field: Complex64) -> Self {
+            Self { field }
+        }
+    }
+
+    impl From<&PyClass> for Complex64 {
+        fn from(value: &PyClass) -> Self {
+            value.field * 2.0
+        }
+    }
+
+    Python::with_gil(|py| {
+        let py_class = py.get_type_bound::<PyClass>();
+        pyo3::py_run!(
+            py,
+            py_class,
+            r#"
+actual = complex(py_class(1.0 + 2.0j))
+assert getattr(actual, "__complex__") is not None
+assert isinstance(actual, complex)
+assert actual == 2.0 + 4.0j
+"#
+        );
+    });
+}

@@ -20,9 +20,13 @@ heck = { version = "0.5" }
 proc-macro2 = { version = "1" }
 quote = { version = "1" }
 syn = { version = "2", features = ["extra-traits", "derive", "full"] }
+num-complex = { version = ">= 0.2", optional = true }
 
 [dev-dependencies]
 pyo3 = { version = "0.21", features = [
     "auto-initialize",
     "multiple-pymethods",
 ] }
+
+[features]
+num-complex = ["pyo3/num-complex", "dep:num-complex"]

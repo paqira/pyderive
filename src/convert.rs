@@ -117,6 +117,66 @@ pub use pyderive_macros::PyBool;
 ///
 /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__bytes__
 pub use pyderive_macros::PyBytes;
+/// Derive macro generating an impl of [`__complex__`][py] method by [`Into<num_complex::Complex64>`] trait.
+///
+/// # Expansion
+///
+/// This implements, for example:
+///
+/// ```
+/// # use pyo3::prelude::*;
+/// # use num_complex;
+/// # #[pyclass]
+/// # struct PyClass {}
+/// # impl From<&PyClass> for num_complex::Complex64 {
+/// #    fn from(v: &PyClass) -> num_complex::Complex64 { Self::new(0., 0.) }
+/// # }
+/// #[pymethods]
+/// impl PyClass {
+///     fn __complex__(&self) -> num_complex::Complex64 {
+///         Into::into(self)
+///     }
+/// }
+/// ```
+///
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use num_complex::Complex64;
+///
+/// use pyderive::PyNew;
+/// use pyderive::convert::PyComplex;
+///
+/// #[derive(PyNew, PyComplex)]
+/// #[pyclass]
+/// struct PyClass {
+///     c: Complex64,
+/// }
+///
+/// impl From<&PyClass> for Complex64 {
+///     fn from(value: &PyClass) -> Complex64 {
+///         value.c * 2.0
+///     }
+/// }
+///
+/// let test = "
+/// actual = complex(PyClass(1.0 + 2.0j))
+/// assert isinstance(actual, complex)
+/// assert actual == 2.0 + 4.0j
+/// ";
+///
+/// Python::with_gil(|py| {
+///     let PyClass = py.get_type_bound::<PyClass>();
+///     py_run!(py, PyClass, test)
+/// });
+/// ```
+///
+/// [py]: https://docs.python.org/3/reference/datamodel.html#object.__complex__
+#[cfg_attr(docsrs, doc(cfg(feature = "num-complex")))]
+#[cfg(feature = "num-complex")]
+pub use pyderive_macros::PyComplex;
 /// Derive macro generating an impl of [`__float__`][py] method by [`Into<f64>`] trait.
 ///
 /// # Expansion

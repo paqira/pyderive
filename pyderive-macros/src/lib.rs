@@ -406,3 +406,24 @@ pub fn py_bytes(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     expanded.into()
 }
+
+#[cfg(feature = "num-complex")]
+#[proc_macro_derive(PyComplex)]
+pub fn py_complex(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    use quote::quote;
+
+    let input = parse_macro_input!(input as DeriveInput);
+
+    let struct_name = &input.ident;
+
+    let expanded = quote! {
+        #[pymethods]
+        impl #struct_name {
+            fn __complex__(&self) -> ::num_complex::Complex64 {
+                Into::into(self)
+            }
+        }
+    };
+
+    expanded.into()
+}

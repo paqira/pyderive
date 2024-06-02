@@ -23,6 +23,10 @@ pyo3 = { version = "0.21", features = [
     "auto-initialize",
     "multiple-pymethods",
 ] }
+num-complex = { version = ">= 0.2" } # for doctest
+
+[features]
+num-complex = ["pyo3/num-complex", "pyderive-macros/num-complex"]
 
 [workspace]
 members = [
