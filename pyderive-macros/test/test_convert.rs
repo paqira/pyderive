@@ -14,6 +14,7 @@ macro_rules! impl_new {
         }
     };
 }
+
 #[test]
 fn r#bool() {
     #[derive(PyBool)]
@@ -37,6 +38,7 @@ fn r#bool() {
             py_class,
             r#"
 actual = bool(py_class(1))
+assert getattr(actual, "__bool__") is not None
 assert isinstance(actual, bool)
 assert actual is True
 "#
@@ -49,14 +51,16 @@ fn bytes() {
     #[derive(PyBytes)]
     #[pyclass(get_all)]
     struct PyClass {
-        field: i64,
+        a: u8,
+        b: u8,
+        c: u8,
     }
 
     impl_new!(PyClass);
 
     impl From<&PyClass> for Cow<'_, [u8]> {
-        fn from(_value: &PyClass) -> Self {
-            vec![0, 1, 2, 3, 4, 5].into()
+        fn from(value: &PyClass) -> Self {
+            Cow::from(vec![value.a, value.b, value.c])
         }
     }
 
@@ -66,9 +70,10 @@ fn bytes() {
             py,
             py_class,
             r#"
-actual = bytes(py_class(1))
+actual = bytes(py_class(1, 2, 3))
+assert getattr(actual, "__bytes__") is not None
 assert isinstance(actual, bytes)
-assert actual == b'\x00\x01\x02\x03\x04\x05'
+assert actual == b'\x01\x02\x03'
 "#
         );
     });
@@ -96,6 +101,7 @@ fn int() {
             py_class,
             r#"
 actual = int(py_class(1))
+assert getattr(actual, "__int__") is not None
 assert isinstance(actual, int)
 assert actual == 1
 "#
@@ -126,6 +132,7 @@ fn index() {
             py_class,
             r#"
 actual = int(py_class(1))
+assert getattr(actual, "__index__") is not None
 # assert isinstance(actual, int)
 # assert actual == 1
 "#
@@ -156,6 +163,7 @@ fn float() {
             py_class,
             r#"
 actual = float(py_class(1))
+assert getattr(actual, "__float__") is not None
 assert isinstance(actual, float)
 assert actual == 1.0
 "#
