@@ -3613,7 +3613,7 @@ pub mod convert {
     /// #[pymethods]
     /// impl PyClass {
     ///     fn __float__(&self) -> f64 {
-    ///         Into::<f64>::into(self)
+    ///         Into::into(self)
     ///     }
     /// }
     /// ```
