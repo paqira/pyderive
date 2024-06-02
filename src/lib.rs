@@ -1059,7 +1059,7 @@ pub mod ops {
     ///     type Output = PyClass;
     ///
     ///     fn add(self, rhs: Self) -> Self::Output {
-    ///         PyClass { field: Add::add(self.field, rhs.field) }
+    ///         PyClass { field: self.field + rhs.field }
     ///     }
     /// }
     ///
@@ -1069,10 +1069,8 @@ pub mod ops {
     /// ";
     ///
     /// Python::with_gil(|py| {
-    ///     if py.version_info() >= (3, 10) {
-    ///         let PyClass = py.get_type_bound::<PyClass>();
-    ///         py_run!(py, PyClass, test)
-    ///     }
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
     /// });
     /// ```
     ///
@@ -1101,6 +1099,40 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::AddAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyAddAssign;
+    ///
+    /// #[derive(PyNew, PyAddAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl AddAssign<&Self> for PyClass {
+    ///     fn add_assign(&mut self, rhs: &Self) {
+    ///         self.field += rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(1)
+    /// actual += PyClass(2)
+    /// assert actual.field == 3
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__iadd__
     pub use pyderive_macros::PyAddAssign;
     /// Derive macro generating an impl of [`__and__`][py] method by [`BitAnd`][std::ops::BitAnd] trait.
@@ -1127,6 +1159,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::BitAnd;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyAnd;
+    ///
+    /// #[derive(PyNew, PyAnd)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl BitAnd for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn bitand(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field & rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(9) & PyClass(5)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__and__
     pub use pyderive_macros::PyAnd;
     /// Derive macro generating an impl of [`__iand__`][py] method by [`BitAndAssign`][std::ops::BitAndAssign] trait.
@@ -1150,6 +1217,40 @@ pub mod ops {
     ///         BitAndAssign::bitand_assign(self, other);
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::BitAndAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyAndAssign;
+    ///
+    /// #[derive(PyNew, PyAndAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl BitAndAssign<&Self> for PyClass {
+    ///     fn bitand_assign(&mut self, rhs: &Self) {
+    ///         self.field &= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(9)
+    /// actual &= PyClass(5)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__iand__
@@ -1182,6 +1283,50 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::{Div, Rem};
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyDivMod;
+    ///
+    /// #[derive(PyNew, PyDivMod)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Div for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn div(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field / rhs.field }
+    ///     }
+    /// }
+    ///
+    /// impl Rem for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn rem(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field % rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = divmod(PyClass(7), PyClass(2))
+    /// assert actual[0].field == 3
+    /// assert actual[1].field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__divmod__
     pub use pyderive_macros::PyDivMod;
     /// Derive macro generating an impl of [`__floordiv__`][py] method by [`Div`][std::ops::Div] trait.
@@ -1208,6 +1353,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Div;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyFloorDiv;
+    ///
+    /// #[derive(PyNew, PyFloorDiv)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Div for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn div(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field / rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) // PyClass(2)
+    /// assert actual.field == 3
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__floordiv__
     pub use pyderive_macros::PyFloorDiv;
     /// Derive macro generating an impl of [`__ifloordiv__`][py] method by [`DivAssign`][std::ops::DivAssign] trait.
@@ -1231,6 +1411,40 @@ pub mod ops {
     ///         DivAssign::div_assign(self, other);
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::DivAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyFloorDivAssign;
+    ///
+    /// #[derive(PyNew, PyFloorDivAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl DivAssign<&Self> for PyClass {
+    ///     fn div_assign(&mut self, rhs: &Self) {
+    ///         self.field /= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7)
+    /// actual //= PyClass(2)
+    /// assert actual.field == 3
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ifloordiv__
@@ -1259,6 +1473,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Not;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyInvert;
+    ///
+    /// #[derive(PyNew, PyInvert)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Not for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn not(self) -> Self::Output {
+    ///         PyClass { field: !self.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = ~PyClass(1)
+    /// assert actual.field == -2
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__invert__
     pub use pyderive_macros::PyInvert;
     /// Derive macro generating an impl of [`__lshift__`][py] method by [`Shl`][std::ops::Shl] trait.
@@ -1285,6 +1534,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Shl;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyLeftShift;
+    ///
+    /// #[derive(PyNew, PyLeftShift)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Shl for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn shl(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field << rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(1) << PyClass(2)
+    /// assert actual.field == 4
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__lshift__
     pub use pyderive_macros::PyLeftShift;
     /// Derive macro generating an impl of [`__ilshift__`][py] method by [`ShlAssign`][std::ops::ShlAssign] trait.
@@ -1308,6 +1592,40 @@ pub mod ops {
     ///         ShlAssign::shl_assign(self, other);
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::ShlAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyLeftShiftAssign;
+    ///
+    /// #[derive(PyNew, PyLeftShiftAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl ShlAssign<&Self> for PyClass {
+    ///     fn shl_assign(&mut self, rhs: &Self) {
+    ///         self.field <<= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(1)
+    /// actual <<= PyClass(2)
+    /// assert actual.field == 4
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ilshift__
@@ -1336,6 +1654,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Mul;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyMatMul;
+    ///
+    /// #[derive(PyNew, PyMatMul)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Mul for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn mul(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field * rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2) @ PyClass(3)
+    /// assert actual.field == 6
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__matmul__
     pub use pyderive_macros::PyMatMul;
     /// Derive macro generating an impl of [`__imatmul__`][py] method by [`MulAssign`][std::ops::MulAssign] trait.
@@ -1359,6 +1712,40 @@ pub mod ops {
     ///         MulAssign::mul_assign(self, other);
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::MulAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyMatMulAssign;
+    ///
+    /// #[derive(PyNew, PyMatMulAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl MulAssign<&Self> for PyClass {
+    ///     fn mul_assign(&mut self, rhs: &Self) {
+    ///         self.field *= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2)
+    /// actual @= PyClass(3)
+    /// assert actual.field == 6
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__imatmul__
@@ -1387,6 +1774,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Rem;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyMod;
+    ///
+    /// #[derive(PyNew, PyMod)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Rem for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn rem(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field % rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) % PyClass(2)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__mod__
     pub use pyderive_macros::PyMod;
     /// Derive macro generating an impl of [`__imod__`][py] method by [`RemAssign`][std::ops::RemAssign] trait.
@@ -1410,6 +1832,40 @@ pub mod ops {
     ///         RemAssign::rem_assign(self, other);
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::RemAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyModAssign;
+    ///
+    /// #[derive(PyNew, PyModAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl RemAssign<&Self> for PyClass {
+    ///     fn rem_assign(&mut self, rhs: &Self) {
+    ///         self.field %= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7)
+    /// actual %= PyClass(2)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__imod__
@@ -1438,6 +1894,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Mul;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyMul;
+    ///
+    /// #[derive(PyNew, PyMul)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Mul for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn mul(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field * rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2) * PyClass(3)
+    /// assert actual.field == 6
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__mul__
     pub use pyderive_macros::PyMul;
     /// Derive macro generating an impl of [`__imul__`][py] method by [`MulAssign`][std::ops::MulAssign] trait.
@@ -1461,6 +1952,40 @@ pub mod ops {
     ///         MulAssign::mul_assign(self, other);
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::MulAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyMulAssign;
+    ///
+    /// #[derive(PyNew, PyMulAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl MulAssign<&Self> for PyClass {
+    ///     fn mul_assign(&mut self, rhs: &Self) {
+    ///         self.field *= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2)
+    /// actual *= PyClass(3)
+    /// assert actual.field == 6
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__imul__
@@ -1553,6 +2078,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::BitOr;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyOr;
+    ///
+    /// #[derive(PyNew, PyOr)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl BitOr for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn bitor(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field | rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(5) | PyClass(3)
+    /// assert actual.field == 7
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__or__
     pub use pyderive_macros::PyOr;
     /// Derive macro generating an impl of [`__ior__`][py] method by [`BitOrAssign`][std::ops::BitOrAssign] trait.
@@ -1578,6 +2138,40 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::BitOrAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyOrAssign;
+    ///
+    /// #[derive(PyNew, PyOrAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl BitOrAssign<&Self> for PyClass {
+    ///     fn bitor_assign(&mut self, rhs: &Self) {
+    ///         self.field |= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(5)
+    /// actual |= PyClass(3)
+    /// assert actual.field == 7
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ior__
     pub use pyderive_macros::PyOrAssign;
     /// Derive macro generating an impl of [`__pos__`][py] method (an identity method).
@@ -1597,6 +2191,31 @@ pub mod ops {
     ///         self_
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyPos;
+    ///
+    /// #[derive(PyNew, PyPos)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// let test = "
+    /// actual = +PyClass(1)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__pos__
@@ -1625,6 +2244,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Add;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedAdd;
+    ///
+    /// #[derive(PyNew, PyReflectedAdd)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Add for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn add(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field + rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(5) + PyClass(3)
+    /// assert actual.field == 8
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__radd__
     pub use pyderive_macros::PyReflectedAdd;
     /// Derive macro generating an impl of [`__rand__`][py] method by [`BitAnd`][std::ops::BitAnd] trait.
@@ -1649,6 +2303,41 @@ pub mod ops {
     ///         BitAnd::bitand(other, self)
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::BitAnd;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedAnd;
+    ///
+    /// #[derive(PyNew, PyReflectedAnd)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl BitAnd for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn bitand(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field & rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) & PyClass(3)
+    /// assert actual.field == 3
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rand__
@@ -1681,6 +2370,50 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::{Div, Rem};
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedDivMod;
+    ///
+    /// #[derive(PyNew, PyReflectedDivMod)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Div for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn div(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field / rhs.field }
+    ///     }
+    /// }
+    ///
+    /// impl Rem for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn rem(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field % rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = divmod(PyClass(7), PyClass(2))
+    /// assert actual[0].field == 3
+    /// assert actual[1].field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rdivmod__
     pub use pyderive_macros::PyReflectedDivMod;
     /// Derive macro generating an impl of [`__rfloordiv__`][py] method by [`Div`][std::ops::Div] trait.
@@ -1705,6 +2438,41 @@ pub mod ops {
     ///         Div::div(other, self)
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Div;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedFloorDiv;
+    ///
+    /// #[derive(PyNew, PyReflectedFloorDiv)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Div for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn div(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field / rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) // PyClass(3)
+    /// assert actual.field == 2
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rfloordiv__
@@ -1733,6 +2501,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Shl;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedLeftShift;
+    ///
+    /// #[derive(PyNew, PyReflectedLeftShift)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Shl for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn shl(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field << rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(1) << PyClass(2)
+    /// assert actual.field == 4
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rlshift__
     pub use pyderive_macros::PyReflectedLeftShift;
     /// Derive macro generating an impl of [`__rmatmul__`][py] method by [`Mul`][std::ops::Mul] trait.
@@ -1757,6 +2560,41 @@ pub mod ops {
     ///         Mul::mul(other, self)
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Mul;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedMatMul;
+    ///
+    /// #[derive(PyNew, PyReflectedMatMul)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Mul for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn mul(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field * rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2) @ PyClass(3)
+    /// assert actual.field == 6
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rmatmul__
@@ -1785,6 +2623,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Rem;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedMod;
+    ///
+    /// #[derive(PyNew, PyReflectedMod)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Rem for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn rem(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field % rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) % PyClass(2)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rmod__
     pub use pyderive_macros::PyReflectedMod;
     /// Derive macro generating an impl of [`__rmul__`][py] method by [`Mul`][std::ops::Mul] trait.
@@ -1809,6 +2682,41 @@ pub mod ops {
     ///         Mul::mul(other, self)
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Mul;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedMul;
+    ///
+    /// #[derive(PyNew, PyReflectedMul)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Mul for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn mul(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field * rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2) * PyClass(3)
+    /// assert actual.field == 6
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rmul__
@@ -1837,6 +2745,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::BitOr;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedOr;
+    ///
+    /// #[derive(PyNew, PyReflectedOr)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl BitOr for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn bitor(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field | rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) | PyClass(3)
+    /// assert actual.field == 7
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ror__
     pub use pyderive_macros::PyReflectedOr;
     /// Derive macro generating an impl of [`__rrshift__`][py] method by [`Shr`][std::ops::Shr] trait.
@@ -1861,6 +2804,41 @@ pub mod ops {
     ///         Shr::shr(other, self)
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Shr;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedRightShift;
+    ///
+    /// #[derive(PyNew, PyReflectedRightShift)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Shr for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn shr(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field >> rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(8) >> PyClass(2)
+    /// assert actual.field == 2
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rrshift__
@@ -1889,6 +2867,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Sub;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedSub;
+    ///
+    /// #[derive(PyNew, PyReflectedSub)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Sub for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn sub(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field - rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2) - PyClass(1)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rsub__
     pub use pyderive_macros::PyReflectedSub;
     /// Derive macro generating an impl of [`__rtruediv__`][py] method by [`Div`][std::ops::Div] trait.
@@ -1913,6 +2926,41 @@ pub mod ops {
     ///         Div::div(other, self)
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Div;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyReflectedTrueDiv;
+    ///
+    /// #[derive(PyNew, PyReflectedTrueDiv)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Div for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn div(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field / rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) / PyClass(3)
+    /// assert actual.field == 2
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rtruediv__
@@ -1967,6 +3015,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Shr;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyRightShift;
+    ///
+    /// #[derive(PyNew, PyRightShift)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Shr for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn shr(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field >> rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(8) >> PyClass(2)
+    /// assert actual.field == 2
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    /// 
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__rshift__
     pub use pyderive_macros::PyRightShift;
     /// Derive macro generating an impl of [`__irshift__`][py] method by [`ShrAssign`][std::ops::ShrAssign] trait.
@@ -1990,6 +3073,40 @@ pub mod ops {
     ///         ShrAssign::shr_assign(self, other);
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::ShrAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyRightShiftAssign;
+    ///
+    /// #[derive(PyNew, PyRightShiftAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl ShrAssign<&Self> for PyClass {
+    ///     fn shr_assign(&mut self, rhs: &Self) {
+    ///         self.field >>= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(8)
+    /// actual >>= PyClass(2)
+    /// assert actual.field == 2
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__irshift__
@@ -2018,6 +3135,41 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Sub;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PySub;
+    ///
+    /// #[derive(PyNew, PySub)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Sub for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn sub(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field - rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2) - PyClass(1)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__sub__
     pub use pyderive_macros::PySub;
     /// Derive macro generating an impl of [`__isub__`][py] method by [`SubAssign`][std::ops::SubAssign] trait.
@@ -2043,6 +3195,40 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::SubAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PySubAssign;
+    ///
+    /// #[derive(PyNew, PySubAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl SubAssign<&Self> for PyClass {
+    ///     fn sub_assign(&mut self, rhs: &Self) {
+    ///         self.field -= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(2)
+    /// actual -= PyClass(1)
+    /// assert actual.field == 1
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    /// 
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__isub__
     pub use pyderive_macros::PySubAssign;
     /// Derive macro generating an impl of [`__truediv__`][py] method by [`Div`][std::ops::Div] trait.
@@ -2067,6 +3253,41 @@ pub mod ops {
     ///         Div::div(self, other)
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::Div;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyTrueDiv;
+    ///
+    /// #[derive(PyNew, PyTrueDiv)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl Div for &PyClass {
+    ///     type Output = PyClass;
+    ///
+    ///     fn div(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field / rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) / PyClass(2)
+    /// assert actual.field == 3
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__truediv__
@@ -2094,6 +3315,40 @@ pub mod ops {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::DivAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyTrueDivAssign;
+    ///
+    /// #[derive(PyNew, PyTrueDivAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl DivAssign<&Self> for PyClass {
+    ///     fn div_assign(&mut self, rhs: &Self) {
+    ///         self.field /= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7)
+    /// actual /= PyClass(2)
+    /// assert actual.field == 3
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__itruediv__
     pub use pyderive_macros::PyTrueDivAssign;
     /// Derive macro generating an impl of [`__xor__`][py] method by [`BitXor`][std::ops::BitXor] trait.
@@ -2118,6 +3373,41 @@ pub mod ops {
     ///         BitXor::bitxor(self, other)
     ///     }
     /// }
+    /// ```
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// use std::ops::BitXor;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyXor;
+    ///
+    /// #[derive(PyNew, PyXor)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl BitXor for &PyClass {
+    ///     type Output = PyClass;
+    /// 
+    ///     fn bitxor(self, rhs: Self) -> Self::Output {
+    ///         PyClass { field: self.field ^ rhs.field }
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7) ^ PyClass(3)
+    /// assert actual.field == 4
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__xor__
@@ -2144,7 +3434,40 @@ pub mod ops {
     ///     }
     /// }
     /// ```
+    /// # Example
     ///
+    /// ```
+    /// use std::ops::BitXorAssign;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::ops::PyXorAssign;
+    ///
+    /// #[derive(PyNew, PyXorAssign)]
+    /// #[pyclass(get_all)]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl BitXorAssign<&Self> for PyClass {
+    ///     fn bitxor_assign(&mut self, rhs: &Self) {
+    ///         self.field ^= rhs.field;
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = PyClass(7)
+    /// actual ^= PyClass(3)
+    /// assert actual.field == 4
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    /// 
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__ixor__
     pub use pyderive_macros::PyXorAssign;
 }
@@ -2172,6 +3495,38 @@ pub mod convert {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::convert::PyBool;
+    ///
+    /// #[derive(PyNew, PyBool)]
+    /// #[pyclass]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl From<&PyClass> for bool {
+    ///     fn from(value: &PyClass) -> Self {
+    ///         value.field.is_positive()
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = bool(PyClass(1))
+    /// assert isinstance(actual, bool)
+    /// assert actual is True
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__bool__
     pub use pyderive_macros::PyBool;
     /// Derive macro generating an impl of [`__bytes__`][py] method by [`Into<Cow<[u8]>>`][core::convert::Into] trait.
@@ -2196,6 +3551,42 @@ pub mod convert {
     ///         Into::into(self)
     ///     }
     /// }
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::borrow::Cow;
+    ///
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::convert::PyBytes;
+    ///
+    /// #[derive(PyNew, PyBytes)]
+    /// #[pyclass]
+    /// struct PyClass {
+    ///     a: u8,
+    ///     b: u8,
+    ///     c: u8
+    /// }
+    ///
+    /// impl From<&PyClass> for Cow<'_, [u8]> {
+    ///     fn from(value: &PyClass) -> Self {
+    ///         vec![value.a, value.b, value.c].into()
+    ///     }
+    /// }
+    ///
+    /// let test = r#"
+    /// actual = bytes(PyClass(1, 2, 3))
+    /// assert isinstance(actual, bytes)
+    /// assert actual == b'\x01\x02\x03'
+    /// "#;
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__bytes__
@@ -2226,7 +3617,8 @@ pub mod convert {
     /// ```
     /// use pyo3::{prelude::*, py_run};
     ///
-    /// use pyderive::{PyNew, convert::PyFloat};
+    /// use pyderive::PyNew;
+    /// use pyderive::convert::PyFloat;
     ///
     /// #[derive(PyNew, PyFloat)]
     /// #[pyclass]
@@ -2235,15 +3627,15 @@ pub mod convert {
     /// }
     ///
     /// impl From<&PyClass> for f64 {
-    ///     fn from(v: &PyClass) -> f64 {
-    ///         v.field as f64
+    ///     fn from(value: &PyClass) -> f64 {
+    ///         (value.field * 2) as f64
     ///     }
     /// }
     ///
     /// let test = "
     /// actual = float(PyClass(1))
     /// assert isinstance(actual, float)
-    /// assert actual == 1.0
+    /// assert actual == 2.0
     /// ";
     ///
     /// Python::with_gil(|py| {
@@ -2275,6 +3667,38 @@ pub mod convert {
     /// }
     /// ```
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::convert::PyIndex;
+    ///
+    /// #[derive(PyNew, PyIndex)]
+    /// #[pyclass]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl From<&PyClass> for isize {
+    ///     fn from(value: &PyClass) -> isize {
+    ///         (value.field * 2) as isize
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = int(PyClass(1))
+    /// assert isinstance(actual, int)
+    /// assert actual == 2
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
+    /// ```
+    ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__index__
     pub use pyderive_macros::PyIndex;
     /// Derive macro generating an impl of [`__int__`][py] method by [`Into<i64>`] trait.
@@ -2296,6 +3720,39 @@ pub mod convert {
     ///         Into::into(self)
     ///     }
     /// }
+    /// ```
+    ///
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use pyo3::{prelude::*, py_run};
+    ///
+    /// use pyderive::PyNew;
+    /// use pyderive::convert::PyInt;
+    ///
+    /// #[derive(PyNew, PyInt)]
+    /// #[pyclass]
+    /// struct PyClass {
+    ///     field: i64
+    /// }
+    ///
+    /// impl From<&PyClass> for i64 {
+    ///     fn from(value: &PyClass) -> i64 {
+    ///         value.field * 2
+    ///     }
+    /// }
+    ///
+    /// let test = "
+    /// actual = int(PyClass(1))
+    /// assert isinstance(actual, int)
+    /// assert actual == 2
+    /// ";
+    ///
+    /// Python::with_gil(|py| {
+    ///     let PyClass = py.get_type_bound::<PyClass>();
+    ///     py_run!(py, PyClass, test)
+    /// });
     /// ```
     ///
     /// [py]: https://docs.python.org/3/reference/datamodel.html#object.__int__
