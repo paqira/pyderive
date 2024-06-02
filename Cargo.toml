@@ -14,21 +14,17 @@ keywords = ["python", "pyo3"]
 repository = "https://github.com/paqira/pyderive"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-[lib]
-proc-macro = true
-
-[[test]]
-name = "test"
-path = "test/test.rs"
 
 [dependencies]
-heck = { version = "0.5" }
-proc-macro2 = { version = "1" }
-quote = { version = "1" }
-syn = { version = "2", features = ["extra-traits", "derive", "full"] }
+pyderive-macros = { path = "pyderive-macros", version = "*" }
 
 [dev-dependencies]
 pyo3 = { version = "0.21", features = [
     "auto-initialize",
     "multiple-pymethods",
 ] }
+
+[workspace]
+members = [
+    "pyderive-macros",
+]

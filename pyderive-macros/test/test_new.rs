@@ -1,4 +1,4 @@
-use pyderive::*;
+use pyderive_macros::*;
 use pyo3::{prelude::*, types::*};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 

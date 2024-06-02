@@ -1,9 +1,9 @@
-use pyderive::*;
+use pyderive_macros::*;
 use pyo3::{prelude::*, py_run};
 
 #[test]
 fn test_no_get_set() {
-    #[derive(PyIter)]
+    #[derive(PyLen)]
     #[pyclass]
     #[derive(Default)]
     #[allow(dead_code)]
@@ -14,13 +14,13 @@ fn test_no_get_set() {
 
     Python::with_gil(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == ()")
+        py_run!(py, data, "assert len(data) == 0")
     });
 }
 
 #[test]
 fn test_get_set() {
-    #[derive(PyIter)]
+    #[derive(PyLen)]
     #[pyclass]
     #[derive(Default)]
     struct PyClass {
@@ -32,13 +32,13 @@ fn test_get_set() {
 
     Python::with_gil(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == (0, )")
+        py_run!(py, data, "assert len(data) == 1")
     });
 }
 
 #[test]
 fn test_get_all() {
-    #[derive(PyIter)]
+    #[derive(PyLen)]
     #[pyclass(get_all)]
     #[derive(Default)]
     struct PyClass {
@@ -48,13 +48,13 @@ fn test_get_all() {
 
     Python::with_gil(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == (0, 0.0)")
+        py_run!(py, data, "assert len(data) == 2")
     });
 }
 
 #[test]
 fn test_set_all() {
-    #[derive(PyIter)]
+    #[derive(PyLen)]
     #[pyclass(set_all)]
     #[derive(Default)]
     struct PyClass {
@@ -65,13 +65,13 @@ fn test_set_all() {
 
     Python::with_gil(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == (0, )")
+        py_run!(py, data, "assert len(data) == 1")
     });
 }
 
 #[test]
 fn test_name_rename_all() {
-    #[derive(PyIter)]
+    #[derive(PyLen)]
     #[pyclass(get_all, name = "PyClass", rename_all = "camelCase")]
     #[derive(Default)]
     struct PyClass {
@@ -82,52 +82,53 @@ fn test_name_rename_all() {
 
     Python::with_gil(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == (0, 0.0)")
+        py_run!(py, data, "assert len(data) == 2")
     });
 }
 
 #[test]
 fn test_pyderive_true() {
-    #[derive(PyIter, Default)]
+    #[derive(PyLen)]
     #[pyclass]
+    #[derive(Default)]
     struct PyClass {
-        #[pyderive(iter)]
+        #[pyderive(len)]
+        #[allow(dead_code)]
         field: i64,
     }
 
     Python::with_gil(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == (0, )")
+        py_run!(py, data, "assert len(data) == 1")
     });
 }
 
 #[test]
 fn test_pyderive_false() {
-    #[derive(PyIter, Default)]
+    #[derive(PyLen)]
     #[pyclass(get_all)]
+    #[derive(Default)]
     struct PyClass {
-        #[pyderive(iter = false)]
+        #[pyderive(len = false)]
         field: i64,
     }
 
     Python::with_gil(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == tuple()")
+        py_run!(py, data, "assert len(data) == 0")
     });
 }
 
 #[test]
 fn test_nest_pyclass() {
-    #[derive(PyIter)]
+    #[derive(PyLen)]
     #[pyclass(get_all)]
     struct PyClassA {
-        field_1: PyClassB,
-        field_2: i64,
+        field: PyClassB,
     }
 
-    #[derive(PyIter, Clone)]
+    #[derive(PyLen, Clone)]
     #[pyclass(get_all)]
-    #[derive(PartialEq)]
     struct PyClassB {
         field: i64,
     }
@@ -135,9 +136,9 @@ fn test_nest_pyclass() {
     #[pymethods]
     impl PyClassA {
         #[new]
-        #[pyo3(signature=(field_1, field_2))]
-        fn new(field_1: PyClassB, field_2: i64) -> Self {
-            Self { field_1, field_2 }
+        #[pyo3(signature=(field))]
+        fn new(field: PyClassB) -> Self {
+            Self { field }
         }
     }
 
@@ -148,16 +149,6 @@ fn test_nest_pyclass() {
         fn new(field: i64) -> Self {
             Self { field }
         }
-
-        fn __eq__(&self, other: &Self) -> bool {
-            self.eq(other)
-        }
-    }
-
-    impl ToPyObject for PyClassB {
-        fn to_object(&self, py: Python<'_>) -> PyObject {
-            self.clone().into_py(py)
-        }
     }
 
     Python::with_gil(|py| {
@@ -167,9 +158,9 @@ fn test_nest_pyclass() {
             py,
             py_class_a py_class_b,
             r#"
-a = py_class_a(py_class_b(1), 1)
+a = py_class_a(py_class_b(1))
 
-assert tuple(a) == (py_class_b(1), 1)
+assert len(a) == 1
 "#
         );
     });

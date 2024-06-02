@@ -280,640 +280,6 @@
 //! [keyword-only-arguments]: https://docs.python.org/3/tutorial/controlflow.html#keyword-only-arguments
 //! [KW_ONLY]: https://docs.python.org/3/library/dataclasses.html#dataclasses.KW_ONLY
 //! [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
-use syn::{parse_macro_input, DeriveInput};
-
-mod attr;
-mod common;
-mod internal;
-
-/// Derive macro generating a [`__repr__()`][__repr__] fn/Python method.
-///
-/// It returns the string that contains `get` and `set` fields as default,
-/// in the order of declaration.
-///
-/// If the filed is marked by `#[pyderive(repr=true)]` attribute,
-/// the field is included in the string that `__str__()` returns;
-/// if `#[pyderive(repr=false)]`, it isn't.
-///
-/// - It should place `#[derive(PyRepr)]` before `#[pyclass]`.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
-/// [__repr__]: https://docs.python.org/reference/datamodel.html#object.__repr__
-/// [repr]: https://docs.python.org/library/functions.html#repr
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// // Place before `#[pyclass]`
-/// #[derive(PyRepr)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-///     float: f64,
-///     tuple: (String, i64, f64),
-///     option: Option<String>,
-///     #[pyderive(repr=false)]
-///     excluded: String,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass {
-///         string: "s".to_string(),
-///         integer: 1,
-///         float: 1.0,
-///         tuple: ("s".to_string(), 1, 1.0),
-///         option: None,
-///         excluded: "excluded".to_string(),
-///     })?;
-///
-///     py_run!(py, a, r#"assert repr(a) == "builtins.PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
-///
-///     Ok(())
-/// });
-/// ```
-#[proc_macro_derive(PyRepr, attributes(pyderive))]
-pub fn py_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::repr::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a [`__str__()`][__str__] fn/Python method.
-///
-/// It returns the string that contains `get` and `set` fields as default,
-/// in the order of declaration.
-///
-/// If the filed is marked by `#[pyderive(str=true)]` attribute,
-/// the field is included in the string that `__str__()` returns;
-/// if `#[pyderive(str=false)]`, it isn't.
-///
-/// - It should place `#[derive(PyStr)]` before `#[pyclass]`.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
-/// [__str__]: https://docs.python.org/reference/datamodel.html#object.__str__
-/// [str]: https://docs.python.org/library/functions.html#str
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// // Place before `#[pyclass]`
-/// #[derive(PyStr)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-///     float: f64,
-///     tuple: (String, i64, f64),
-///     option: Option<String>,
-///     #[pyderive(str=false)]
-///     excluded: String,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass {
-///         string: "s".to_string(),
-///         integer: 1,
-///         float: 1.0,
-///         tuple: ("s".to_string(), 1, 1.0),
-///         option: None,
-///         excluded: "excluded".to_string(),
-///     })?;
-///
-///     py_run!(py, a, r#"assert str(a) == "builtins.PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
-///
-///     Ok(())
-/// });
-/// ```
-#[proc_macro_derive(PyStr, attributes(pyderive))]
-pub fn py_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::str::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a [`__len__()`][__len__] fn/Python method.
-///
-/// That returns number of `get` fields as default.
-///
-/// If the filed is marked by `#[pyderive(len=true)]` attribute,
-/// the field is counted by the `__len__()`; if `#[pyderive(len=false)]`, it isn't.
-///
-/// - It should place `#[derive(PyLen)]` before `#[pyclass]`.
-///
-/// [__len__]: https://docs.python.org/reference/datamodel.html#object.__len__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// // Place before `#[pyclass]`
-/// #[derive(PyLen)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-///     float: f64,
-///     tuple: (String, i64, f64),
-///     option: Option<String>,
-///     #[pyderive(len=false)]
-///     excluded: String,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass {
-///         string: "s".to_string(),
-///         integer: 1,
-///         float: 1.0,
-///         tuple: ("s".to_string(), 1, 1.0),
-///         option: None,
-///         excluded: "excluded".to_string(),
-///     })?;
-///
-///     py_run!(py, a, "assert len(a) == 5");
-///
-///     Ok(())
-/// });
-/// ```
-#[proc_macro_derive(PyLen, attributes(pyderive))]
-pub fn py_len(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::len::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a [`__iter__()`][__iter__] fn/Python method.
-///
-/// It returns an iterator of `get` fields as default,
-/// in the order of declaration.
-///
-/// If the filed is marked by `#[pyderive(iter=true)]` attribute,
-/// the field is included to the iterator that `__iter__()` returns;
-/// if `#[pyderive(iter=false)]`, it isn't.
-///
-/// - It should place `#[derive(PyIter)]` before `#[pyclass]`.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
-/// [__iter__]: https://docs.python.org/reference/datamodel.html#object.__iter__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// // Place before `#[pyclass]`
-/// #[derive(PyIter)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-///     float: f64,
-///     tuple: (String, i64, f64),
-///     option: Option<String>,
-///     #[pyderive(iter=false)]
-///     excluded: String,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass {
-///         string: "s".to_string(),
-///         integer: 1,
-///         float: 1.0,
-///         tuple: ("s".to_string(), 1, 1.0),
-///         option: None,
-///         excluded: "excluded".to_string(),
-///     })?;
-///
-///     py_run!(py, a, "assert tuple(a) == ('s', 1, 1.0, ('s', 1, 1.0), None)");
-///
-///     Ok(())
-/// });
-/// ```
-#[proc_macro_derive(PyIter, attributes(pyderive))]
-pub fn py_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::iter::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a [`__reversed__()`][__reversed__] fn/Python method.
-///
-/// It returns an iterator of `get` fields as default,
-/// in the reverse order of declaration.
-///
-/// This is a reversed one of a derive macro, [`PyIter`].
-///
-/// If the filed is marked by `#[pyderive(iter=true)]` attribute,
-/// the field is included to the iterator that `__reversed__()` returns;
-/// if `#[pyderive(iter=false)]`, it isn't.
-///
-/// - It should place `#[derive(PyReversed)]` before `#[pyclass]`.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
-/// [__reversed__]: https://docs.python.org/reference/datamodel.html#object.__reversed__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// // Place before `#[pyclass]`
-/// #[derive(PyReversed)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-///     float: f64,
-///     tuple: (String, i64, f64),
-///     option: Option<String>,
-///     #[pyderive(iter=false)]
-///     excluded: String,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass {
-///         string: "s".to_string(),
-///         integer: 1,
-///         float: 1.0,
-///         tuple: ("s".to_string(), 1, 1.0),
-///         option: None,
-///         excluded: "excluded".to_string(),
-///     })?;
-///
-///     py_run!(py, a, "assert tuple(reversed(a)) == (None, ('s', 1, 1.0), 1.0, 1, 's')");
-///
-///     Ok(())
-/// });
-/// ```
-#[proc_macro_derive(PyReversed, attributes(pyderive))]
-pub fn py_reversed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::reversed::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a [`__new__()`][__new__] Python method.
-///
-/// It has all fields as the arguments as default,
-/// in the order of declaration.
-///
-/// If the filed is marked by `#[pyderive(new=false)]` attribute,
-/// the field is excluded from the arguments of the `__new__()` method.
-/// Notes, `new=true` has no effect.
-///
-/// - It should place `#[derive(PyNew)]` before `#[pyclass]`.
-///
-/// See the [Customize Implementation](crate) section of the crate doc for detail.
-///
-/// [__new__]: https://docs.python.org/reference/datamodel.html#object.__new__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// // Place before `#[pyclass]`
-/// #[derive(PyNew)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-///     float: f64,
-///     tuple: (String, i64, f64),
-///     option: Option<String>,
-///     #[pyderive(new=false)]
-///     excluded: String,
-/// }
-///
-/// let test = "
-/// a = PyClass('s', 1, 1.0, ('s', 1, 1.0), None)
-/// assert a.string == 's'
-/// assert a.integer == 1
-/// assert a.float == 1.0
-/// assert a.tuple == ('s', 1, 1.0)
-/// assert a.option is None
-/// assert a.excluded == ''
-/// ";
-///
-/// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
-///
-///     py_run!(py, PyClass, test)
-/// });
-/// ```
-#[proc_macro_derive(PyNew, attributes(pyderive))]
-pub fn py_new(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::new::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a [`__eq__()`][__eq__] and [`__ne__()`][__ne__] fn/Python methods.
-///
-/// The implementation is based on [`PartialEq`]/[`Eq`] trait.
-///
-/// *Note that implementing `__eq__()` and `__ne__()` methods will cause
-/// Python not to generate a default `__hash__()` implementation,
-/// so consider also implementing `__hash__()`.*
-///
-/// # Expansion
-///
-/// This implements, for example;
-///
-/// ```
-/// # use pyo3::prelude::*;
-/// # #[pyclass]
-/// # #[derive(PartialEq)]
-/// # struct PyClass {}
-/// #[pymethods]
-/// impl PyClass {
-///     pub fn __eq__(&self, other: &Self) -> bool {
-///         self.eq(other)
-///     }
-///     pub fn __ne__(&self, other: &Self) -> bool {
-///         self.ne(other)
-///     }
-/// }
-/// ```
-///
-/// [__eq__]: https://docs.python.org/reference/datamodel.html#object.__eq__
-/// [__ne__]: https://docs.python.org/reference/datamodel.html#object.__ne__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// #[derive(PyEq)]
-/// #[pyclass]
-/// #[derive(PartialEq)]
-/// struct PyClass {
-///     field: f64,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass { field: 0.0 })?;
-///     let b = Py::new(py, PyClass { field: 1.0 })?;
-///     let c = Py::new(py, PyClass { field: f64::NAN })?;
-///
-///     py_run!(py, a b, "assert a == a");
-///     py_run!(py, a b, "assert a != b");
-///     py_run!(py, c, "assert c != c");
-///     py_run!(py, a, "assert a != 1");
-///
-///     Ok(())
-/// });
-/// ```
-#[proc_macro_derive(PyEq)]
-pub fn py_eq(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::eq::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating [`__lt__()`][__lt__], [`__le__()`][__le__], [`__gt__()`][__gt__] and [`__ge__()`][__ge__] fn/Python methods.
-///
-/// The implementation is based on [`PartialOrd`]/[`Ord`] trait.
-///
-/// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
-///
-/// *Note that implementing `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` methods
-/// will cause Python not to generate a default `__hash__()` implementation,
-/// so consider also implementing `__hash__()`.*
-///
-/// # Expansion
-///
-/// This implements, for example;
-///
-/// ```
-/// # use std::cmp::Ordering;
-/// # use pyo3::prelude::*;
-/// # #[pyclass]
-/// # #[derive(PartialOrd, PartialEq)]
-/// # struct PyClass {}
-/// #[pymethods]
-/// impl PyClass {
-///     pub fn __lt__(&self, other: &Self) -> PyResult<bool> {
-///         match self.partial_cmp(other) {
-///             Some(Ordering::Less) => Ok(true),
-///             _ => Ok(false),
-///         }
-///     }
-///     // and __le__, __gt__ and __ge__
-/// }
-/// ```
-///
-/// [__lt__]: https://docs.python.org/reference/datamodel.html#object.__lt__
-/// [__le__]: https://docs.python.org/reference/datamodel.html#object.__le__
-/// [__gt__]: https://docs.python.org/reference/datamodel.html#object.__gt__
-/// [__ge__]: https://docs.python.org/reference/datamodel.html#object.__ge__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// #[derive(PyOrd)]
-/// #[pyclass]
-/// #[derive(PartialOrd, PartialEq)]
-/// struct PyClass {
-///     field: f64,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass { field: 0.0 })?;
-///     let b = Py::new(py, PyClass { field: 1.0 })?;
-///     let c = Py::new(py, PyClass { field: f64::NAN })?;
-///
-///     py_run!(py, a b, "assert a < b");
-///     py_run!(py, a b, "assert a <= b");
-///     py_run!(py, a b, "assert not a > b");
-///     py_run!(py, a b, "assert not a >= b");
-///     py_run!(py, c, "assert not c < c");
-///     
-///     let test = "
-/// try:
-///     a < 1
-/// except TypeError:
-///     pass
-/// else:
-///     raise AssertionError
-/// ";
-///     py_run!(py, a, test);
-///
-///     Ok(())
-/// });
-/// ```
-#[proc_macro_derive(PyOrd)]
-pub fn py_ord(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::ord::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a [`__hash__()`][__hash__] fn/Python method.
-///
-/// The implementation is based on [`Hash`] trait.
-///
-/// # Expansion
-///
-/// This implements, for example;
-///
-/// ```
-/// # use pyo3::prelude::*;
-/// # #[pyclass]
-/// # #[derive(Hash)]
-/// # struct PyClass {}
-/// #[pymethods]
-/// impl PyClass {
-///     pub fn __hash__(&self) -> u64 {
-///         use std::collections::hash_map::DefaultHasher;
-///         use std::hash::{Hash, Hasher};
-///
-///         let mut s = DefaultHasher::new();
-///         self.hash(&mut s);
-///         s.finish()
-///     }
-/// }
-/// ```
-///
-/// [__hash__]: https://docs.python.org/reference/datamodel.html#object.__hash__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// #[derive(PyHash)]
-/// #[pyclass]
-/// #[derive(Hash)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass {
-///         string: "s".to_string(),
-///         integer: 1,
-///     })?;
-///
-///     py_run!(py, a, "assert hash(a) == -1989231435886966707");
-///
-///     Ok(())
-/// });
-/// ```
-#[proc_macro_derive(PyHash)]
-pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::hash::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
-/// Derive macro generating a [`__match_args__`][__match_args__] const/Python class attribute.
-///
-/// It contains `get` fields as default,
-/// in the order of declaration.
-///
-/// If the filed is marked by `#[pyderive(match_args=true)]` attribute,
-/// the field is included to the `__match_args__`;
-/// if `#[pyderive(match_args=false)]`, it isn't.
-///
-/// - It should place `#[derive(PyMatchArgs)]` before `#[pyclass]`.
-///
-/// [__match_args__]: https://docs.python.org/reference/datamodel.html#object.__match_args__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// // Place before `#[pyclass]`
-/// #[derive(PyNew, PyMatchArgs)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-///     float: f64,
-///     tuple: (String, i64, f64),
-///     option: Option<String>,
-///     #[pyderive(match_args=false)]
-///     excluded: String,
-/// }
-///
-/// let test = "
-/// match PyClass('s', 1, 1.0, ('s', 1, 1.0), None, 's'):
-///     case PyClass(a, b, c, d, e):
-///         assert a == 's'
-///         assert b == 1
-///         assert c == 1.0
-///         assert d == ('s', 1, 1.0)
-///         assert e is None
-///     case _:
-///         raise AssertionError
-/// ";
-///
-/// Python::with_gil(|py| {
-///     if py.version_info() >= (3, 10) {
-///         let PyClass = py.get_type_bound::<PyClass>();
-///
-///         py_run!(py, PyClass, test)
-///     }
-/// });
-/// ```
-#[proc_macro_derive(PyMatchArgs, attributes(pyderive))]
-pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::match_args::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
 
 /// Derive macro generating a `__dataclass_fields__` fn/Python class attribute.
 ///
@@ -1035,15 +401,556 @@ pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// [MISSING]: https://docs.python.org/3/library/dataclasses.html#dataclasses.MISSING
 /// [PEP487]: https://peps.python.org/pep-0487/
 /// [set_name]: https://docs.python.org/3/reference/datamodel.html#object.__set_name__
-#[proc_macro_derive(PyDataclassFields, attributes(pyderive))]
-pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::dataclass_fields::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
+pub use pyderive_macros::PyDataclassFields;
+/// Derive macro generating a [`__eq__()`][__eq__] and [`__ne__()`][__ne__] fn/Python methods.
+///
+/// The implementation is based on [`PartialEq`]/[`Eq`] trait.
+///
+/// *Note that implementing `__eq__()` and `__ne__()` methods will cause
+/// Python not to generate a default `__hash__()` implementation,
+/// so consider also implementing `__hash__()`.*
+///
+/// # Expansion
+///
+/// This implements, for example;
+///
+/// ```
+/// # use pyo3::prelude::*;
+/// # #[pyclass]
+/// # #[derive(PartialEq)]
+/// # struct PyClass {}
+/// #[pymethods]
+/// impl PyClass {
+///     pub fn __eq__(&self, other: &Self) -> bool {
+///         self.eq(other)
+///     }
+///     pub fn __ne__(&self, other: &Self) -> bool {
+///         self.ne(other)
+///     }
+/// }
+/// ```
+///
+/// [__eq__]: https://docs.python.org/reference/datamodel.html#object.__eq__
+/// [__ne__]: https://docs.python.org/reference/datamodel.html#object.__ne__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// #[derive(PyEq)]
+/// #[pyclass]
+/// #[derive(PartialEq)]
+/// struct PyClass {
+///     field: f64,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass { field: 0.0 })?;
+///     let b = Py::new(py, PyClass { field: 1.0 })?;
+///     let c = Py::new(py, PyClass { field: f64::NAN })?;
+///
+///     py_run!(py, a b, "assert a == a");
+///     py_run!(py, a b, "assert a != b");
+///     py_run!(py, c, "assert c != c");
+///     py_run!(py, a, "assert a != 1");
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyEq;
+/// Derive macro generating a [`__hash__()`][__hash__] fn/Python method.
+///
+/// The implementation is based on [`Hash`] trait.
+///
+/// # Expansion
+///
+/// This implements, for example;
+///
+/// ```
+/// # use pyo3::prelude::*;
+/// # #[pyclass]
+/// # #[derive(Hash)]
+/// # struct PyClass {}
+/// #[pymethods]
+/// impl PyClass {
+///     pub fn __hash__(&self) -> u64 {
+///         use std::collections::hash_map::DefaultHasher;
+///         use std::hash::{Hash, Hasher};
+///
+///         let mut s = DefaultHasher::new();
+///         self.hash(&mut s);
+///         s.finish()
+///     }
+/// }
+/// ```
+///
+/// [__hash__]: https://docs.python.org/reference/datamodel.html#object.__hash__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// #[derive(PyHash)]
+/// #[pyclass]
+/// #[derive(Hash)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///     })?;
+///
+///     py_run!(py, a, "assert hash(a) == -1989231435886966707");
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyHash;
+/// Derive macro generating a [`__iter__()`][__iter__] fn/Python method.
+///
+/// It returns an iterator of `get` fields as default,
+/// in the order of declaration.
+///
+/// If the filed is marked by `#[pyderive(iter=true)]` attribute,
+/// the field is included to the iterator that `__iter__()` returns;
+/// if `#[pyderive(iter=false)]`, it isn't.
+///
+/// - It should place `#[derive(PyIter)]` before `#[pyclass]`.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
+/// [__iter__]: https://docs.python.org/reference/datamodel.html#object.__iter__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyIter)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+///     #[pyderive(iter=false)]
+///     excluded: String,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///         option: None,
+///         excluded: "excluded".to_string(),
+///     })?;
+///
+///     py_run!(py, a, "assert tuple(a) == ('s', 1, 1.0, ('s', 1, 1.0), None)");
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyIter;
+/// Derive macro generating a [`__len__()`][__len__] fn/Python method.
+///
+/// That returns number of `get` fields as default.
+///
+/// If the filed is marked by `#[pyderive(len=true)]` attribute,
+/// the field is counted by the `__len__()`; if `#[pyderive(len=false)]`, it isn't.
+///
+/// - It should place `#[derive(PyLen)]` before `#[pyclass]`.
+///
+/// [__len__]: https://docs.python.org/reference/datamodel.html#object.__len__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyLen)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+///     #[pyderive(len=false)]
+///     excluded: String,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///         option: None,
+///         excluded: "excluded".to_string(),
+///     })?;
+///
+///     py_run!(py, a, "assert len(a) == 5");
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyLen;
+/// Derive macro generating a [`__match_args__`][__match_args__] const/Python class attribute.
+///
+/// It contains `get` fields as default,
+/// in the order of declaration.
+///
+/// If the filed is marked by `#[pyderive(match_args=true)]` attribute,
+/// the field is included to the `__match_args__`;
+/// if `#[pyderive(match_args=false)]`, it isn't.
+///
+/// - It should place `#[derive(PyMatchArgs)]` before `#[pyclass]`.
+///
+/// [__match_args__]: https://docs.python.org/reference/datamodel.html#object.__match_args__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyNew, PyMatchArgs)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+///     #[pyderive(match_args=false)]
+///     excluded: String,
+/// }
+///
+/// let test = "
+/// match PyClass('s', 1, 1.0, ('s', 1, 1.0), None, 's'):
+///     case PyClass(a, b, c, d, e):
+///         assert a == 's'
+///         assert b == 1
+///         assert c == 1.0
+///         assert d == ('s', 1, 1.0)
+///         assert e is None
+///     case _:
+///         raise AssertionError
+/// ";
+///
+/// Python::with_gil(|py| {
+///     if py.version_info() >= (3, 10) {
+///         let PyClass = py.get_type_bound::<PyClass>();
+///
+///         py_run!(py, PyClass, test)
+///     }
+/// });
+/// ```
+pub use pyderive_macros::PyMatchArgs;
+/// Derive macro generating a [`__new__()`][__new__] Python method.
+///
+/// It has all fields as the arguments as default,
+/// in the order of declaration.
+///
+/// If the filed is marked by `#[pyderive(new=false)]` attribute,
+/// the field is excluded from the arguments of the `__new__()` method.
+/// Notes, `new=true` has no effect.
+///
+/// - It should place `#[derive(PyNew)]` before `#[pyclass]`.
+///
+/// See the [Customize Implementation](crate) section of the crate doc for detail.
+///
+/// [__new__]: https://docs.python.org/reference/datamodel.html#object.__new__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyNew)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+///     #[pyderive(new=false)]
+///     excluded: String,
+/// }
+///
+/// let test = "
+/// a = PyClass('s', 1, 1.0, ('s', 1, 1.0), None)
+/// assert a.string == 's'
+/// assert a.integer == 1
+/// assert a.float == 1.0
+/// assert a.tuple == ('s', 1, 1.0)
+/// assert a.option is None
+/// assert a.excluded == ''
+/// ";
+///
+/// Python::with_gil(|py| {
+///     let PyClass = py.get_type_bound::<PyClass>();
+///
+///     py_run!(py, PyClass, test)
+/// });
+/// ```
+pub use pyderive_macros::PyNew;
+/// Derive macro generating [`__lt__()`][__lt__], [`__le__()`][__le__], [`__gt__()`][__gt__] and [`__ge__()`][__ge__] fn/Python methods.
+///
+/// The implementation is based on [`PartialOrd`]/[`Ord`] trait.
+///
+/// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
+///
+/// *Note that implementing `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` methods
+/// will cause Python not to generate a default `__hash__()` implementation,
+/// so consider also implementing `__hash__()`.*
+///
+/// # Expansion
+///
+/// This implements, for example;
+///
+/// ```
+/// # use std::cmp::Ordering;
+/// # use pyo3::prelude::*;
+/// # #[pyclass]
+/// # #[derive(PartialOrd, PartialEq)]
+/// # struct PyClass {}
+/// #[pymethods]
+/// impl PyClass {
+///     pub fn __lt__(&self, other: &Self) -> PyResult<bool> {
+///         match self.partial_cmp(other) {
+///             Some(Ordering::Less) => Ok(true),
+///             _ => Ok(false),
+///         }
+///     }
+///     // and __le__, __gt__ and __ge__
+/// }
+/// ```
+///
+/// [__lt__]: https://docs.python.org/reference/datamodel.html#object.__lt__
+/// [__le__]: https://docs.python.org/reference/datamodel.html#object.__le__
+/// [__gt__]: https://docs.python.org/reference/datamodel.html#object.__gt__
+/// [__ge__]: https://docs.python.org/reference/datamodel.html#object.__ge__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// #[derive(PyOrd)]
+/// #[pyclass]
+/// #[derive(PartialOrd, PartialEq)]
+/// struct PyClass {
+///     field: f64,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass { field: 0.0 })?;
+///     let b = Py::new(py, PyClass { field: 1.0 })?;
+///     let c = Py::new(py, PyClass { field: f64::NAN })?;
+///
+///     py_run!(py, a b, "assert a < b");
+///     py_run!(py, a b, "assert a <= b");
+///     py_run!(py, a b, "assert not a > b");
+///     py_run!(py, a b, "assert not a >= b");
+///     py_run!(py, c, "assert not c < c");
+///
+///     let test = "
+/// try:
+///     a < 1
+/// except TypeError:
+///     pass
+/// else:
+///     raise AssertionError
+/// ";
+///     py_run!(py, a, test);
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyOrd;
+/// Derive macro generating a [`__repr__()`][__repr__] fn/Python method.
+///
+/// It returns the string that contains `get` and `set` fields as default,
+/// in the order of declaration.
+///
+/// If the filed is marked by `#[pyderive(repr=true)]` attribute,
+/// the field is included in the string that `__str__()` returns;
+/// if `#[pyderive(repr=false)]`, it isn't.
+///
+/// - It should place `#[derive(PyRepr)]` before `#[pyclass]`.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
+/// [__repr__]: https://docs.python.org/reference/datamodel.html#object.__repr__
+/// [repr]: https://docs.python.org/library/functions.html#repr
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyRepr)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+///     #[pyderive(repr=false)]
+///     excluded: String,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///         option: None,
+///         excluded: "excluded".to_string(),
+///     })?;
+///
+///     py_run!(py, a, r#"assert repr(a) == "builtins.PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyRepr;
+/// Derive macro generating a [`__reversed__()`][__reversed__] fn/Python method.
+///
+/// It returns an iterator of `get` fields as default,
+/// in the reverse order of declaration.
+///
+/// This is a reversed one of a derive macro, [`PyIter`].
+///
+/// If the filed is marked by `#[pyderive(iter=true)]` attribute,
+/// the field is included to the iterator that `__reversed__()` returns;
+/// if `#[pyderive(iter=false)]`, it isn't.
+///
+/// - It should place `#[derive(PyReversed)]` before `#[pyclass]`.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
+/// [__reversed__]: https://docs.python.org/reference/datamodel.html#object.__reversed__
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyReversed)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+///     #[pyderive(iter=false)]
+///     excluded: String,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///         option: None,
+///         excluded: "excluded".to_string(),
+///     })?;
+///
+///     py_run!(py, a, "assert tuple(reversed(a)) == (None, ('s', 1, 1.0), 1.0, 1, 's')");
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyReversed;
+/// Derive macro generating a [`__str__()`][__str__] fn/Python method.
+///
+/// It returns the string that contains `get` and `set` fields as default,
+/// in the order of declaration.
+///
+/// If the filed is marked by `#[pyderive(str=true)]` attribute,
+/// the field is included in the string that `__str__()` returns;
+/// if `#[pyderive(str=false)]`, it isn't.
+///
+/// - It should place `#[derive(PyStr)]` before `#[pyclass]`.
+/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
+///   for child [`pyclass`][pyo3_pyclass]es.
+///
+/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
+/// [__str__]: https://docs.python.org/reference/datamodel.html#object.__str__
+/// [str]: https://docs.python.org/library/functions.html#str
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyStr)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+///     #[pyderive(str=false)]
+///     excluded: String,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///         option: None,
+///         excluded: "excluded".to_string(),
+///     })?;
+///
+///     py_run!(py, a, r#"assert str(a) == "builtins.PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyStr;
 /// Derive macro generating an impl of the trait [`ToPyObject`][pyo3_ToPyObject] by trait [`IntoPy<PyObject>`][pyo3_IntoPy].
 ///
 /// - It requires [`Clone`] trait.
@@ -1100,11 +1007,4 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     py_run!(py, PyClass Child, test)
 /// });
 /// ```
-#[proc_macro_derive(ToPyObject)]
-pub fn py_to_py_object(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::to_py_object::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
+pub use pyderive_macros::ToPyObject;

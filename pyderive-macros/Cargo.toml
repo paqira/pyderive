@@ -1,0 +1,28 @@
+[package]
+name = "pyderive-macros"
+version = "0.1.0"
+edition = "2021"
+# MSRV of inventory v0.3
+rust-version = "1.62"
+authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "Proc macros for pyderive package"
+
+[lib]
+proc-macro = true
+
+[[test]]
+name = "test"
+path = "test/test.rs"
+
+[dependencies]
+heck = { version = "0.5" }
+proc-macro2 = { version = "1" }
+quote = { version = "1" }
+syn = { version = "2", features = ["extra-traits", "derive", "full"] }
+
+[dev-dependencies]
+pyo3 = { version = "0.21", features = [
+    "auto-initialize",
+    "multiple-pymethods",
+] }

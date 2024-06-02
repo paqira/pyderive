@@ -1,4 +1,4 @@
-use pyderive::*;
+use pyderive_macros::*;
 use pyo3::{prelude::*, py_run};
 
 #[test]
