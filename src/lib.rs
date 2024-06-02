@@ -1033,7 +1033,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __add__(&self, other: &Self) -> Self {
+    ///     fn __add__(&self, other: &Self) -> <&Self as Add<&Self>>::Output {
     ///         Add::add(self, other)
     ///     }
     /// }
@@ -1153,7 +1153,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __and__(&self, other: &Self) -> Self {
+    ///     fn __and__(&self, other: &Self) -> <&Self as BitAnd<&Self>>::Output {
     ///         BitAnd::bitand(self, other)
     ///     }
     /// }
@@ -1277,7 +1277,10 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __divmod__(&self, other: &Self) -> (Self, Self) {
+    ///     fn __divmod__(&self, other: &Self) -> (
+    ///         <&Self as Div<&Self>>::Output,
+    ///         <&Self as Rem<&Self>>::Output
+    ///     ) {
     ///         (Div::div(self, other), Rem::rem(self, other))
     ///     }
     /// }
@@ -1347,7 +1350,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __floordiv__(&self, other: &Self) -> Self {
+    ///     fn __floordiv__(&self, other: &Self) -> <&Self as Div<&Self>>::Output {
     ///         Div::div(self, other)
     ///     }
     /// }
@@ -1467,7 +1470,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __invert__(&self) -> Self {
+    ///     fn __invert__(&self) -> <&Self as Not>::Output {
     ///         Not::not(self)
     ///     }
     /// }
@@ -1528,7 +1531,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __lshift__(&self, other: &Self) -> Self {
+    ///     fn __lshift__(&self, other: &Self) -> <&Self as Shl<&Self>>::Output {
     ///         Shl::shl(self, other)
     ///     }
     /// }
@@ -1648,7 +1651,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __matmul__(&self, other: &Self) -> Self {
+    ///     fn __matmul__(&self, other: &Self) -> <&Self as Mul<&Self>>::Output {
     ///         Mul::mul(self, other)
     ///     }
     /// }
@@ -1768,7 +1771,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __mod__(&self, other: &Self) -> Self {
+    ///     fn __mod__(&self, other: &Self) -> <&Self as Rem<&Self>>::Output {
     ///         Rem::rem(self, other)
     ///     }
     /// }
@@ -1888,7 +1891,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __mul__(&self, other: &Self) -> Self {
+    ///     fn __mul__(&self, other: &Self) -> <&Self as Mul<&Self>>::Output {
     ///         Mul::mul(self, other)
     ///     }
     /// }
@@ -2008,7 +2011,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __neg__(&self) -> Self {
+    ///     fn __neg__(&self) -> <&Self as Neg>::Output {
     ///         Neg::neg(self)
     ///     }
     /// }
@@ -2072,7 +2075,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __or__(&self, other: &Self) -> Self {
+    ///     fn __or__(&self, other: &Self) -> <&Self as BitOr<&Self>>::Output {
     ///         BitOr::bitor(self, other)
     ///     }
     /// }
@@ -2238,7 +2241,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __radd__(&self, other: &Self) -> Self {
+    ///     fn __radd__(&self, other: &Self) -> <&Self as Add<&Self>>::Output {
     ///         Add::add(other, self)
     ///     }
     /// }
@@ -2299,7 +2302,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rand__(&self, other: &Self) -> Self {
+    ///     fn __rand__(&self, other: &Self) -> <&Self as BitAnd<&Self>>::Output {
     ///         BitAnd::bitand(other, self)
     ///     }
     /// }
@@ -2364,7 +2367,10 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rdivmod__(&self, other: &Self) -> (Self, Self) {
+    ///     fn __rdivmod__(&self, other: &Self) -> (
+    ///         <&Self as Div<&Self>>::Output,
+    ///         <&Self as Rem<&Self>>::Output
+    ///     ) {
     ///         (Div::div(other, self), Rem::rem(other, self))
     ///     }
     /// }
@@ -2434,7 +2440,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rfloordiv__(&self, other: &Self) -> Self {
+    ///     fn __rfloordiv__(&self, other: &Self) -> <&Self as Div<&Self>>::Output {
     ///         Div::div(other, self)
     ///     }
     /// }
@@ -2495,7 +2501,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rlshift__(&self, other: &Self) -> Self {
+    ///     fn __rlshift__(&self, other: &Self) -> <&Self as Shl<&Self>>::Output {
     ///         Shl::shl(other, self)
     ///     }
     /// }
@@ -2556,7 +2562,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rmatmul__(&self, other: &Self) -> Self {
+    ///     fn __rmatmul__(&self, other: &Self) -> <&Self as Mul<&Self>>::Output {
     ///         Mul::mul(other, self)
     ///     }
     /// }
@@ -2617,7 +2623,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rmod__(&self, other: &Self) -> Self {
+    ///     fn __rmod__(&self, other: &Self) -> <&Self as Rem<&Self>>::Output {
     ///         Rem::rem(other, self)
     ///     }
     /// }
@@ -2678,7 +2684,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rmul__(&self, other: &Self) -> Self {
+    ///     fn __rmul__(&self, other: &Self) -> <&Self as Mul<&Self>>::Output {
     ///         Mul::mul(other, self)
     ///     }
     /// }
@@ -2739,7 +2745,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __ror__(&self, other: &Self) -> Self {
+    ///     fn __ror__(&self, other: &Self) -> <&Self as BitOr<&Self>>::Output {
     ///         BitOr::bitor(other, self)
     ///     }
     /// }
@@ -2800,7 +2806,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rrshift__(&self, other: &Self) -> Self {
+    ///     fn __rrshift__(&self, other: &Self) -> <&Self as Shr<&Self>>::Output {
     ///         Shr::shr(other, self)
     ///     }
     /// }
@@ -2861,7 +2867,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rsub__(&self, other: &Self) -> Self {
+    ///     fn __rsub__(&self, other: &Self) -> <&Self as Sub<&Self>>::Output {
     ///         Sub::sub(other, self)
     ///     }
     /// }
@@ -2922,7 +2928,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rtruediv__(&self, other: &Self) -> Self {
+    ///     fn __rtruediv__(&self, other: &Self) -> <&Self as Div<&Self>>::Output {
     ///         Div::div(other, self)
     ///     }
     /// }
@@ -2983,7 +2989,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rxor__(&self, other: &Self) -> Self {
+    ///     fn __rxor__(&self, other: &Self) -> <&Self as BitXor<&Self>>::Output {
     ///         BitXor::bitxor(other, self)
     ///     }
     /// }
@@ -3009,7 +3015,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __rshift__(&self, other: &Self) -> Self {
+    ///     fn __rshift__(&self, other: &Self) -> <&Self as Shr<&Self>>::Output {
     ///         Shr::shr(self, other)
     ///     }
     /// }
@@ -3129,7 +3135,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __sub__(&self, other: &Self) -> Self {
+    ///     fn __sub__(&self, other: &Self) -> <&Self as Sub<&Self>>::Output {
     ///         Sub::sub(self, other)
     ///     }
     /// }
@@ -3249,7 +3255,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __truediv__(&self, other: &Self) -> Self {
+    ///     fn __truediv__(&self, other: &Self) -> <&Self as Div<&Self>>::Output {
     ///         Div::div(self, other)
     ///     }
     /// }
@@ -3369,7 +3375,7 @@ pub mod ops {
     /// # }
     /// #[pymethods]
     /// impl PyClass {
-    ///     fn __xor__(&self, other: &Self) -> Self {
+    ///     fn __xor__(&self, other: &Self) -> <&Self as BitXor<&Self>>::Output {
     ///         BitXor::bitxor(self, other)
     ///     }
     /// }

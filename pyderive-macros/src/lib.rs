@@ -127,7 +127,7 @@ macro_rules! impl_unary {
             let expanded = quote! {
                 #[pymethods]
                 impl #struct_name {
-                    pub fn $pyname(&self) -> Self {
+                    pub fn $pyname(&self) -> <&Self as $trait>::Output {
                         use std::ops::$trait;
                         $trait::$method(self)
                     }
@@ -152,7 +152,7 @@ macro_rules! impl_binary {
             let expanded = quote! {
                 #[pymethods]
                 impl #struct_name {
-                    fn $pyname(&self, other: &Self) -> Self {
+                    fn $pyname(&self, other: &Self) -> <&Self as $trait<&Self>>::Output {
                         use ::std::ops::$trait;
                         $trait::$method(self, other)
                     }
@@ -177,7 +177,7 @@ macro_rules! impl_reflected_binary {
             let expanded = quote! {
                 #[pymethods]
                 impl #struct_name {
-                    fn $pyname(&self, other: &Self) -> Self {
+                    fn $pyname(&self, other: &Self) -> <&Self as $trait<&Self>>::Output {
                         use ::std::ops::$trait;
                         $trait::$method(other, self)
                     }
@@ -319,7 +319,10 @@ pub fn py_divmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
-            fn __divmod__(&self, other: &Self) -> (Self, Self) {
+            fn __divmod__(&self, other: &Self) -> (
+                <&Self as Div<&Self>>::Output,
+                <&Self as Rem<&Self>>::Output
+            ) {
                 use std::ops::{Div, Rem};
                 (Div::div(self, other), Rem::rem(self, other))
             }
@@ -340,7 +343,10 @@ pub fn py_rdivmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
-            fn __rdivmod__(&self, other: &Self) -> (Self, Self) {
+            fn __rdivmod__(&self, other: &Self) -> (
+                <&Self as Div<&Self>>::Output,
+                <&Self as Rem<&Self>>::Output
+            ) {
                 use ::std::ops::{Div, Rem};
                 (Div::div(other, self), Rem::rem(other, self))
             }
