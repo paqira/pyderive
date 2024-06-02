@@ -56,7 +56,13 @@ fn bytes() {
         c: u8,
     }
 
-    impl_new!(PyClass);
+    #[pymethods]
+    impl PyClass {
+        #[new]
+        fn new(a: u8, b: u8, c: u8) -> Self {
+            Self { a, b, c }
+        }
+    }
 
     impl From<&PyClass> for Cow<'_, [u8]> {
         fn from(value: &PyClass) -> Self {
