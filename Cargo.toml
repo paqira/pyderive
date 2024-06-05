@@ -6,12 +6,12 @@ edition = "2021"
 rust-version = "1.62"
 authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
 license = "MIT OR Apache-2.0"
-description = "Derive macro of Python special methods and a class attributes for PyO3"
-readme = "README.md"
-categories = ["api-bindings"]
-keywords = ["python", "pyo3"]
-
 repository = "https://github.com/paqira/pyderive"
+description = "Derive macro of Python special methods and a class attributes for PyO3"
+keywords = ["pyo3", "python"]
+readme = "README.md"
+exclude = [".*"]
+categories = ["rust-patterns"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
