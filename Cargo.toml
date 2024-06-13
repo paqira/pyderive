@@ -16,14 +16,14 @@ categories = ["rust-patterns"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pyderive-macros = { path = "pyderive-macros", version = "*" }
+pyderive-macros = { path = "pyderive-macros", version = "=0.1.0" }
 
 [dev-dependencies]
 pyo3 = { version = "0.21", features = [
     "auto-initialize",
     "multiple-pymethods",
 ] }
-num-complex = { version = ">= 0.2" } # for doctest
+num-complex = { version = ">=0.2" } # for doctest
 
 [features]
 num-complex = ["pyo3/num-complex", "pyderive-macros/num-complex"]
