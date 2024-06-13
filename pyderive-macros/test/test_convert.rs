@@ -1,3 +1,6 @@
+// Note:
+//   The instance python <= 10.0 does not have __complex__ attr. etc.
+
 use pyo3::prelude::*;
 use std::borrow::Cow;
 
@@ -38,7 +41,7 @@ fn r#bool() {
             py_class,
             r#"
 actual = bool(py_class(1))
-assert getattr(actual, "__bool__") is not None
+# assert hasattr(actual, "__bool__")
 assert isinstance(actual, bool)
 assert actual is True
 "#
@@ -77,7 +80,7 @@ fn bytes() {
             py_class,
             r#"
 actual = bytes(py_class(1, 2, 3))
-assert getattr(actual, "__bytes__") is not None
+# assert hasattr(actual, "__bytes__")
 assert isinstance(actual, bytes)
 assert actual == b'\x01\x02\x03'
 "#
@@ -107,7 +110,7 @@ fn int() {
             py_class,
             r#"
 actual = int(py_class(1))
-assert getattr(actual, "__int__") is not None
+# assert hasattr(actual, "__int__")
 assert isinstance(actual, int)
 assert actual == 1
 "#
@@ -138,9 +141,9 @@ fn index() {
             py_class,
             r#"
 actual = int(py_class(1))
-assert getattr(actual, "__index__") is not None
-# assert isinstance(actual, int)
-# assert actual == 1
+# assert hasattr(actual, "__index__")
+assert isinstance(actual, int)
+assert actual == 1
 "#
         );
     });
@@ -169,7 +172,7 @@ fn float() {
             py_class,
             r#"
 actual = float(py_class(1))
-assert getattr(actual, "__float__") is not None
+# assert hasattr(actual, "__float__")
 assert isinstance(actual, float)
 assert actual == 1.0
 "#
@@ -209,7 +212,7 @@ fn complex() {
             py_class,
             r#"
 actual = complex(py_class(1.0 + 2.0j))
-assert getattr(actual, "__complex__") is not None
+# assert hasattr(actual, "__complex__")
 assert isinstance(actual, complex)
 assert actual == 2.0 + 4.0j
 "#
