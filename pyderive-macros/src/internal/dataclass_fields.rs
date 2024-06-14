@@ -117,6 +117,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let expanded = quote! {
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             #[classattr]
             pub fn __dataclass_fields__(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::types::PyDict>> {

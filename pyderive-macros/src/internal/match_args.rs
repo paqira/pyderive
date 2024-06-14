@@ -23,11 +23,12 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     } else {
         quote! {
             #[pymethods]
-                impl #struct_name {
-                    #[classattr]
-                    #[allow(non_upper_case_globals)]
-                    pub const __match_args__: (#(#types),* ,) = (#(#names),* ,);
-                }
+            #[automatically_derived]
+            impl #struct_name {
+                #[classattr]
+                #[allow(non_upper_case_globals)]
+                pub const __match_args__: (#(#types),* ,) = (#(#names),* ,);
+            }
         }
     };
 

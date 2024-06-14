@@ -126,6 +126,7 @@ macro_rules! impl_unary {
 
             let expanded = quote! {
                 #[pymethods]
+                #[automatically_derived]
                 impl #struct_name {
                     pub fn $pyname(&self) -> <&Self as $trait>::Output {
                         use std::ops::$trait;
@@ -151,6 +152,7 @@ macro_rules! impl_binary {
 
             let expanded = quote! {
                 #[pymethods]
+                #[automatically_derived]
                 impl #struct_name {
                     fn $pyname(&self, other: &Self) -> <&Self as $trait<&Self>>::Output {
                         use ::std::ops::$trait;
@@ -176,6 +178,7 @@ macro_rules! impl_reflected_binary {
 
             let expanded = quote! {
                 #[pymethods]
+                #[automatically_derived]
                 impl #struct_name {
                     fn $pyname(&self, other: &Self) -> <&Self as $trait<&Self>>::Output {
                         use ::std::ops::$trait;
@@ -201,6 +204,7 @@ macro_rules! impl_binary_assign {
 
             let expanded = quote! {
                 #[pymethods]
+                #[automatically_derived]
                 impl #struct_name {
                     fn $pyname(&mut self, other: &Self) {
                         use ::std::ops::$trait;
@@ -297,6 +301,7 @@ pub fn py_pos(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     let expanded = quote! {
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             fn __pos__<'a>(self_: PyRef<'a, Self>) -> PyRef<'a, Self> {
                 self_
@@ -317,6 +322,7 @@ pub fn py_divmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     let expanded = quote! {
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             fn __divmod__(&self, other: &Self) -> (
                 <&Self as Div<&Self>>::Output,
@@ -341,6 +347,7 @@ pub fn py_rdivmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     let expanded = quote! {
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             fn __rdivmod__(&self, other: &Self) -> (
                 <&Self as Div<&Self>>::Output,
@@ -369,6 +376,7 @@ macro_rules! impl_convert {
 
             let expanded = quote! {
                 #[pymethods]
+                #[automatically_derived]
                 impl #struct_name {
                     fn $pyname(&self) -> $ty {
                         Into::into(self)
@@ -395,6 +403,7 @@ pub fn py_bytes(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     let expanded = quote! {
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             fn __bytes__(&self) -> Cow<[u8]> {
                 use ::std::borrow::Cow;
@@ -417,6 +426,7 @@ pub fn py_complex(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     let expanded = quote! {
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             fn __complex__(&self) -> ::num_complex::Complex64 {
                 Into::into(self)

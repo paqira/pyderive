@@ -35,6 +35,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let expanded = quote! {
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             pub fn __str__(slf: &::pyo3::Bound<'_, Self>) -> ::pyo3::PyResult<::std::string::String> {
                 let t = slf.get_type();

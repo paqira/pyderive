@@ -79,6 +79,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let expanded = quote! {
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             #[new]
             #[pyo3(signature = ( #( #signature ),* ))]

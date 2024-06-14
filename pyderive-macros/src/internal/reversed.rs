@@ -24,11 +24,13 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let expanded = quote! {
         #[pyclass]
         #[pyo3(name="pyclass_reverseiterator", module="pyderive")]
+        #[automatically_derived]
         struct #iter_name {
             inner: ::std::iter::Rev<::std::array::IntoIter<::pyo3::PyObject, #length>>,
         }
 
         #[pymethods]
+        #[automatically_derived]
         impl #iter_name {
             pub fn __iter__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyRef<'_, Self> {
                 slf
@@ -39,6 +41,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         }
 
         #[pymethods]
+        #[automatically_derived]
         impl #struct_name {
             pub fn __reversed__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyResult<::pyo3::Py<#iter_name>> {
                 let py = slf.py();
