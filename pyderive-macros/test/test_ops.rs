@@ -122,8 +122,9 @@ assert actual.field == -2
                 py,
                 py_class,
                 r#"
-actual = +py_class(1)
-assert actual.field == 1
+actual = py_class(1)
+assert (+actual).field == 1
+assert id(actual) == id(+actual)
 "#
             );
         });
