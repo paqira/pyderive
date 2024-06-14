@@ -362,6 +362,162 @@ pub fn py_rdivmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     expanded.into()
 }
 
+#[proc_macro_derive(PyNumeric)]
+pub fn py_numeric(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    use quote::quote;
+
+    let input = parse_macro_input!(input as DeriveInput);
+
+    let struct_name = &input.ident;
+
+    let expanded = quote! {
+        #[pymethods]
+        #[automatically_derived]
+        impl #struct_name {
+            fn __pos__<'a>(self_: PyRef<'a, Self>) -> PyRef<'a, Self> {
+                self_
+            }
+
+            fn __neg__(&self) -> <&Self as Neg>::Output {
+                use ::std::ops::Neg;
+                Neg::neg(self)
+            }
+
+            fn __add__(&self, other: &Self) -> <&Self as Add<&Self>>::Output {
+                use ::std::ops::Add;
+                Add::add(self, other)
+            }
+
+            fn __sub__(&self, other: &Self) -> <&Self as Sub<&Self>>::Output {
+                use ::std::ops::Sub;
+                Sub::sub(self, other)
+            }
+
+            fn __mul__(&self, other: &Self) -> <&Self as Mul<&Self>>::Output {
+                use ::std::ops::Mul;
+                Mul::mul(self, other)
+            }
+
+            fn __truediv__(&self, other: &Self) -> <&Self as Div<&Self>>::Output {
+                use ::std::ops::Div;
+                Div::div(self, other)
+            }
+
+            fn __mod__(&self, other: &Self) -> <&Self as Rem<&Self>>::Output {
+                use ::std::ops::Rem;
+                Rem::rem(self, other)
+            }
+
+            fn __iadd__(&mut self, other: &Self) {
+                use ::std::ops::AddAssign;
+                AddAssign::add_assign(self, other);
+            }
+
+            fn __isub__(&mut self, other: &Self) {
+                use ::std::ops::SubAssign;
+                SubAssign::sub_assign(self, other);
+            }
+
+            fn __imul__(&mut self, other: &Self) {
+                use ::std::ops::MulAssign;
+                MulAssign::mul_assign(self, other);
+            }
+
+            fn __itruediv__(&mut self, other: &Self) {
+                use ::std::ops::DivAssign;
+                DivAssign::div_assign(self, other);
+            }
+
+            fn __imod__(&mut self, other: &Self) {
+                use ::std::ops::RemAssign;
+                RemAssign::rem_assign(self, other);
+            }
+
+            fn __divmod__(&self, other: &Self) -> (
+                <&Self as ::std::ops::Div<&Self>>::Output,
+                <&Self as ::std::ops::Rem<&Self>>::Output,
+            ) {
+                use ::std::ops::{Div, Rem};
+                (Div::div(self, other), Rem::rem(self, other))
+            }
+        }
+    };
+
+    expanded.into()
+}
+
+#[proc_macro_derive(PyBitwise)]
+pub fn py_bitwise(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    use quote::quote;
+
+    let input = parse_macro_input!(input as DeriveInput);
+
+    let struct_name = &input.ident;
+
+    let expanded = quote! {
+        #[pymethods]
+        #[automatically_derived]
+        impl #struct_name {
+            fn __invert__(&self) -> <&Self as Not>::Output {
+                use ::std::ops::Not;
+                Not::not(self)
+            }
+
+            fn __and__(&self, other: &Self) -> <&Self as BitAnd<&Self>>::Output {
+                use ::std::ops::BitAnd;
+                BitAnd::bitand(self, other)
+            }
+
+            fn __or__(&self, other: &Self) -> <&Self as BitOr<&Self>>::Output {
+                use ::std::ops::BitOr;
+                BitOr::bitor(self, other)
+            }
+
+            fn __xor__(&self, other: &Self) -> <&Self as BitXor<&Self>>::Output {
+                use ::std::ops::BitXor;
+                BitXor::bitxor(self, other)
+            }
+
+            fn __lshift__(&self, other: &Self) -> <&Self as Shl<&Self>>::Output {
+                use ::std::ops::Shl;
+                Shl::shl(self, other)
+            }
+
+            fn __rshift__(&self, other: &Self) -> <&Self as Shr<&Self>>::Output {
+                use ::std::ops::Shr;
+                Shr::shr(self, other)
+            }
+
+            fn __iand__(&mut self, other: &Self) {
+                use ::std::ops::BitAndAssign;
+                BitAndAssign::bitand_assign(self, other);
+            }
+
+            fn __ior__(&mut self, other: &Self) {
+                use ::std::ops::BitOrAssign;
+                BitOrAssign::bitor_assign(self, other);
+            }
+
+            fn __ixor__(&mut self, other: &Self) {
+                use ::std::ops::BitXorAssign;
+                BitXorAssign::bitxor_assign(self, other);
+            }
+
+            fn __ilshift__(&mut self, other: &Self) {
+                use ::std::ops::ShlAssign;
+                ShlAssign::shl_assign(self, other);
+            }
+
+            fn __irshift__(&mut self, other: &Self) {
+                use ::std::ops::ShrAssign;
+                ShrAssign::shr_assign(self, other);
+            }
+        }
+    };
+
+    expanded.into()
+}
+
 // convert
 
 macro_rules! impl_convert {

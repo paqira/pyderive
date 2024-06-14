@@ -19,9 +19,9 @@ struct MyClass {
     option: Option<String>
 }
 ```
+
 ```python
 from rust_module import MyClass
-
 
 # Derives __new__()
 m = MyClass("a", 1, None)
@@ -61,6 +61,8 @@ This provides deriving following special methods and attributes;
 | `PyReversed`        | `__reversed__()`                                  |
 | `PyLen`             | `__len__()`                                       |
 | `PyDataclassFields` | `__dataclass_fields__`                            |
+| `PyNumeric`         | Numeric op methods (`__add__()` etc.)             |
+| `PyBitwise`         | Bitwise op methods (`__and__()` etc.)             |
 
 The field attributes `#[pyderive(..)]` is used to customize the implementation,
 like [`dataclasses.field()`][dataclasses-field] of Python.
@@ -68,7 +70,7 @@ like [`dataclasses.field()`][dataclasses-field] of Python.
 [dataclasses-field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
 
 Module `pyderive::ops` and `pyderive::convert` provides
-derive macros that implement method that enumerating numeric type (`__add__` etc.) and
+derive macros that implement individual method that enumerating numeric type (`__add__` etc.) and
 called by builtin functions (`__int__` etc.).
 
 In addition, this provides a helper derive macro:

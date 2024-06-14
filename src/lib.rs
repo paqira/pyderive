@@ -85,9 +85,11 @@
 //! | [`PyEq`]        | `__eq__()` and `__ne__()` based on [`PartialEq`]/[`Eq`] trait                                                   |
 //! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
+//! | [`PyNumeric`]   | Numeric op methods (`__add__()` etc.)                                                                           |
+//! | [`PyBitwise`]   | Bitwise op methods (`__and__()` etc.)                                                                           |
 //!
 //! Module [`pyderive::ops`](mod@ops) and [`pyderive::convert`](mod@convert) provides
-//! derive macros that implement method that enumerating numeric type (`__add__` etc.) and
+//! derive macros that implement individual method that enumerating numeric type (`__add__` etc.) and
 //! called by builtin functions (`__int__` etc.).
 //!
 //! In addition, this provides a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
@@ -1017,3 +1019,60 @@ pub use pyderive_macros::PyStr;
 /// });
 /// ```
 pub use pyderive_macros::ToPyObject;
+
+/// Derive macro generating an impl of numeric op methods/fns base on [std::ops] traits.
+///
+/// This derives;
+///
+/// | Python method                | Required Trait                    |
+/// |------------------------------|-----------------------------------|
+/// | [`__invert__()`][__invert__] | `Not for &Class`                  |
+/// | [`__and__()`][__and__]       | `BitAnd<&Class> for &Class`       |
+/// | [`__or__()`][__or__]         | `BitOr<&Class> for &Class`        |
+/// | [`__xor__()`][__xor__]       | `BitXor<&Class> for &Class`       |
+/// | [`__iand__()`][__iand__]     | `BitAndAssign<&Class> for &Class` |
+/// | [`__ior__()`][__ior__]       | `BitOrAssign<&Class> for &Class`  |
+/// | [`__ixor__()`][__ixor__]     | `BitXorAssign<&Class> for &Class` |
+///
+/// [__invert__]: https://docs.python.org/3/reference/datamodel.html#object.__invert__
+/// [__and__]: https://docs.python.org/3/reference/datamodel.html#object.__and__
+/// [__or__]: https://docs.python.org/3/reference/datamodel.html#object.__or__
+/// [__xor__]: https://docs.python.org/3/reference/datamodel.html#object.__xor__
+/// [__iand__]: https://docs.python.org/3/reference/datamodel.html#object.__iand__
+/// [__ior__]: https://docs.python.org/3/reference/datamodel.html#object.__ior__
+/// [__ixor__]: https://docs.python.org/3/reference/datamodel.html#object.__ixor__
+pub use pyderive_macros::PyBitwise;
+/// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
+///
+/// This derives;
+///
+/// | Python method                    | Required Trait                          |
+/// |----------------------------------|-----------------------------------------|
+/// | [`__pos__()`][__pos__]           | --                                      |
+/// | [`__neg__()`][__neg__]           | `Neg<&Class> for &Class`                |
+/// | [`__add__()`][__add__]           | `Add<&Class> for &Class`                |
+/// | [`__sub__()`][__sub__]           | `Sub<&Class> for &Class`                |
+/// | [`__mul__()`][__mul__]           | `Mul<&Class> for &Class`                |
+/// | [`__truediv__()`][__truediv__]   | `Div<&Class> for &Class`                |
+/// | [`__mod__()`][__mod__]           | `Rem<&Class> for &Class`                |
+/// | [`__iadd__()`][__iadd__]         | `AddAssign<&Class> for &Class`          |
+/// | [`__isub__()`][__isub__]         | `SubAssign<&Class> for &Class`          |
+/// | [`__imul__()`][__imul__]         | `MulAssign<&Class> for &Class`          |
+/// | [`__itruediv__()`][__itruediv__] | `DivAssign<&Class> for &Class`          |
+/// | [`__imod__()`][__imod__]         | `Rem<Assign&Class> for &Class`          |
+/// | [`__divmod__()`][__divmod__]     | Same as `__truediv__()` and `__mod__()` |
+///
+/// [__pos__]: https://docs.python.org/3/reference/datamodel.html#object.__pos__
+/// [__neg__]: https://docs.python.org/3/reference/datamodel.html#object.__neg__
+/// [__add__]: https://docs.python.org/3/reference/datamodel.html#object.__add__
+/// [__sub__]: https://docs.python.org/3/reference/datamodel.html#object.__sub__
+/// [__mul__]: https://docs.python.org/3/reference/datamodel.html#object.__mul__
+/// [__truediv__]: https://docs.python.org/3/reference/datamodel.html#object.__truediv__
+/// [__mod__]: https://docs.python.org/3/reference/datamodel.html#object.__mod__
+/// [__iadd__]: https://docs.python.org/3/reference/datamodel.html#object.__iadd__
+/// [__isub__]: https://docs.python.org/3/reference/datamodel.html#object.__isub__
+/// [__imul__]: https://docs.python.org/3/reference/datamodel.html#object.__imul__
+/// [__itruediv__]: https://docs.python.org/3/reference/datamodel.html#object.__itruediv__
+/// [__imod__]: https://docs.python.org/3/reference/datamodel.html#object.__imod__
+/// [__divmod__]: https://docs.python.org/3/reference/datamodel.html#object.__divmod__
+pub use pyderive_macros::PyNumeric;

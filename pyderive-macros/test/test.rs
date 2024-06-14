@@ -1,3 +1,4 @@
+mod test_bitwise;
 mod test_convert;
 mod test_dataclass_fields;
 mod test_eq;
@@ -6,6 +7,7 @@ mod test_iter;
 mod test_len;
 mod test_match_args;
 mod test_new;
+mod test_numeric;
 mod test_ops;
 mod test_ord;
 mod test_repr;
