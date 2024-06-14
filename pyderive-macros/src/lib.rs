@@ -287,7 +287,6 @@ impl_binary_assign!(PyAndAssign, py_iand, __iand__, BitAndAssign::bitand_assign)
 impl_binary_assign!(PyOrAssign, py_ior, __ior__, BitOrAssign::bitor_assign);
 impl_binary_assign!(PyXorAssign, py_ixor, __ixor__, BitXorAssign::bitxor_assign);
 
-// FIXME: return exact `self` (same id obj)
 #[proc_macro_derive(PyPos)]
 pub fn py_pos(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     use quote::quote;
@@ -299,7 +298,7 @@ pub fn py_pos(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let expanded = quote! {
         #[pymethods]
         impl #struct_name {
-            fn __pos__(self_: PyRef<'_, Self>) -> PyRef<'_, Self> {
+            fn __pos__<'a>(self_: PyRef<'a, Self>) -> PyRef<'a, Self> {
                 self_
             }
         }
@@ -321,7 +320,7 @@ pub fn py_divmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         impl #struct_name {
             fn __divmod__(&self, other: &Self) -> (
                 <&Self as Div<&Self>>::Output,
-                <&Self as Rem<&Self>>::Output
+                <&Self as Rem<&Self>>::Output,
             ) {
                 use std::ops::{Div, Rem};
                 (Div::div(self, other), Rem::rem(self, other))
@@ -345,7 +344,7 @@ pub fn py_rdivmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         impl #struct_name {
             fn __rdivmod__(&self, other: &Self) -> (
                 <&Self as Div<&Self>>::Output,
-                <&Self as Rem<&Self>>::Output
+                <&Self as Rem<&Self>>::Output,
             ) {
                 use ::std::ops::{Div, Rem};
                 (Div::div(other, self), Rem::rem(other, self))
