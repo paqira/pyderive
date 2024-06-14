@@ -328,7 +328,7 @@ pub fn py_divmod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 <&Self as Div<&Self>>::Output,
                 <&Self as Rem<&Self>>::Output,
             ) {
-                use std::ops::{Div, Rem};
+                use ::std::ops::{Div, Rem};
                 (Div::div(self, other), Rem::rem(self, other))
             }
         }
