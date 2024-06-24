@@ -1020,7 +1020,7 @@ pub use pyderive_macros::PyStr;
 /// ```
 pub use pyderive_macros::ToPyObject;
 
-/// Derive macro generating an impl of numeric op methods/fns base on [std::ops] traits.
+/// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
 ///
 /// This derives;
 ///
@@ -1042,7 +1042,7 @@ pub use pyderive_macros::ToPyObject;
 /// [__ior__]: https://docs.python.org/3/reference/datamodel.html#object.__ior__
 /// [__ixor__]: https://docs.python.org/3/reference/datamodel.html#object.__ixor__
 pub use pyderive_macros::PyBitwise;
-/// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
+/// Derive macro generating an impl of numeric op methods/fns base on [std::ops] traits.
 ///
 /// This derives;
 ///
@@ -1059,7 +1059,7 @@ pub use pyderive_macros::PyBitwise;
 /// | [`__isub__()`][__isub__]         | `SubAssign<&Class> for &Class`          |
 /// | [`__imul__()`][__imul__]         | `MulAssign<&Class> for &Class`          |
 /// | [`__itruediv__()`][__itruediv__] | `DivAssign<&Class> for &Class`          |
-/// | [`__imod__()`][__imod__]         | `Rem<Assign&Class> for &Class`          |
+/// | [`__imod__()`][__imod__]         | `RemAssign<&Class> for &Class`          |
 /// | [`__divmod__()`][__divmod__]     | Same as `__truediv__()` and `__mod__()` |
 ///
 /// [__pos__]: https://docs.python.org/3/reference/datamodel.html#object.__pos__
