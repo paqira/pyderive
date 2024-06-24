@@ -70,8 +70,8 @@ like [`dataclasses.field()`][dataclasses-field] of Python.
 [dataclasses-field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
 
 Module `pyderive::ops` and `pyderive::convert` provides
-derive macros that implement individual method that enumerating numeric type (`__add__` etc.) and
-called by builtin functions (`__int__` etc.).
+derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
+called by builtin functions (`__int__()` etc.).
 
 In addition, this provides a helper derive macro:
 

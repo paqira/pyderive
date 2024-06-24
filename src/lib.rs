@@ -89,8 +89,8 @@
 //! | [`PyBitwise`]   | Bitwise op methods (`__and__()` etc.)                                                                           |
 //!
 //! Module [`pyderive::ops`](mod@ops) and [`pyderive::convert`](mod@convert) provides
-//! derive macros that implement individual method that enumerating numeric type (`__add__` etc.) and
-//! called by builtin functions (`__int__` etc.).
+//! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
+//! called by builtin functions (`__int__()` etc.).
 //!
 //! In addition, this provides a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
 //! that required by [`PyRepr`], [`PyStr`], [`PyIter`] and [`PyDataclassFields`] derive macros.
