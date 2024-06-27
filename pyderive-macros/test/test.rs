@@ -12,5 +12,6 @@ mod test_ops;
 mod test_ord;
 mod test_repr;
 mod test_reversed;
+mod test_richcmp;
 mod test_str;
 mod test_to_py_object;

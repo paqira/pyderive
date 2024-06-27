@@ -56,6 +56,7 @@ This provides deriving following special methods and attributes;
 | `PyStr`             | `__str__()`                                       |
 | `PyEq`              | `__eq__()` and `__ne__()`                         |
 | `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` |
+| `PyRichCmp`         | `==`, `!=`, `>`, `>=`, `<` and `<=`               |
 | `PyHash`            | `__hash__()`                                      |
 | `PyIter`            | `__iter__()`                                      |
 | `PyReversed`        | `__reversed__()`                                  |

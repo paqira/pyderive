@@ -4,7 +4,7 @@ use pyo3::{prelude::*, py_run};
 #[test]
 fn test_ord() {
     #[pyclass]
-    #[derive(Default, PartialOrd, PartialEq, Eq, Ord, PyOrd)]
+    #[derive(Default, PartialOrd, PartialEq, Eq, Ord, PyRichCmp)]
     #[allow(dead_code)]
     struct PyClass {
         fa: i64,
@@ -35,7 +35,7 @@ except TypeError: pass");
 #[test]
 fn test_partial_ord() {
     #[pyclass]
-    #[derive(Default, PartialOrd, PartialEq, PyOrd)]
+    #[derive(Default, PartialOrd, PartialEq, PyRichCmp)]
     #[allow(dead_code)]
     struct PyClass {
         f: f64,
@@ -58,12 +58,12 @@ except TypeError: pass");
 #[test]
 fn test_nest_pyclass() {
     #[pyclass(get_all)]
-    #[derive(PartialOrd, PartialEq, PyOrd)]
+    #[derive(PartialOrd, PartialEq, PyRichCmp)]
     struct PyClassA {
         field: PyClassB,
     }
 
-    #[derive(PyOrd, Clone)]
+    #[derive(PyRichCmp, Clone)]
     #[pyclass(get_all)]
     #[derive(PartialOrd, PartialEq)]
     struct PyClassB {
@@ -106,14 +106,14 @@ assert not a >= b
 }
 
 #[test]
-fn test_nest_pyclass_py_rich_cmp() {
+fn test_nest_pyclass_py_ord() {
     #[pyclass(get_all)]
-    #[derive(PartialOrd, PartialEq, PyOrd)]
+    #[derive(PartialOrd, PartialEq, PyRichCmp)]
     struct PyClassA {
         field: PyClassB,
     }
 
-    #[derive(PyRichCmp, Clone)]
+    #[derive(PyOrd, Clone)]
     #[pyclass(get_all)]
     #[derive(PartialOrd, PartialEq)]
     struct PyClassB {

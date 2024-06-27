@@ -84,6 +84,7 @@
 //! | --------------- | --------------------------------------------------------------------------------------------------------------- |
 //! | [`PyEq`]        | `__eq__()` and `__ne__()` based on [`PartialEq`]/[`Eq`] trait                                                   |
 //! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
+//! | [`PyRichCmp`]   | `==`, `!=`, `>`, `>=`, `<` and `<=` based on [`PartialEq`] and [`PartialOrd`] traits                            |
 //! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
 //! | [`PyNumeric`]   | Numeric op methods (`__add__()` etc.)                                                                           |
 //! | [`PyBitwise`]   | Bitwise op methods (`__and__()` etc.)                                                                           |
@@ -921,6 +922,86 @@ pub use pyderive_macros::PyRepr;
 /// });
 /// ```
 pub use pyderive_macros::PyReversed;
+/// Derive macro generating `__richcmp__` fn that provides Python comparison operations (`==`, `!=`, `<`, `<=`, `>`, and `>=`).
+///
+/// The implementation is based on [`PartialEq`] and [`PartialOrd`] traits.
+///
+/// <section class="warning">
+/// PyO3 supports <code>#[pyclass(ord)]</code> since 0.23.0, it is recommended to use it.
+/// </section>
+///
+/// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
+///
+/// *Note that implementing `__richcmp__` will cause Python not to generate
+/// a default `__hash__` implementation, so consider implementing `__hash__`
+/// when implementing `__richcmp__`.*
+///
+/// # Expansion
+///
+/// This implements, for example;
+///
+/// ```
+/// # use std::cmp::Ordering;
+/// # use pyo3::prelude::*;
+/// # use pyo3::pyclass::CompareOp;
+/// # #[pyclass]
+/// # #[derive(PartialOrd, PartialEq)]
+/// # struct PyClass {}
+/// #[pymethods]
+/// impl PyClass {
+///     pub fn __richcmp__(&self, other: &Self, op: CompareOp) -> bool {
+///         match op {
+///             CompareOp::Eq => self.eq(other),
+///             CompareOp::Ne => self.ne(other),
+///             CompareOp::Lt => matches!(self.partial_cmp(other), Some(Ordering::Less)),
+///             CompareOp::Le => matches!(self.partial_cmp(other), Some(Ordering::Less | Ordering::Equal)),
+///             CompareOp::Gt => matches!(self.partial_cmp(other), Some(Ordering::Greater)),
+///             CompareOp::Ge => matches!(self.partial_cmp(other), Some(Ordering::Greater | Ordering::Equal))
+///         }
+///     }
+/// }
+/// ```
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// #[derive(PyRichCmp)]
+/// #[pyclass]
+/// #[derive(PartialOrd, PartialEq)]
+/// struct PyClass {
+///     field: f64,
+/// }
+///
+/// Python::with_gil(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass { field: 0.0 })?;
+///     let b = Py::new(py, PyClass { field: 1.0 })?;
+///     let c = Py::new(py, PyClass { field: f64::NAN })?;
+///
+///     py_run!(py, a b, "assert a == a");
+///     py_run!(py, a b, "assert a != b");
+///     py_run!(py, a b, "assert a < b");
+///     py_run!(py, a b, "assert a <= b");
+///     py_run!(py, a b, "assert not a > b");
+///     py_run!(py, a b, "assert not a >= b");
+///     py_run!(py, c, "assert not c < c");
+///
+///     let test = "
+/// try:
+///     a < 1
+/// except TypeError:
+///     pass
+/// else:
+///     raise AssertionError
+/// ";
+///     py_run!(py, a, test);
+///
+///     Ok(())
+/// });
+/// ```
+pub use pyderive_macros::PyRichCmp;
 /// Derive macro generating a [`__str__()`][__str__] fn/Python method.
 ///
 /// It returns the string that contains `get` and `set` fields as default,
