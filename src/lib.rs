@@ -741,7 +741,7 @@ pub use pyderive_macros::PyNew;
 /// The implementation requires [`PartialOrd`] impl.
 ///
 /// <section class="warning">
-/// PyO3 supports <code>#[pyclass(hash)]</code> since 0.23.0.
+/// PyO3 supports <code>#[pyclass(ord)]</code> since 0.23.0.
 /// </section>
 ///
 /// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
