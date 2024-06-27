@@ -418,7 +418,7 @@ pub use pyderive_macros::PyDataclassFields;
 /// The implementation is based on [`PartialEq`]/[`Eq`] trait.
 ///
 /// <section class="warning">
-/// PyO3 officially support such a mechanism by <code>#[pyclass(eq)]</code> since 0.23.0.
+/// PyO3 supports <code>#[pyclass(eq)]</code> since 0.23.0, it is recommended to use it.
 /// </section>
 ///
 /// *Note that implementing `__eq__()` and `__ne__()` methods will cause
@@ -480,7 +480,7 @@ pub use pyderive_macros::PyEq;
 /// The implementation is based on [`Hash`] trait.
 ///
 /// <section class="warning">
-/// PyO3 officially support such a mechanism by <code>#[pyclass(hash)]</code> since 0.23.0.
+/// PyO3 supports <code>#[pyclass(hash)]</code> since 0.23.0, it is recommended to use it.
 /// </section>
 ///
 /// # Expansion
@@ -740,7 +740,7 @@ pub use pyderive_macros::PyNew;
 /// The implementation is based on [`PartialOrd`]/[`Ord`] trait.
 ///
 /// <section class="warning">
-/// PyO3 officially support such a mechanism by <code>#[pyclass(ord)]</code> since 0.23.0.
+/// PyO3 supports <code>#[pyclass(hash)]</code> since 0.23.0.
 /// </section>
 ///
 /// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
