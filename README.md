@@ -36,8 +36,8 @@ match m:
         raise AssertionError
 
 # Derives __repr__()
-assert str(m) == "builtins.MyClass(string='a', integer=1, option=None)"
-assert repr(m) == "builtins.MyClass(string='a', integer=1, option=None)"
+assert str(m) == "MyClass(string='a', integer=1, option=None)"
+assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 
 # Derives __eq__() that depends on PartialEq/Eq trait
 assert m == MyClass("a", 1, None)

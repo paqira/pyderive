@@ -46,7 +46,7 @@ fn test_no_get_set() {
 
     Python::with_gil(|py| {
         let py_class = py.get_type_bound::<PyClass>();
-        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
+        assert_eq!("PyClass", py_class.name().unwrap().to_string());
 
         pyo3::py_run!(
             py,
@@ -97,7 +97,7 @@ fn test_get_set() {
 
     Python::with_gil(|py| {
         let py_class = py.get_type_bound::<PyClass>();
-        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
+        assert_eq!("PyClass", py_class.name().unwrap().to_string());
 
         pyo3::py_run!(py, py_class, "assert py_class(0, '').fd_name_a == 0")
     })
@@ -116,10 +116,7 @@ fn test_name_rename_all() {
 
     Python::with_gil(|py| {
         let py_class = py.get_type_bound::<PyClass>();
-        assert_eq!(
-            "builtins.renamedClass",
-            py_class.name().unwrap().to_string()
-        );
+        assert_eq!("renamedClass", py_class.name().unwrap().to_string());
 
         pyo3::py_run!(py, py_class, "assert py_class(0, '').new_name == 0");
         pyo3::py_run!(py, py_class, "assert py_class(0, '').fdNameB == ''");

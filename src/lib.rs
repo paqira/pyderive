@@ -46,8 +46,8 @@
 //!         raise AssertionError
 //!
 //! # Derives __repr__()
-//! assert str(m) == "builtins.MyClass(string='a', integer=1, option=None)"
-//! assert repr(m) == "builtins.MyClass(string='a', integer=1, option=None)"
+//! assert str(m) == "MyClass(string='a', integer=1, option=None)"
+//! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 //!
 //! # Derives __eq__() that depends on PartialEq trait
 //! assert m == MyClass("a", 1, None)
@@ -859,7 +859,7 @@ pub use pyderive_macros::PyOrd;
 ///         excluded: "excluded".to_string(),
 ///     })?;
 ///
-///     py_run!(py, a, r#"assert repr(a) == "builtins.PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///     py_run!(py, a, r#"assert repr(a) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
 ///
 ///     Ok(())
 /// });
@@ -1046,7 +1046,7 @@ pub use pyderive_macros::PyRichCmp;
 ///         excluded: "excluded".to_string(),
 ///     })?;
 ///
-///     py_run!(py, a, r#"assert str(a) == "builtins.PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
+///     py_run!(py, a, r#"assert str(a) == "PyClass(string='s', integer=1, float=1.0, tuple=('s', 1, 1.0), option=None)""#);
 ///
 ///     Ok(())
 /// });
@@ -1098,7 +1098,7 @@ pub use pyderive_macros::PyStr;
 /// let test = r#"
 /// a = PyClass(Child(10))
 ///
-/// assert repr(a) == "builtins.PyClass(child=builtins.Child(field=10))"
+/// assert repr(a) == "PyClass(child=Child(field=10))"
 /// "#;
 ///
 /// Python::with_gil(|py| {

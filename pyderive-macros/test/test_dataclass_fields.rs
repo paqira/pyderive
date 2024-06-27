@@ -237,7 +237,7 @@ fn test_variation() {
 
     Python::with_gil(|py| {
         let py_class = py.get_type_bound::<PyClass>();
-        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
+        assert_eq!("PyClass", py_class.name().unwrap().to_string());
         pyo3::py_run!(
                 py,
                 py_class,
@@ -325,7 +325,7 @@ fn test_options() {
 
     Python::with_gil(|py| {
         let py_class = py.get_type_bound::<PyClass>();
-        assert_eq!("builtins.PyClass", py_class.name().unwrap().to_string());
+        assert_eq!("PyClass", py_class.name().unwrap().to_string());
         pyo3::py_run!(
             py,
             py_class,

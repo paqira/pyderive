@@ -1,6 +1,6 @@
 [package]
 name = "pyderive"
-version = "0.6.2"
+version = "0.7.0"
 edition = "2021"
 # MSRV of inventory v0.3
 rust-version = "1.62"
@@ -16,10 +16,10 @@ categories = ["rust-patterns"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pyderive-macros = { path = "pyderive-macros", version = "= 0.6.1" }
+pyderive-macros = { path = "pyderive-macros", version = "= 0.7.0" }
 
 [dev-dependencies]
-pyo3 = { version = "0.21", features = [
+pyo3 = { version = "0.22", features = [
     "auto-initialize",
     "multiple-pymethods",
 ] }

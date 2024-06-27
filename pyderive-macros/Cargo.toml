@@ -1,6 +1,6 @@
 [package]
 name = "pyderive-macros"
-version = "0.6.1"
+version = "0.7.0"
 edition = "2021"
 # MSRV of inventory v0.3
 rust-version = "1.62"
@@ -26,7 +26,7 @@ syn = { version = "2", features = ["extra-traits", "derive", "full"] }
 num-complex = { version = ">= 0.2", optional = true }
 
 [dev-dependencies]
-pyo3 = { version = "0.21", features = [
+pyo3 = { version = "0.22", features = [
     "auto-initialize",
     "multiple-pymethods",
 ] }

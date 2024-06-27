@@ -1,5 +1,7 @@
 use proc_macro::TokenStream;
+
 use quote::{format_ident, quote};
+use syn::spanned::Spanned;
 use syn::DeriveInput;
 
 use crate::common::FieldData;
@@ -22,13 +24,21 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         let (default, default_factory) = match &d.default {
             Some(default) => {
                 if d.default_factory() {
-                    let name = format!("pyderive_internal_{}_{}_factory", struct_name, pyname);
+                    let name = format!("pyderive_internal_{}_{}_factory\0", struct_name, pyname);
+
+                    // name must contains exactly one null char ('\0').
+                    if 1 != name.chars().filter(|c| *c == '\0').count() {
+                        return Err(syn::Error::new(input.span(), "invalid struct name"));
+                    }
+
                     (
                         quote! { MISSING.as_unbound() },
                         quote! {
                             ::pyo3::types::PyCFunction::new_closure_bound(
                                 py,
-                                ::std::option::Option::Some(#name),
+                                ::std::option::Option::Some(
+                                    unsafe { ::std::ffi::CStr::from_bytes_with_nul_unchecked(#name.as_bytes()) }
+                                ),
                                 ::std::option::Option::None,
                                 |_, _| #default
                             )?
@@ -65,7 +75,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             format_ident!("{}", "_FIELD_CLASSVAR")
         };
 
-        quote! {
+        let r = quote! {
             let field_name = ::pyo3::intern!(py, #pyname);
             // python <= 3.9 does not have kw_only
             let field = if py.version_info() >= (3, 10) {
@@ -112,8 +122,11 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             field.call_method1(pystr_set_name, (&cls, field_name))?;
 
             fields.set_item(field_name, field)?;
-        }
-    });
+        };
+
+        Ok(r)
+    })
+    .collect::<Result<Vec<_>, syn::Error>>()?;
 
     let expanded = quote! {
         #[pymethods]
