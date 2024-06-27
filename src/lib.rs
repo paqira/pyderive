@@ -417,6 +417,10 @@ pub use pyderive_macros::PyDataclassFields;
 ///
 /// The implementation is based on [`PartialEq`]/[`Eq`] trait.
 ///
+/// <section class="warning">
+/// PyO3 officially support such a mechanism by <code>#[pyclass(eq)]</code> since 0.23.0.
+/// </section>
+///
 /// *Note that implementing `__eq__()` and `__ne__()` methods will cause
 /// Python not to generate a default `__hash__()` implementation,
 /// so consider also implementing `__hash__()`.*
@@ -474,6 +478,10 @@ pub use pyderive_macros::PyEq;
 /// Derive macro generating a [`__hash__()`][__hash__] fn/Python method.
 ///
 /// The implementation is based on [`Hash`] trait.
+///
+/// <section class="warning">
+/// PyO3 officially support such a mechanism by <code>#[pyclass(hash)]</code> since 0.23.0.
+/// </section>
 ///
 /// # Expansion
 ///
@@ -730,6 +738,10 @@ pub use pyderive_macros::PyNew;
 /// Derive macro generating [`__lt__()`][__lt__], [`__le__()`][__le__], [`__gt__()`][__gt__] and [`__ge__()`][__ge__] fn/Python methods.
 ///
 /// The implementation is based on [`PartialOrd`]/[`Ord`] trait.
+///
+/// <section class="warning">
+/// PyO3 officially support such a mechanism by <code>#[pyclass(ord)]</code> since 0.23.0.
+/// </section>
 ///
 /// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
 ///
