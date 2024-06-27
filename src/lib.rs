@@ -762,11 +762,8 @@ pub use pyderive_macros::PyNew;
 /// # struct PyClass {}
 /// #[pymethods]
 /// impl PyClass {
-///     pub fn __lt__(&self, other: &Self) -> PyResult<bool> {
-///         match self.partial_cmp(other) {
-///             Some(Ordering::Less) => Ok(true),
-///             _ => Ok(false),
-///         }
+///     pub fn __lt__(&self, other: &Self) -> bool {
+///         matches!(self.partial_cmp(other), Some(Ordering::Less))
 ///     }
 ///     // and __le__, __gt__ and __ge__
 /// }
