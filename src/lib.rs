@@ -49,10 +49,10 @@
 //! assert str(m) == "builtins.MyClass(string='a', integer=1, option=None)"
 //! assert repr(m) == "builtins.MyClass(string='a', integer=1, option=None)"
 //!
-//! # Derives __eq__() based on PartialEq/Eq trait
+//! # Derives __eq__() that depends on PartialEq trait
 //! assert m == MyClass("a", 1, None)
 //!
-//! # Derives __hash__() based on Hash trait
+//! # Derives __hash__() that depends on Hash trait
 //! assert hash(m) == 3289857268557676066
 //! ```
 //!
@@ -80,14 +80,14 @@
 //!
 //! The following derive macros depend on traits.
 //!
-//! | Derive Macro    | Derives                                                                                                         |
-//! | --------------- | --------------------------------------------------------------------------------------------------------------- |
-//! | [`PyEq`]        | `__eq__()` and `__ne__()` based on [`PartialEq`]/[`Eq`] trait                                                   |
-//! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` based on [`PartialOrd`]/[`Ord`] trait                         |
-//! | [`PyRichCmp`]   | `==`, `!=`, `>`, `>=`, `<` and `<=` based on [`PartialEq`] and [`PartialOrd`] traits                            |
-//! | [`PyHash`]      | `__hash__()` based on [`Hash`] trait and [`hash_map::DefaultHasher`][std::collections::hash_map::DefaultHasher] |
-//! | [`PyNumeric`]   | Numeric op methods (`__add__()` etc.)                                                                           |
-//! | [`PyBitwise`]   | Bitwise op methods (`__and__()` etc.)                                                                           |
+//! | Derive Macro    | Derives                                                                                    |
+//! | --------------- | ------------------------------------------------------------------------------------------ |
+//! | [`PyEq`]        | `__eq__()` and `__ne__()`, depends on [`PartialEq`]                                        |
+//! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`, depend on [`PartialOrd`]                |
+//! | [`PyRichCmp`]   | `==`, `!=`, `>`, `>=`, `<` and `<=`, depend on [`PartialEq`] and [`PartialOrd`]            |
+//! | [`PyHash`]      | `__hash__()`, depends on on [`Hash`]                                                       |
+//! | [`PyNumeric`]   | Numeric op traits (`__add__()` etc.)                                                       |
+//! | [`PyBitwise`]   | Bitwise op traits (`__and__()` etc.)                                                       |
 //!
 //! Module [`pyderive::ops`](mod@ops) and [`pyderive::convert`](mod@convert) provides
 //! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
@@ -416,7 +416,7 @@ pub mod ops;
 pub use pyderive_macros::PyDataclassFields;
 /// Derive macro generating a [`__eq__()`][__eq__] and [`__ne__()`][__ne__] fn/Python methods.
 ///
-/// The implementation is based on [`PartialEq`]/[`Eq`] trait.
+/// The implementation requires [`PartialEq`] impl.
 ///
 /// <section class="warning">
 /// PyO3 supports <code>#[pyclass(eq)]</code> since 0.23.0, it is recommended to use it.
@@ -478,7 +478,7 @@ pub use pyderive_macros::PyDataclassFields;
 pub use pyderive_macros::PyEq;
 /// Derive macro generating a [`__hash__()`][__hash__] fn/Python method.
 ///
-/// The implementation is based on [`Hash`] trait.
+/// The implementation requires [`Hash`] impl.
 ///
 /// <section class="warning">
 /// PyO3 supports <code>#[pyclass(hash)]</code> since 0.23.0, it is recommended to use it.
@@ -738,7 +738,7 @@ pub use pyderive_macros::PyMatchArgs;
 pub use pyderive_macros::PyNew;
 /// Derive macro generating [`__lt__()`][__lt__], [`__le__()`][__le__], [`__gt__()`][__gt__] and [`__ge__()`][__ge__] fn/Python methods.
 ///
-/// The implementation is based on [`PartialOrd`]/[`Ord`] trait.
+/// The implementation requires [`PartialOrd`] impl.
 ///
 /// <section class="warning">
 /// PyO3 supports <code>#[pyclass(hash)]</code> since 0.23.0.
@@ -924,7 +924,7 @@ pub use pyderive_macros::PyRepr;
 pub use pyderive_macros::PyReversed;
 /// Derive macro generating `__richcmp__` fn that provides Python comparison operations (`==`, `!=`, `<`, `<=`, `>`, and `>=`).
 ///
-/// The implementation is based on [`PartialEq`] and [`PartialOrd`] traits.
+/// The implementation requires [`PartialEq`] and [`PartialOrd`] impl.
 ///
 /// <section class="warning">
 /// PyO3 supports <code>#[pyclass(ord)]</code> since 0.23.0, it is recommended to use it.

@@ -39,10 +39,10 @@ match m:
 assert str(m) == "builtins.MyClass(string='a', integer=1, option=None)"
 assert repr(m) == "builtins.MyClass(string='a', integer=1, option=None)"
 
-# Derives __eq__() based on PartialEq/Eq trait
+# Derives __eq__() that depends on PartialEq/Eq trait
 assert m == MyClass("a", 1, None)
 
-# Derives __hash__() based on Hash trait
+# Derives __hash__() that depends on Hash trait
 assert hash(m) == 3289857268557676066
 ```
 
