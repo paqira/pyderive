@@ -37,12 +37,11 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pymethods]
         #[automatically_derived]
         impl #struct_name {
-            pub fn __repr__(slf: &::pyo3::PyCell<Self>) -> ::pyo3::PyResult<::std::string::String> {
-                let t = slf.get_type();
-                let name = t.name()?;
+            pub fn __repr__(slf: &::pyo3::Bound<'_, Self>) -> ::pyo3::PyResult<::std::string::String> {
+                let name = slf.get_type().name()?;
 
-                let this = slf.borrow();
                 let py = slf.py();
+                let this = slf.borrow();
 
                 let s = format!(#fmt, name, #(#args),*);
                 ::pyo3::PyResult::Ok(s)
