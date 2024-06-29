@@ -138,7 +138,7 @@ macro_rules! impl_unary {
                 #[automatically_derived]
                 impl #struct_name {
                     pub fn $pyname(&self) -> <&Self as $trait>::Output {
-                        use std::ops::$trait;
+                        use ::std::ops::$trait;
                         $trait::$method(self)
                     }
                 }
@@ -544,7 +544,7 @@ macro_rules! impl_convert {
                 #[automatically_derived]
                 impl #struct_name {
                     pub fn $pyname(&self) -> $ty {
-                        Into::into(self)
+                        ::std::convert::Into::into(self)
                     }
                 }
             };
@@ -570,9 +570,8 @@ pub fn py_bytes(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         #[pymethods]
         #[automatically_derived]
         impl #struct_name {
-            pub fn __bytes__(&self) -> Cow<[u8]> {
-                use ::std::borrow::Cow;
-                Into::into(self)
+            pub fn __bytes__(&self) -> ::std::borrow::Cow<[::std::primitive::u8]> {
+                ::std::convert::Into::into(self)
             }
         }
     };
@@ -594,7 +593,7 @@ pub fn py_complex(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         #[automatically_derived]
         impl #struct_name {
             pub fn __complex__(&self) -> ::num_complex::Complex64 {
-                Into::into(self)
+                ::std::convert::Into::into(self)
             }
         }
     };
