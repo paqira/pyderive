@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
@@ -77,13 +79,13 @@ impl TryFrom<&Vec<Attribute>> for Pyo3StructOption {
 }
 
 #[derive(Debug, Default, Clone)]
-pub(crate) struct Pyo3FieldOption {
+pub(crate) struct Pyo3FieldOption<'a> {
     pub(crate) get: bool,
     pub(crate) set: bool,
-    pub(crate) name: Option<String>,
+    pub(crate) name: Option<Cow<'a, str>>,
 }
 
-impl FromIterator<Pyo3FieldAttr> for Pyo3FieldOption {
+impl<'a> FromIterator<Pyo3FieldAttr> for Pyo3FieldOption<'a> {
     fn from_iter<T: IntoIterator<Item = Pyo3FieldAttr>>(iter: T) -> Self {
         let mut new = Self::default();
 
@@ -96,7 +98,7 @@ impl FromIterator<Pyo3FieldAttr> for Pyo3FieldOption {
                     new.set = true;
                 }
                 Pyo3FieldAttr::Name { value, .. } => {
-                    new.name = Some(value.value());
+                    new.name = Some(Cow::from(value.value()));
                 }
                 Pyo3FieldAttr::Other => {}
             }
@@ -107,7 +109,7 @@ impl FromIterator<Pyo3FieldAttr> for Pyo3FieldOption {
 
 // NEVER returns Error on parsing Pyo3 attr args,
 // we just read them.
-impl TryFrom<&Vec<Attribute>> for Pyo3FieldOption {
+impl<'a> TryFrom<&Vec<Attribute>> for Pyo3FieldOption<'a> {
     type Error = syn::Error;
 
     fn try_from(value: &Vec<Attribute>) -> Result<Self> {
@@ -124,7 +126,7 @@ impl TryFrom<&Vec<Attribute>> for Pyo3FieldOption {
 }
 
 #[derive(Debug, Default, Clone)]
-pub(crate) struct PyderiveFieldOption {
+pub(crate) struct PyderiveFieldOption<'a> {
     pub(crate) new: Option<bool>,
     pub(crate) match_args: Option<bool>,
     pub(crate) repr: Option<bool>,
@@ -135,10 +137,10 @@ pub(crate) struct PyderiveFieldOption {
     pub(crate) dataclass_field: Option<bool>,
     pub(crate) default: Option<Expr>,
     pub(crate) default_factory: Option<bool>,
-    pub(crate) annotation: Option<String>,
+    pub(crate) annotation: Option<Cow<'a, str>>,
 }
 
-impl FromIterator<PyderiveFieldAttr> for Result<PyderiveFieldOption> {
+impl<'a> FromIterator<PyderiveFieldAttr> for Result<PyderiveFieldOption<'a>> {
     fn from_iter<T: IntoIterator<Item = PyderiveFieldAttr>>(iter: T) -> Self {
         let mut new = PyderiveFieldOption::default();
 
@@ -262,7 +264,7 @@ impl FromIterator<PyderiveFieldAttr> for Result<PyderiveFieldOption> {
                         return Err(syn::Error::new(v.left.span(), "duplicated annotation"));
                     }
                     None => {
-                        new.annotation = Some(v.right.value());
+                        new.annotation = Some(Cow::from(v.right.value()));
                     }
                 },
             }
@@ -272,7 +274,7 @@ impl FromIterator<PyderiveFieldAttr> for Result<PyderiveFieldOption> {
     }
 }
 
-impl TryFrom<&Vec<Attribute>> for PyderiveFieldOption {
+impl<'a> TryFrom<&Vec<Attribute>> for PyderiveFieldOption<'a> {
     type Error = syn::Error;
 
     fn try_from(value: &Vec<Attribute>) -> Result<Self> {

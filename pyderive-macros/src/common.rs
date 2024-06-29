@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use quote::format_ident;
 use syn::{
     punctuated::Punctuated, spanned::Spanned, Data, DataEnum, DataStruct, DataUnion, DeriveInput,
@@ -29,14 +31,14 @@ pub(crate) fn is_py(ty: &Type) -> bool {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct FieldData {
+pub(crate) struct FieldData<'a> {
     #[allow(dead_code)]
     pub(crate) index: usize,
     pub(crate) field: Field,
     pub(crate) get: bool,
     pub(crate) set: bool,
     // String -> Some(String) to support Tuple struct
-    pub(crate) pyname: String,
+    pub(crate) pyname: Cow<'a, str>,
     // String -> Some(Ident) to support Tuple struct
     pub(crate) pyident: Ident,
     new: Option<bool>,
@@ -49,10 +51,10 @@ pub(crate) struct FieldData {
     dataclass_field: Option<bool>,
     pub(crate) default: Option<Expr>,
     default_factory: Option<bool>,
-    pub(crate) annotation: Option<String>,
+    pub(crate) annotation: Option<Cow<'a, str>>,
 }
 
-impl FieldData {
+impl FieldData<'_> {
     #[allow(clippy::wrong_self_convention)]
     #[allow(clippy::new_ret_no_self)]
     pub(crate) fn new(&self) -> bool {
@@ -123,21 +125,25 @@ impl FieldData {
                 let set = pyo3_struct_op.set || pyo3_field_opt.set;
                 let pyname = match pyo3_field_opt.name {
                     Some(name) => name,
-                    None => match pyo3_struct_op.rename {
-                        RenamingRule::Other => field.ident.as_ref().unwrap().to_string(),
-                        _ => pyo3_struct_op
-                            .rename
-                            .rename(&field.ident.as_ref().unwrap().to_string()),
-                    },
+                    None => {
+                        let r = match pyo3_struct_op.rename {
+                            RenamingRule::Other => field.ident.as_ref().unwrap().to_string(),
+                            _ => pyo3_struct_op
+                                .rename
+                                .rename(&field.ident.as_ref().unwrap().to_string()),
+                        };
+                        Cow::from(r)
+                    }
                 };
+                let pyident = format_ident!("{}", pyname);
 
                 Ok(FieldData {
                     index,
                     field: field.to_owned(),
                     get,
                     set,
-                    pyname: pyname.clone(),
-                    pyident: format_ident!("{}", pyname),
+                    pyname,
+                    pyident,
                     //
                     new: pyderive_field_opt.new,
                     match_args: pyderive_field_opt.match_args,
@@ -149,7 +155,7 @@ impl FieldData {
                     dataclass_field: pyderive_field_opt.dataclass_field,
                     default: pyderive_field_opt.default,
                     default_factory: pyderive_field_opt.default_factory,
-                    annotation: pyderive_field_opt.annotation,
+                    annotation: pyderive_field_opt.annotation.map(Cow::from),
                 })
             })
             .collect::<Result<Vec<_>>>()
