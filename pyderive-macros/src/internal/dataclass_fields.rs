@@ -37,6 +37,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                             ::pyo3::types::PyCFunction::new_closure_bound(
                                 py,
                                 ::std::option::Option::Some(
+                                    // make &'static CStr
+                                    // we check #name contains only one \0 above 
                                     unsafe { ::std::ffi::CStr::from_bytes_with_nul_unchecked(#name.as_bytes()) }
                                 ),
                                 ::std::option::Option::None,
