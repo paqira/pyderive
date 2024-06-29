@@ -54,22 +54,22 @@ assert hash(m) == 3289857268557676066
 
 This provides deriving following special methods and attributes;
 
-| Derive Macro        | Python Method/Attribute                           |
-|---------------------|---------------------------------------------------|
-| `PyNew`             | `__new__()`                                       |
-| `PyMatchArgs`       | `__match_args__`                                  |
-| `PyRepr`            | `__repr__()`                                      |
-| `PyStr`             | `__str__()`                                       |
-| `PyEq`              | `__eq__()` and `__ne__()`                         |
-| `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()` |
-| `PyRichCmp`         | `==`, `!=`, `>`, `>=`, `<` and `<=`               |
-| `PyHash`            | `__hash__()`                                      |
-| `PyIter`            | `__iter__()`                                      |
-| `PyReversed`        | `__reversed__()`                                  |
-| `PyLen`             | `__len__()`                                       |
-| `PyDataclassFields` | `__dataclass_fields__`                            |
-| `PyNumeric`         | Numeric op methods (`__add__()` etc.)             |
-| `PyBitwise`         | Bitwise op methods (`__and__()` etc.)             |
+| Derive Macro        | Python Method/Attribute                                |
+|---------------------|--------------------------------------------------------|
+| `PyNew`             | `__new__()`                                            |
+| `PyMatchArgs`       | `__match_args__`                                       |
+| `PyRepr`            | `__repr__()`                                           |
+| `PyStr`             | `__str__()`                                            |
+| `PyEq`              | `__eq__()` and `__ne__()`                              |
+| `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`      |
+| `PyRichCmp`         | `==`, `!=`, `>`, `>=`, `<` and `<=` by `__richcmp__()` |
+| `PyHash`            | `__hash__()`                                           |
+| `PyIter`            | `__iter__()`                                           |
+| `PyReversed`        | `__reversed__()`                                       |
+| `PyLen`             | `__len__()`                                            |
+| `PyDataclassFields` | `__dataclass_fields__`                                 |
+| `PyNumeric`         | Numeric op methods (`__add__()` etc.)                  |
+| `PyBitwise`         | Bitwise op methods (`__and__()` etc.)                  |
 
 The field attributes `#[pyderive(..)]` is used to customize the implementation,
 like [`dataclasses.field()`][dataclasses-field] of Python.

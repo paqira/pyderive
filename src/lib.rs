@@ -80,14 +80,14 @@
 //!
 //! The following derive macros depend on traits.
 //!
-//! | Derive Macro    | Derives                                                                                    |
-//! | --------------- | ------------------------------------------------------------------------------------------ |
-//! | [`PyEq`]        | `__eq__()` and `__ne__()`, depends on [`PartialEq`]                                        |
-//! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`, depend on [`PartialOrd`]                |
-//! | [`PyRichCmp`]   | `==`, `!=`, `>`, `>=`, `<` and `<=`, depend on [`PartialEq`] and [`PartialOrd`]            |
-//! | [`PyHash`]      | `__hash__()`, depends on on [`Hash`]                                                       |
-//! | [`PyNumeric`]   | Numeric op traits (`__add__()` etc.)                                                       |
-//! | [`PyBitwise`]   | Bitwise op traits (`__and__()` etc.)                                                       |
+//! | Derive Macro    | Derives                                                                                            |
+//! | --------------- | -------------------------------------------------------------------------------------------------- |
+//! | [`PyEq`]        | `__eq__()` and `__ne__()`, depends on [`PartialEq`]                                                |
+//! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`, depend on [`PartialOrd`]                        |
+//! | [`PyRichCmp`]   | `==`, `!=`, `>`, `>=`, `<` and `<=` by `__richcmp__()`, depend on [`PartialEq`] and [`PartialOrd`] |
+//! | [`PyHash`]      | `__hash__()`, depends on on [`Hash`]                                                               |
+//! | [`PyNumeric`]   | Numeric op traits (`__add__()` etc.)                                                               |
+//! | [`PyBitwise`]   | Bitwise op traits (`__and__()` etc.)                                                               |
 //!
 //! Module [`pyderive::ops`](mod@ops) and [`pyderive::convert`](mod@convert) provides
 //! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
