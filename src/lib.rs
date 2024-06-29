@@ -419,7 +419,7 @@ pub use pyderive_macros::PyDataclassFields;
 /// The implementation requires [`PartialEq`] impl.
 ///
 /// <section class="warning">
-/// PyO3 supports <code>#[pyclass(eq)]</code> since 0.23.0, it is recommended to use it.
+/// PyO3 supports <code>#[pyclass(eq)]</code> since 0.22, it is recommended to use it.
 /// </section>
 ///
 /// *Note that implementing `__eq__()` and `__ne__()` methods will cause
@@ -481,7 +481,7 @@ pub use pyderive_macros::PyEq;
 /// The implementation requires [`Hash`] impl.
 ///
 /// <section class="warning">
-/// PyO3 supports <code>#[pyclass(hash)]</code> since 0.23.0, it is recommended to use it.
+/// PyO3 supports <code>#[pyclass(hash)]</code> since 0.22, it is recommended to use it.
 /// </section>
 ///
 /// # Expansion
@@ -741,7 +741,7 @@ pub use pyderive_macros::PyNew;
 /// The implementation requires [`PartialOrd`] impl.
 ///
 /// <section class="warning">
-/// PyO3 supports <code>#[pyclass(ord)]</code> since 0.23.0.
+/// PyO3 supports <code>#[pyclass(ord)]</code> since 0.22.
 /// </section>
 ///
 /// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].
@@ -924,7 +924,7 @@ pub use pyderive_macros::PyReversed;
 /// The implementation requires [`PartialEq`] and [`PartialOrd`] impl.
 ///
 /// <section class="warning">
-/// PyO3 supports <code>#[pyclass(ord)]</code> since 0.23.0, it is recommended to use it.
+/// PyO3 supports <code>#[pyclass(ord)]</code> since 0.22, it is recommended to use it.
 /// </section>
 ///
 /// The generated methods return `False` when [`PartialOrd::partial_cmp`] returns [`None`].

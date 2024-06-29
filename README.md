@@ -45,7 +45,7 @@ match m:
 assert str(m) == "MyClass(string='a', integer=1, option=None)"
 assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 
-# Derives __eq__() that depends on PartialEq/Eq trait
+# Derives __eq__() that depends on PartialEq trait
 assert m == MyClass("a", 1, None)
 
 # Derives __hash__() that depends on Hash trait
