@@ -16,7 +16,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .filter(|d| d.repr())
         .map(|d| {
             let ident = d.field.ident.to_owned().unwrap();
-            let name = d.pyname.to_owned();
+            let name = &d.pyname;
 
             if is_py(&d.field.ty) {
                 quote! { #name, this.#ident.bind(py).repr()? }

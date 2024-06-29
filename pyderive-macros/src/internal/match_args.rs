@@ -13,7 +13,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let names = data
         .iter()
         .filter(|d| d.match_args())
-        .map(|d| d.pyname.to_owned())
+        .map(|d| &d.pyname)
         .collect::<Vec<_>>();
 
     let types = iter::repeat(quote! { &'static ::std::primitive::str }).take(names.len());
