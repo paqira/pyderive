@@ -1,5 +1,11 @@
 # pyderive
 
+[![Crates.io Version](https://img.shields.io/crates/v/pyderive?logo=rust)](https://crates.io/crates/pyderive)
+[![Crates.io MSRV](https://img.shields.io/crates/msrv/pyderive?logo=rust)](https://rust-lang.github.io/rfcs/2495-min-rust-version.html)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/paqira/pyderive/ci.yaml?logo=GitHub)
+[![docs.rs](https://img.shields.io/docsrs/pyderive?logo=rust)](https://docs.rs/pyderive/)
+![Crates.io License](https://img.shields.io/crates/l/pyderive)
+
 `pyderive` provides derive macros for Python spacial methods and a class attributes for [PyO3].
 
 [PyO3]: https://github.com/PyO3/pyo3
