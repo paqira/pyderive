@@ -32,3 +32,7 @@ num-complex = ["pyo3/num-complex", "pyderive-macros/num-complex"]
 members = [
     "pyderive-macros",
 ]
+
+[package.metadata.docs.rs]
+features = ["num-complex"]
+rustdoc-args = ["--cfg", "docsrs"]
