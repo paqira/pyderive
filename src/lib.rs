@@ -1109,6 +1109,7 @@ pub use pyderive_macros::PyStr;
 ///     py_run!(py, PyClass Child, test)
 /// });
 /// ```
+#[deprecated(since = "0.8.0", note = "`ToPyObject` is deprecated since PyO3 0.23.0, see PyO3 documentation")]
 pub use pyderive_macros::ToPyObject;
 
 /// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
