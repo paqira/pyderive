@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.0 - 2014-12-13
+## v0.8.0 - 2024-12-13
 
 - Migrate to PyO3 0.23.0
 - Deprecates `PyHash`, PyO3 officially provides same functionality by `#[pyclass(hash)]`
