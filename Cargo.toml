@@ -1,6 +1,6 @@
 [package]
 name = "pyderive"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 # MSRV of inventory v0.3
 rust-version = "1.62"
@@ -15,8 +15,21 @@ categories = ["rust-patterns"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = [
+    "pyderive-macros",
+]
+
+[workspace.package]
+authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/paqira/pyderive"
+rust-version = "1.62"
+version = "0.8.0"
+
 [dependencies]
-pyderive-macros = { path = "pyderive-macros", version = "= 0.7.0" }
+pyderive-macros = { path = "pyderive-macros", version = "= 0.8.0" }
 
 [dev-dependencies]
 pyo3 = { version = "0.23", features = [
@@ -27,11 +40,6 @@ num-complex = { version = ">= 0.2" } # for doctest
 
 [features]
 num-complex = ["pyo3/num-complex", "pyderive-macros/num-complex"]
-
-[workspace]
-members = [
-    "pyderive-macros",
-]
 
 [package.metadata.docs.rs]
 features = ["num-complex"]

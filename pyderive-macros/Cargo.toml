@@ -1,12 +1,11 @@
 [package]
 name = "pyderive-macros"
-version = "0.7.0"
-edition = "2021"
-# MSRV of inventory v0.3
-rust-version = "1.62"
-authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/paqira/pyderive"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 description = "Macros for pyderive crate"
 exclude = [".*"]
 
