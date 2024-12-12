@@ -828,6 +828,7 @@ pub use pyderive_macros::PyOrd;
 /// - It should place `#[derive(PyRepr)]` before `#[pyclass]`.
 /// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
 ///   for child [`pyclass`][pyo3_pyclass]es.
+/// - This calls Python `repr()` recursively.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
@@ -1015,6 +1016,7 @@ pub use pyderive_macros::PyRichCmp;
 /// - It should place `#[derive(PyStr)]` before `#[pyclass]`.
 /// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
 ///   for child [`pyclass`][pyo3_pyclass]es.
+/// - This calls Python `str()` recursively.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
@@ -1112,7 +1114,10 @@ pub use pyderive_macros::PyStr;
 ///     py_run!(py, PyClass Child, test)
 /// });
 /// ```
-#[deprecated(since = "0.8.0", note = "`ToPyObject` is deprecated since PyO3 0.23.0, see PyO3 documentation")]
+#[deprecated(
+    since = "0.8.0",
+    note = "`ToPyObject` is deprecated since PyO3 0.23.0, see PyO3 documentation"
+)]
 pub use pyderive_macros::ToPyObject;
 
 /// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
