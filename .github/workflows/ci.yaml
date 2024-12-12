@@ -45,27 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@1.62
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
-      - name: Build
-        run: cargo build --all-features
-      - name: Test
-        run: cargo test --all-features --workspace
-  test-stable:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.63
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
       - name: Build
