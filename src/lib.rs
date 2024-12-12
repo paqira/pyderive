@@ -19,7 +19,7 @@
 //! use pyderive::*;
 //!
 //! // Place #[derive(PyNew, ...)] before #[pyclass]
-//! #[derive(PyNew, PyMatchArgs, PyRepr, PyEq, PyHash)]
+//! #[derive(PyNew, PyMatchArgs, PyRepr, PyEq)]
 //! #[pyclass(get_all)]
 //! #[derive(PartialEq, Hash)]
 //! struct MyClass {
@@ -45,15 +45,12 @@
 //!     case _:
 //!         raise AssertionError
 //!
-//! # Derives __repr__()
+//! # Derives __repr__(), calls Python repr() recursively
 //! assert str(m) == "MyClass(string='a', integer=1, option=None)"
 //! assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 //!
 //! # Derives __eq__() that depends on PartialEq trait
 //! assert m == MyClass("a", 1, None)
-//!
-//! # Derives __hash__() that depends on Hash trait
-//! assert hash(m) == 3289857268557676066
 //! ```
 //!
 //! # Detail
@@ -63,16 +60,16 @@
 //!
 //! We list the default implementations that the macros generate.
 //!
-//! | Derive Macro          | Derives                                              |
-//! | --------------------- | ---------------------------------------------------- |
-//! | [`PyNew`]             | `__new__()` with all fields                          |
-//! | [`PyMatchArgs`]       | `__match_args__` class attr. with `get` fields       |
-//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields          |
-//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields           |
-//! | [`PyIter`]            | `__iter__()` returns an iterator of `get` fields     |
-//! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields |
-//! | [`PyLen`]             | `__len__()` returns number of `get` fields           |
-//! | [`PyDataclassFields`] | `__dataclass_fields__` class attr. with all fields   |
+//! | Derive Macro          | Derives                                                                 |
+//! | --------------------- | ----------------------------------------------------------------------- |
+//! | [`PyNew`]             | `__new__()` with all fields                                             |
+//! | [`PyMatchArgs`]       | `__match_args__` class attr. with `get` fields                          |
+//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields, recursively calls `repr()` |
+//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields, recursively calls `str()`   |
+//! | [`PyIter`]            | `__iter__()` returns an iterator of `get` fields                        |
+//! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields                    |
+//! | [`PyLen`]             | `__len__()` returns number of `get` fields                              |
+//! | [`PyDataclassFields`] | `__dataclass_fields__` class attr. with all fields                      |
 //!
 //! We call the field is *`get` (or `set`) field*
 //! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
@@ -85,20 +82,12 @@
 //! | [`PyEq`]        | `__eq__()` and `__ne__()`, depends on [`PartialEq`]                                                |
 //! | [`PyOrd`]       | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`, depend on [`PartialOrd`]                        |
 //! | [`PyRichCmp`]   | `==`, `!=`, `>`, `>=`, `<` and `<=` by `__richcmp__()`, depend on [`PartialEq`] and [`PartialOrd`] |
-//! | [`PyHash`]      | `__hash__()`, depends on on [`Hash`]                                                               |
 //! | [`PyNumeric`]   | Numeric op traits (`__add__()` etc.)                                                               |
 //! | [`PyBitwise`]   | Bitwise op traits (`__and__()` etc.)                                                               |
 //!
 //! Module [`pyderive::ops`](mod@ops) and [`pyderive::convert`](mod@convert) provides
 //! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
 //! called by builtin functions (`__int__()` etc.).
-//!
-//! In addition, this provides a helper derive macro that generates an impl of [`ToPyObject`][pyo3_ToPyObject] trait
-//! that required by [`PyRepr`], [`PyStr`], [`PyIter`] and [`PyDataclassFields`] derive macros.
-//!
-//! | Derive Macro   | Impl                                                                                                           |
-//! | -------------- | -------------------------------------------------------------------------------------------------------------- |
-//! | [`ToPyObject`] | [`ToPyObject`][pyo3_ToPyObject] trait by [`IntoPy<PyObject>`][pyo3_IntoPy] trait for [`pyclass`][pyo3_pyclass] |
 //!
 //! [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 //! [pyo3_IntoPy]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPy.html

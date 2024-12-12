@@ -16,7 +16,7 @@ use pyo3::prelude::*;
 use pyderive::*;
 
 // Place #[derive(PyNew, ...)] before #[pyclass]
-#[derive(PyNew, PyMatchArgs, PyRepr, PyEq, PyHash)]
+#[derive(PyNew, PyMatchArgs, PyRepr, PyEq)]
 #[pyclass(get_all)]
 #[derive(PartialEq, Hash)]
 struct MyClass {
@@ -41,15 +41,12 @@ match m:
     case _:
         raise AssertionError
 
-# Derives __repr__()
+# Derives __repr__(), calls Python repr() recursively
 assert str(m) == "MyClass(string='a', integer=1, option=None)"
 assert repr(m) == "MyClass(string='a', integer=1, option=None)"
 
 # Derives __eq__() that depends on PartialEq trait
 assert m == MyClass("a", 1, None)
-
-# Derives __hash__() that depends on Hash trait
-assert hash(m) == 3289857268557676066
 ```
 
 This provides deriving following special methods and attributes;
@@ -58,12 +55,11 @@ This provides deriving following special methods and attributes;
 |---------------------|--------------------------------------------------------|
 | `PyNew`             | `__new__()`                                            |
 | `PyMatchArgs`       | `__match_args__`                                       |
-| `PyRepr`            | `__repr__()`                                           |
-| `PyStr`             | `__str__()`                                            |
+| `PyRepr`            | `__repr__()` (recursively calls `repr()`)              |
+| `PyStr`             | `__str__()`  (recursively calls `str()`)               |
 | `PyEq`              | `__eq__()` and `__ne__()`                              |
 | `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`      |
 | `PyRichCmp`         | `==`, `!=`, `>`, `>=`, `<` and `<=` by `__richcmp__()` |
-| `PyHash`            | `__hash__()`                                           |
 | `PyIter`            | `__iter__()`                                           |
 | `PyReversed`        | `__reversed__()`                                       |
 | `PyLen`             | `__len__()`                                            |
@@ -79,12 +75,6 @@ like [`dataclasses.field()`][dataclasses-field] of Python.
 Module `pyderive::ops` and `pyderive::convert` provides
 derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
 called by builtin functions (`__int__()` etc.).
-
-In addition, this provides a helper derive macro:
-
-| Derive Macro | Impl                                                         |
-|--------------|--------------------------------------------------------------|
-| `ToPyObject` | `ToPyObject` trait by `IntoPy<PyObject>` trait for `pyclass` |
 
 It requires to enable `multiple-pymethods` feature of PyO3 because this may produce multiple `#[pymethods]`.
 
