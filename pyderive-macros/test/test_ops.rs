@@ -70,7 +70,7 @@ mod unary {
         impl_unary!(PyClass, Neg::neg);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -94,7 +94,7 @@ assert actual.field == -1
         impl_unary!(PyClass, Not::not);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -117,7 +117,7 @@ assert actual.field == -2
         impl_new!(PyClass);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -147,7 +147,7 @@ mod binary {
         impl_binary!(PyClass, Add::add);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -171,7 +171,7 @@ assert actual.field == 2
         impl_binary!(PyClass, Sub::sub);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -195,7 +195,7 @@ assert actual.field == 0
         impl_binary!(PyClass, Mul::mul);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -219,7 +219,7 @@ assert actual.field == 6
         impl_binary!(PyClass, Div::div);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -243,7 +243,7 @@ assert actual.field == 2
         impl_binary!(PyClass, Div::div);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -267,7 +267,7 @@ assert actual.field == 2
         impl_binary!(PyClass, Rem::rem);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -291,7 +291,7 @@ assert actual.field == 1
         impl_binary!(PyClass, Shl::shl);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -315,7 +315,7 @@ assert actual.field == 800
         impl_binary!(PyClass, Shr::shr);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -339,7 +339,7 @@ assert actual.field == 12
         impl_binary!(PyClass, BitAnd::bitand);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -363,7 +363,7 @@ assert actual.field == 3
         impl_binary!(PyClass, BitOr::bitor);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -387,7 +387,7 @@ assert actual.field == 7
         impl_binary!(PyClass, BitXor::bitxor);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -416,7 +416,7 @@ mod assign {
         impl_binary_assign!(PyClass, AddAssign::add_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -441,7 +441,7 @@ assert actual.field == 2
         impl_binary_assign!(PyClass, SubAssign::sub_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -466,7 +466,7 @@ assert actual.field == 0
         impl_binary_assign!(PyClass, MulAssign::mul_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -491,7 +491,7 @@ assert actual.field == 6
         impl_binary_assign!(PyClass, DivAssign::div_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -516,7 +516,7 @@ assert actual.field == 2
         impl_binary_assign!(PyClass, DivAssign::div_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -541,7 +541,7 @@ assert actual.field == 2
         impl_binary_assign!(PyClass, RemAssign::rem_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -566,7 +566,7 @@ assert actual.field == 1
         impl_binary_assign!(PyClass, ShlAssign::shl_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -591,7 +591,7 @@ assert actual.field == 800
         impl_binary_assign!(PyClass, ShrAssign::shr_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -616,7 +616,7 @@ assert actual.field == 12
         impl_binary_assign!(PyClass, BitAndAssign::bitand_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -641,7 +641,7 @@ assert actual.field == 3
         impl_binary_assign!(PyClass, BitOrAssign::bitor_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -666,7 +666,7 @@ assert actual.field == 7
         impl_binary_assign!(PyClass, BitXorAssign::bitxor_assign);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -696,7 +696,7 @@ mod reflect {
         impl_binary!(PyClass, Add::add);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -720,7 +720,7 @@ assert actual.field == 2
         impl_binary!(PyClass, Sub::sub);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -744,7 +744,7 @@ assert actual.field == 1
         impl_binary!(PyClass, Mul::mul);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -768,7 +768,7 @@ assert actual.field == 6
         impl_binary!(PyClass, Div::div);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -792,7 +792,7 @@ assert actual.field == 2
         impl_binary!(PyClass, Div::div);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -816,7 +816,7 @@ assert actual.field == 2
         impl_binary!(PyClass, Rem::rem);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -840,7 +840,7 @@ assert actual.field == 1
         impl_binary!(PyClass, Shl::shl);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -864,7 +864,7 @@ assert actual.field == 800
         impl_binary!(PyClass, Shr::shr);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -888,7 +888,7 @@ assert actual.field == 12
         impl_binary!(PyClass, BitAnd::bitand);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -912,7 +912,7 @@ assert actual.field == 3
         impl_binary!(PyClass, BitOr::bitor);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,
@@ -936,7 +936,7 @@ assert actual.field == 7
         impl_binary!(PyClass, BitXor::bitxor);
 
         Python::with_gil(|py| {
-            let py_class = py.get_type_bound::<PyClass>();
+            let py_class = py.get_type::<PyClass>();
             pyo3::py_run!(
                 py,
                 py_class,

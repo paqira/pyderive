@@ -84,20 +84,20 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let args = (
                     #default, // default
                     #default_factory, // default_factory
-                    ::pyo3::types::PyBool::new_bound(py, #new), // new
-                    ::pyo3::types::PyBool::new_bound(py, #repr), // repr
+                    ::pyo3::types::PyBool::new(py, #new), // new
+                    ::pyo3::types::PyBool::new(py, #repr), // repr
                     py.None(), // hash
                     py.None(), // compare
                     py.None(), // metadata
-                    ::pyo3::types::PyBool::new_bound(py, #kw_only), // kw_only
+                    ::pyo3::types::PyBool::new(py, #kw_only), // kw_only
                 );
                 Field.call1(args)
             } else {
                 let args = (
                     #default, // default
                     #default_factory, // default_factory
-                    ::pyo3::types::PyBool::new_bound(py, #new), // new
-                    ::pyo3::types::PyBool::new_bound(py, #repr), // repr
+                    ::pyo3::types::PyBool::new(py, #new), // new
+                    ::pyo3::types::PyBool::new(py, #repr), // repr
                     py.None(), // hash
                     py.None(), // compare
                     py.None(), // metadata
@@ -137,7 +137,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             #[classattr]
             pub fn __dataclass_fields__(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::types::PyDict>> {
                 // For supporting __set_name__ protocol
-                let cls = py.get_type_bound::<Self>();
+                let cls = py.get_type::<Self>();
 
                 let dataclasses = ::pyo3::types::PyModule::import_bound(py, "dataclasses")?;
 
@@ -156,7 +156,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let pystr_field_type = ::pyo3::intern!(py, "_field_type");
                 let pystr_set_name = ::pyo3::intern!(py, "__set_name__");
 
-                let fields = ::pyo3::types::PyDict::new_bound(py);
+                let fields = ::pyo3::types::PyDict::new(py);
 
                 #(#assignments)*
 

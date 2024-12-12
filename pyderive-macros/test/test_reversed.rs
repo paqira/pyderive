@@ -121,7 +121,7 @@ fn test_nest_pyclass() {
     #[derive(PyReversed)]
     #[pyclass(get_all)]
     struct PyClassA {
-        field_1: PyClassB,
+        field_1: Py<PyClassB>,
         field_2: i64,
     }
 
@@ -136,8 +136,11 @@ fn test_nest_pyclass() {
     impl PyClassA {
         #[new]
         #[pyo3(signature=(field_1, field_2))]
-        fn new(field_1: PyClassB, field_2: i64) -> Self {
-            Self { field_1, field_2 }
+        fn new<'py>(py: Python<'py>, field_1: PyClassB, field_2: i64) -> Self {
+            Self {
+                field_1: field_1.into_pyobject(py).unwrap().unbind(),
+                field_2,
+            }
         }
     }
 
@@ -154,15 +157,9 @@ fn test_nest_pyclass() {
         }
     }
 
-    impl ToPyObject for PyClassB {
-        fn to_object(&self, py: Python<'_>) -> PyObject {
-            self.clone().into_py(py)
-        }
-    }
-
     Python::with_gil(|py| {
-        let py_class_a = py.get_type_bound::<PyClassA>();
-        let py_class_b = py.get_type_bound::<PyClassB>();
+        let py_class_a = py.get_type::<PyClassA>();
+        let py_class_b = py.get_type::<PyClassB>();
         py_run!(
             py,
             py_class_a py_class_b,

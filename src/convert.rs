@@ -48,7 +48,7 @@
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -110,7 +110,7 @@ pub use pyderive_macros::PyBool;
 /// "#;
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -168,7 +168,7 @@ pub use pyderive_macros::PyBytes;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -225,7 +225,7 @@ pub use pyderive_macros::PyComplex;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -280,7 +280,7 @@ pub use pyderive_macros::PyFloat;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -336,7 +336,7 @@ pub use pyderive_macros::PyIndex;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```

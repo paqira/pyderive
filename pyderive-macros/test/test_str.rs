@@ -30,17 +30,17 @@ fn test_variation() {
 
         fd_name_pybool: Py<PyBool>,
         fd_name_pystr: Py<PyString>,
-        fd_name_pyint: Py<PyLong>,
+        fd_name_pyint: Py<PyInt>,
         fd_name_pyfloat: Py<PyFloat>,
 
         fd_name_opt_pystr: Option<Py<PyString>>,
-        fd_name_opt_pyint: Option<Py<PyLong>>,
+        fd_name_opt_pyint: Option<Py<PyInt>>,
 
         fd_name_vec_pystr: Vec<Py<PyString>>,
-        fd_name_vec_pyint: Vec<Py<PyLong>>,
+        fd_name_vec_pyint: Vec<Py<PyInt>>,
 
         fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
-        fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
+        fd_name_vec_opt_pyint: Vec<Option<Py<PyInt>>>,
 
         fd_name_pystr_abspath: Py<PyString>,
     }
@@ -110,17 +110,17 @@ fn test_variation() {
 
             fd_name_pybool: Py<PyBool>,
             fd_name_pystr: Py<PyString>,
-            fd_name_pyint: Py<PyLong>,
+            fd_name_pyint: Py<PyInt>,
             fd_name_pyfloat: Py<PyFloat>,
 
             fd_name_opt_pystr: Option<Py<PyString>>,
-            fd_name_opt_pyint: Option<Py<PyLong>>,
+            fd_name_opt_pyint: Option<Py<PyInt>>,
 
             fd_name_vec_pystr: Vec<Py<PyString>>,
-            fd_name_vec_pyint: Vec<Py<PyLong>>,
+            fd_name_vec_pyint: Vec<Py<PyInt>>,
 
             fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
-            fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
+            fd_name_vec_opt_pyint: Vec<Option<Py<PyInt>>>,
 
             fd_name_pystr_abspath: Py<PyString>,
         ) -> Self {
@@ -156,7 +156,7 @@ fn test_variation() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type_bound::<PyClass>();
+        let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
 
         py_run!(
@@ -176,7 +176,7 @@ fn test_variation() {
     'str',
 )
 
-assert str(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=[115, 116, 114], fd_name_opt_str='str', fd_name_opt_int=1, fd_name_vec_str=['str'], fd_name_vec_int=[1], fd_name_vec_opt_str=['str'], fd_name_vec_opt_int=[1], fd_name_hs_str={'str'}, fd_name_js_int={1}, fd_name_hm_str={'str': 'str'}, fd_name_hm_int={1: 1}, fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0, fd_name_opt_pystr='str', fd_name_opt_pyint=1, fd_name_vec_pystr=['str'], fd_name_vec_pyint=[1], fd_name_vec_opt_pystr=['str'], fd_name_vec_opt_pyint=[1], fd_name_pystr_abspath='str')""#
+assert str(a) == "PyClass(fd_name_bool=True, fd_name_str='str', fd_name_int=1, fd_name_float=1.0, fn_name_bytes=b'str', fd_name_opt_str='str', fd_name_opt_int=1, fd_name_vec_str=['str'], fd_name_vec_int=[1], fd_name_vec_opt_str=['str'], fd_name_vec_opt_int=[1], fd_name_hs_str={'str'}, fd_name_js_int={1}, fd_name_hm_str={'str': 'str'}, fd_name_hm_int={1: 1}, fd_name_pybool=True, fd_name_pystr='str', fd_name_pyint=1, fd_name_pyfloat=1.0, fd_name_opt_pystr='str', fd_name_opt_pyint=1, fd_name_vec_pystr=['str'], fd_name_vec_pyint=[1], fd_name_vec_opt_pystr=['str'], fd_name_vec_opt_pyint=[1], fd_name_pystr_abspath='str')""#
         );
     });
 }
@@ -186,7 +186,7 @@ fn test_nest_pyclass() {
     #[derive(PyStr)]
     #[pyclass(get_all)]
     struct PyClassA {
-        field: PyClassB,
+        field: Py<PyClassB>,
     }
 
     // PyStr calls repr()
@@ -200,8 +200,10 @@ fn test_nest_pyclass() {
     impl PyClassA {
         #[new]
         #[pyo3(signature=(field))]
-        fn new(field: PyClassB) -> Self {
-            Self { field }
+        fn new<'py>(py: Python<'py>, field: PyClassB) -> Self {
+            Self {
+                field: field.into_pyobject(py).unwrap().into(),
+            }
         }
     }
 
@@ -214,15 +216,9 @@ fn test_nest_pyclass() {
         }
     }
 
-    impl ToPyObject for PyClassB {
-        fn to_object(&self, py: Python<'_>) -> PyObject {
-            self.clone().into_py(py)
-        }
-    }
-
     Python::with_gil(|py| {
-        let py_class_a = py.get_type_bound::<PyClassA>();
-        let py_class_b = py.get_type_bound::<PyClassB>();
+        let py_class_a = py.get_type::<PyClassA>();
+        let py_class_b = py.get_type::<PyClassB>();
         assert_eq!("PyClassA", py_class_a.name().unwrap().to_string());
         assert_eq!("PyClassB", py_class_b.name().unwrap().to_string());
 

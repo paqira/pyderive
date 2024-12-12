@@ -678,7 +678,7 @@ pub use pyderive_macros::PyLen;
 ///
 /// Python::with_gil(|py| {
 ///     if py.version_info() >= (3, 10) {
-///         let PyClass = py.get_type_bound::<PyClass>();
+///         let PyClass = py.get_type::<PyClass>();
 ///
 ///         py_run!(py, PyClass, test)
 ///     }
@@ -730,7 +730,7 @@ pub use pyderive_macros::PyMatchArgs;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1084,7 +1084,7 @@ pub use pyderive_macros::PyStr;
 /// #[derive(PyNew, PyRepr)]
 /// #[pyclass(get_all)]
 /// struct PyClass {
-///     child: Child,
+///     child: Py<Child>,
 /// }
 ///
 /// // PyRepr requires ToPyObject trait for child pyclass
@@ -1102,8 +1102,8 @@ pub use pyderive_macros::PyStr;
 /// "#;
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
-///     let Child = py.get_type_bound::<Child>();
+///     let PyClass = py.get_type::<PyClass>();
+///     let Child = py.get_type::<Child>();
 ///
 ///     py_run!(py, PyClass Child, test)
 /// });

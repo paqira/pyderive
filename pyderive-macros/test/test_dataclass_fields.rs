@@ -24,7 +24,7 @@ fn test_rename() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type_bound::<PyClass>();
+        let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
@@ -60,7 +60,7 @@ fn test_on_class() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type_bound::<PyClass>();
+        let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
@@ -117,17 +117,17 @@ fn test_variation() {
 
         fd_name_pybool: Py<PyBool>,
         fd_name_pystr: Py<PyString>,
-        fd_name_pyint: Py<PyLong>,
+        fd_name_pyint: Py<PyInt>,
         fd_name_pyfloat: Py<PyFloat>,
 
         fd_name_opt_pystr: Option<Py<PyString>>,
-        fd_name_opt_pyint: Option<Py<PyLong>>,
+        fd_name_opt_pyint: Option<Py<PyInt>>,
 
         fd_name_vec_pystr: Vec<Py<PyString>>,
-        fd_name_vec_pyint: Vec<Py<PyLong>>,
+        fd_name_vec_pyint: Vec<Py<PyInt>>,
 
         fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
-        fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
+        fd_name_vec_opt_pyint: Vec<Option<Py<PyInt>>>,
     }
 
     #[pymethods]
@@ -193,17 +193,17 @@ fn test_variation() {
 
             fd_name_pybool: Py<PyBool>,
             fd_name_pystr: Py<PyString>,
-            fd_name_pyint: Py<PyLong>,
+            fd_name_pyint: Py<PyInt>,
             fd_name_pyfloat: Py<PyFloat>,
 
             fd_name_opt_pystr: Option<Py<PyString>>,
-            fd_name_opt_pyint: Option<Py<PyLong>>,
+            fd_name_opt_pyint: Option<Py<PyInt>>,
 
             fd_name_vec_pystr: Vec<Py<PyString>>,
-            fd_name_vec_pyint: Vec<Py<PyLong>>,
+            fd_name_vec_pyint: Vec<Py<PyInt>>,
 
             fd_name_vec_opt_pystr: Vec<Option<Py<PyString>>>,
-            fd_name_vec_opt_pyint: Vec<Option<Py<PyLong>>>,
+            fd_name_vec_opt_pyint: Vec<Option<Py<PyInt>>>,
         ) -> Self {
             Self {
                 fd_name_bool,
@@ -236,7 +236,7 @@ fn test_variation() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type_bound::<PyClass>();
+        let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
         pyo3::py_run!(
                 py,
@@ -257,7 +257,7 @@ fn test_variation() {
 from dataclasses import is_dataclass, asdict, astuple
 
 assert is_dataclass(a) is True
-assert asdict(a) == {'fd_name_bool': True, 'fd_name_str': 'str', 'fd_name_int': 1, 'fd_name_float': 1.0, 'fn_name_bytes': [115, 116, 114], 'fd_name_opt_str': 'str', 'fd_name_opt_int': 1, 'fd_name_vec_str': ['str'], 'fd_name_vec_int': [1], 'fd_name_vec_opt_str': ['str'], 'fd_name_vec_opt_int': [1], 'fd_name_hs_str': {'str'}, 'fd_name_js_int': {1}, 'fd_name_hm_str': {'str': 'str'}, 'fd_name_hm_int': {1: 1}, 'fd_name_pybool': True, 'fd_name_pystr': 'str', 'fd_name_pyint': 1, 'fd_name_pyfloat': 1.0, 'fd_name_opt_pystr': 'str', 'fd_name_opt_pyint': 1, 'fd_name_vec_pystr': ['str'], 'fd_name_vec_pyint': [1], 'fd_name_vec_opt_pystr': ['str'], 'fd_name_vec_opt_pyint': [1]}
+assert asdict(a) == {'fd_name_bool': True, 'fd_name_str': 'str', 'fd_name_int': 1, 'fd_name_float': 1.0, 'fn_name_bytes': b'str', 'fd_name_opt_str': 'str', 'fd_name_opt_int': 1, 'fd_name_vec_str': ['str'], 'fd_name_vec_int': [1], 'fd_name_vec_opt_str': ['str'], 'fd_name_vec_opt_int': [1], 'fd_name_hs_str': {'str'}, 'fd_name_js_int': {1}, 'fd_name_hm_str': {'str': 'str'}, 'fd_name_hm_int': {1: 1}, 'fd_name_pybool': True, 'fd_name_pystr': 'str', 'fd_name_pyint': 1, 'fd_name_pyfloat': 1.0, 'fd_name_opt_pystr': 'str', 'fd_name_opt_pyint': 1, 'fd_name_vec_pystr': ['str'], 'fd_name_vec_pyint': [1], 'fd_name_vec_opt_pystr': ['str'], 'fd_name_vec_opt_pyint': [1]}
 astuple(a) == (True, 'str', 1, 1.0, [115, 116, 114], 'str', 1, ['str'], [1], ['str'], [1], {'str'}, {1}, {'str': 'str'}, {1: 1}, True, 'str', 1, 1.0, 'str', 1, ['str'], [1], ['str'], [1])
 "
             );
@@ -324,7 +324,7 @@ fn test_options() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type_bound::<PyClass>();
+        let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
         pyo3::py_run!(
             py,
@@ -425,15 +425,9 @@ fn test_nest_pyclass() {
         }
     }
 
-    impl ToPyObject for PyClassB {
-        fn to_object(&self, py: Python<'_>) -> PyObject {
-            self.clone().into_py(py)
-        }
-    }
-
     Python::with_gil(|py| {
-        let py_class_a = py.get_type_bound::<PyClassA>();
-        let py_class_b = py.get_type_bound::<PyClassB>();
+        let py_class_a = py.get_type::<PyClassA>();
+        let py_class_b = py.get_type::<PyClassB>();
         pyo3::py_run!(
             py,
             py_class_a py_class_b,
@@ -481,15 +475,9 @@ fn test_set_name() {
         }
     }
 
-    impl ToPyObject for PyClassB {
-        fn to_object(&self, py: Python<'_>) -> PyObject {
-            self.clone().into_py(py)
-        }
-    }
-
     Python::with_gil(|py| {
-        let py_class_a = py.get_type_bound::<PyClassA>();
-        let py_class_b = py.get_type_bound::<PyClassB>();
+        let py_class_a = py.get_type::<PyClassA>();
+        let py_class_b = py.get_type::<PyClassB>();
         pyo3::py_run!(
             py,
             py_class_a py_class_b,
@@ -522,7 +510,7 @@ fn test_annotation() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type_bound::<PyClass>();
+        let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,
@@ -558,7 +546,7 @@ fn test_default_factory() {
     }
 
     Python::with_gil(|py| {
-        let py_class = py.get_type_bound::<PyClass>();
+        let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,

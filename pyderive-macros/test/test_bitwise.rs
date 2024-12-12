@@ -76,7 +76,7 @@ fn test() {
     impl_binary_assign!(PyClass, ShrAssign::shr_assign);
 
     Python::with_gil(|py| {
-        let py_class = py.get_type_bound::<PyClass>();
+        let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
             py_class,

@@ -54,7 +54,7 @@
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -113,7 +113,7 @@ pub use pyderive_macros::PyAdd;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -174,7 +174,7 @@ pub use pyderive_macros::PyAddAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -233,7 +233,7 @@ pub use pyderive_macros::PyAnd;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -310,7 +310,7 @@ pub use pyderive_macros::PyAndAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -371,7 +371,7 @@ pub use pyderive_macros::PyDivMod;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -430,7 +430,7 @@ pub use pyderive_macros::PyFloorDiv;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -491,7 +491,7 @@ pub use pyderive_macros::PyFloorDivAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -552,7 +552,7 @@ pub use pyderive_macros::PyInvert;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -611,7 +611,7 @@ pub use pyderive_macros::PyLeftShift;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -672,7 +672,7 @@ pub use pyderive_macros::PyLeftShiftAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -731,7 +731,7 @@ pub use pyderive_macros::PyMatMul;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -792,7 +792,7 @@ pub use pyderive_macros::PyMatMulAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -851,7 +851,7 @@ pub use pyderive_macros::PyMod;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -912,7 +912,7 @@ pub use pyderive_macros::PyModAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -971,7 +971,7 @@ pub use pyderive_macros::PyMul;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1033,7 +1033,7 @@ pub use pyderive_macros::PyMulAssign;
 ///
 /// Python::with_gil(|py| {
 ///     if py.version_info() >= (3, 10) {
-///         let PyClass = py.get_type_bound::<PyClass>();
+///         let PyClass = py.get_type::<PyClass>();
 ///
 ///         py_run!(py, PyClass, test)
 ///     }
@@ -1096,7 +1096,7 @@ pub use pyderive_macros::PyNeg;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1155,7 +1155,7 @@ pub use pyderive_macros::PyOr;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1201,7 +1201,7 @@ pub use pyderive_macros::PyOrAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1262,7 +1262,7 @@ pub use pyderive_macros::PyPos;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1323,7 +1323,7 @@ pub use pyderive_macros::PyReflectedAdd;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1400,7 +1400,7 @@ pub use pyderive_macros::PyReflectedAnd;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1461,7 +1461,7 @@ pub use pyderive_macros::PyReflectedDivMod;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1522,7 +1522,7 @@ pub use pyderive_macros::PyReflectedFloorDiv;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1583,7 +1583,7 @@ pub use pyderive_macros::PyReflectedLeftShift;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1644,7 +1644,7 @@ pub use pyderive_macros::PyReflectedMatMul;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1705,7 +1705,7 @@ pub use pyderive_macros::PyReflectedMod;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1766,7 +1766,7 @@ pub use pyderive_macros::PyReflectedMul;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1827,7 +1827,7 @@ pub use pyderive_macros::PyReflectedOr;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1888,7 +1888,7 @@ pub use pyderive_macros::PyReflectedRightShift;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -1949,7 +1949,7 @@ pub use pyderive_macros::PyReflectedSub;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -2036,7 +2036,7 @@ pub use pyderive_macros::PyReflectedXor;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -2095,7 +2095,7 @@ pub use pyderive_macros::PyRightShift;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -2156,7 +2156,7 @@ pub use pyderive_macros::PyRightShiftAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -2215,7 +2215,7 @@ pub use pyderive_macros::PySub;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -2276,7 +2276,7 @@ pub use pyderive_macros::PySubAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -2335,7 +2335,7 @@ pub use pyderive_macros::PyTrueDiv;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -2396,7 +2396,7 @@ pub use pyderive_macros::PyTrueDivAssign;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
@@ -2454,7 +2454,7 @@ pub use pyderive_macros::PyXor;
 /// ";
 ///
 /// Python::with_gil(|py| {
-///     let PyClass = py.get_type_bound::<PyClass>();
+///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
 /// ```
