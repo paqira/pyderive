@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@1.62
+        uses: dtolnay/rust-toolchain@1.63
         with:
           components: clippy, rustfmt
       - name: Cache Rust
