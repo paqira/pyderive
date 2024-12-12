@@ -533,6 +533,7 @@ pub use pyderive_macros::PyEq;
 ///     Ok(())
 /// });
 /// ```
+#[deprecated(since = "0.8.0", note = "PyO3 provides the equivarent feature `#[pyclass(hash)]` since PyO3 0.23.0.")]
 pub use pyderive_macros::PyHash;
 /// Derive macro generating a [`__iter__()`][__iter__] fn/Python method.
 ///
