@@ -20,14 +20,6 @@ members = [
     "pyderive-macros",
 ]
 
-[workspace.package]
-authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
-edition = "2021"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/paqira/pyderive"
-rust-version = "1.62"
-version = "0.8.0"
-
 [dependencies]
 pyderive-macros = { path = "pyderive-macros", version = "= 0.8.0" }
 
