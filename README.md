@@ -55,8 +55,8 @@ This provides deriving following special methods and attributes;
 |---------------------|--------------------------------------------------------|
 | `PyNew`             | `__new__()`                                            |
 | `PyMatchArgs`       | `__match_args__`                                       |
-| `PyRepr`            | `__repr__()` (recursively calls `repr()`)              |
-| `PyStr`             | `__str__()`  (recursively calls `str()`)               |
+| `PyRepr`            | `__repr__()`                                           |
+| `PyStr`             | `__str__()`                                            |
 | `PyEq`              | `__eq__()` and `__ne__()`                              |
 | `PyOrd`             | `__lt__()`, `__le__()`, `__gt__()` and `__ge__()`      |
 | `PyRichCmp`         | `==`, `!=`, `>`, `>=`, `<` and `<=` by `__richcmp__()` |
@@ -77,6 +77,16 @@ derive macros that implement individual method that enumerating numeric type (`_
 called by builtin functions (`__int__()` etc.).
 
 It requires to enable `multiple-pymethods` feature of PyO3 because this may produce multiple `#[pymethods]`.
+
+## Feature
+
+### `PyRepr` and `PyStr`
+
+The methods implemented by `PyRepr` and `PyStr` are recursively calls `repr()` or `str()` like a Python `dataclass`.
+
+### `PyEq` and `PyOrd`
+
+The implementation of `PyEq` and `PyOrd` does not use `__richcmp__()`. It is faster than using `__richcmp__()`.
 
 ## License
 

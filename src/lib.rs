@@ -60,16 +60,18 @@
 //!
 //! We list the default implementations that the macros generate.
 //!
-//! | Derive Macro          | Derives                                                                 |
-//! | --------------------- | ----------------------------------------------------------------------- |
-//! | [`PyNew`]             | `__new__()` with all fields                                             |
-//! | [`PyMatchArgs`]       | `__match_args__` class attr. with `get` fields                          |
-//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields, recursively calls `repr()` |
-//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields, recursively calls `str()`   |
-//! | [`PyIter`]            | `__iter__()` returns an iterator of `get` fields                        |
-//! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields                    |
-//! | [`PyLen`]             | `__len__()` returns number of `get` fields                              |
-//! | [`PyDataclassFields`] | `__dataclass_fields__` class attr. with all fields                      |
+//! | Derive Macro          | Derives                                              |
+//! | --------------------- | ---------------------------------------------------- |
+//! | [`PyNew`]             | `__new__()` with all fields                          |
+//! | [`PyMatchArgs`]       | `__match_args__` class attr. with `get` fields       |
+//! | [`PyRepr`]            | `__repr__()` returns `get` and `set` fields          |
+//! | [`PyStr`]             | `__str__()` returns `get` and `set` fields           |
+//! | [`PyIter`]            | `__iter__()` returns an iterator of `get` fields     |
+//! | [`PyReversed`]        | `__reversed__()` returns an iterator of `get` fields |
+//! | [`PyLen`]             | `__len__()` returns number of `get` fields           |
+//! | [`PyDataclassFields`] | `__dataclass_fields__` class attr. with all fields   |
+//!
+//! Notes, methods implemented by [`PyRepr`] and [`PyStr`] are recursively calls `repr()` or `str()` like a Python `dataclass`.
 //!
 //! We call the field is *`get` (or `set`) field*
 //! if the field has a `#[pyclass/pyo3(get)]` (or `#[pyclass/pyo3(set)]`) attribute or
@@ -84,6 +86,8 @@
 //! | [`PyRichCmp`]   | `==`, `!=`, `>`, `>=`, `<` and `<=` by `__richcmp__()`, depend on [`PartialEq`] and [`PartialOrd`] |
 //! | [`PyNumeric`]   | Numeric op traits (`__add__()` etc.)                                                               |
 //! | [`PyBitwise`]   | Bitwise op traits (`__and__()` etc.)                                                               |
+//!
+//! Notes, implementation of [`PyEq`] and [`PyOrd`] does not use `__richcmp__()`. It is faster than using `__richcmp__()`.
 //!
 //! Module [`pyderive::ops`](mod@ops) and [`pyderive::convert`](mod@convert) provides
 //! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
@@ -817,7 +821,7 @@ pub use pyderive_macros::PyOrd;
 /// - It should place `#[derive(PyRepr)]` before `#[pyclass]`.
 /// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
 ///   for child [`pyclass`][pyo3_pyclass]es.
-/// - This calls Python `repr()` recursively.
+/// - This recursively calls `repr()` like a dataclass.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
@@ -1005,7 +1009,7 @@ pub use pyderive_macros::PyRichCmp;
 /// - It should place `#[derive(PyStr)]` before `#[pyclass]`.
 /// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
 ///   for child [`pyclass`][pyo3_pyclass]es.
-/// - This calls Python `str()` recursively.
+/// - recursively calls `str()` like a dataclass.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
