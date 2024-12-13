@@ -411,10 +411,6 @@ pub use pyderive_macros::PyDataclassFields;
 ///
 /// The implementation requires [`PartialEq`] impl.
 ///
-/// <section class="warning">
-/// PyO3 supports <code>#[pyclass(eq)]</code> since 0.22, it is recommended to use it.
-/// </section>
-///
 /// *Note that implementing `__eq__()` and `__ne__()` methods will cause
 /// Python not to generate a default `__hash__()` implementation,
 /// so consider also implementing `__hash__()`.*
