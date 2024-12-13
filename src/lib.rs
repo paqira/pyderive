@@ -539,6 +539,7 @@ pub use pyderive_macros::PyHash;
 /// - It should place `#[derive(PyIter)]` before `#[pyclass]`.
 /// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
 ///   for child [`pyclass`][pyo3_pyclass]es.
+/// - Calling `__next__()` is thread-safe, it raises `PyRuntimeError` when it fails to take a lock.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
@@ -873,6 +874,7 @@ pub use pyderive_macros::PyRepr;
 /// - It should place `#[derive(PyReversed)]` before `#[pyclass]`.
 /// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
 ///   for child [`pyclass`][pyo3_pyclass]es.
+/// - Calling `__next__()` is thread-safe, it raises `PyRuntimeError` when it fails to take a lock.
 ///
 /// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
