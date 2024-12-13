@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::DeriveInput;
 
-use crate::common::FieldData;
+use crate::common::{is_py, FieldData};
 
 pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = &input.ident;
@@ -16,7 +16,11 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .map(|d| {
             let ident = &d.field.ident;
 
-            quote! { slf.#ident.to_object(py) }
+            if is_py(&d.field.ty) {
+                quote! { (&slf.#ident).clone_ref(py).into_any() }
+            } else {
+                quote! { (&slf.#ident).into_pyobject(py)?.into_any().unbind() }
+            }
         })
         .collect::<Vec<_>>();
     let length = args.len();

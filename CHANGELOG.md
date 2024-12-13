@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.2 - 20xx-xx-xx
+
+- Remove ToPyObject method from `PyIter` and `PyReverse` (migration to PyO3 0.23.0 is complete, maybe)
+
 ## v0.8.1 - 2024-12-13
 
 - Fix `PyEq` document
