@@ -93,7 +93,6 @@
 //! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
 //! called by builtin functions (`__int__()` etc.).
 //!
-//! [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
 //! [pyo3_IntoPy]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPy.html
 //! [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 //!
@@ -301,13 +300,12 @@ pub mod ops;
 ///
 /// - It should place `#[derive(PyDataclassField)]` before `#[pyclass]`.
 /// - All fields in the arguments of the `__new__()` method should be `get` field, like `dataclass` does.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
+/// - It requires [`IntoPyObject`][pyo3_IntoPyObject] trait for fields.
 ///
 /// This does not generate other fn/method,
 /// use [`PyNew`] etc. to implement `__new__()` etc.
 ///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_IntoPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 ///
 /// # Example
@@ -537,11 +535,10 @@ pub use pyderive_macros::PyHash;
 /// if `#[pyderive(iter=false)]`, it isn't.
 ///
 /// - It should place `#[derive(PyIter)]` before `#[pyclass]`.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
+/// - It requires [`IntoPyObject`][pyo3_IntoPyObject] trait for fields.
 /// - Calling `__next__()` is thread-safe, it raises `PyRuntimeError` when it fails to take a lock.
 ///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_IntoPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// [__iter__]: https://docs.python.org/reference/datamodel.html#object.__iter__
 ///
@@ -816,11 +813,10 @@ pub use pyderive_macros::PyOrd;
 /// if `#[pyderive(repr=false)]`, it isn't.
 ///
 /// - It should place `#[derive(PyRepr)]` before `#[pyclass]`.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
+/// - It requires [`IntoPyObject`][pyo3_IntoPyObject] trait for fields.
 /// - This recursively calls `repr()` like a dataclass.
 ///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_IntoPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// [__repr__]: https://docs.python.org/reference/datamodel.html#object.__repr__
 /// [repr]: https://docs.python.org/library/functions.html#repr
@@ -872,11 +868,10 @@ pub use pyderive_macros::PyRepr;
 /// if `#[pyderive(iter=false)]`, it isn't.
 ///
 /// - It should place `#[derive(PyReversed)]` before `#[pyclass]`.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
+/// - It requires [`IntoPyObject`][pyo3_IntoPyObject] trait for fields.
 /// - Calling `__next__()` is thread-safe, it raises `PyRuntimeError` when it fails to take a lock.
 ///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_IntoPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// [__reversed__]: https://docs.python.org/reference/datamodel.html#object.__reversed__
 ///
@@ -1005,11 +1000,10 @@ pub use pyderive_macros::PyRichCmp;
 /// if `#[pyderive(str=false)]`, it isn't.
 ///
 /// - It should place `#[derive(PyStr)]` before `#[pyclass]`.
-/// - It requires [`ToPyObject`][pyo3_ToPyObject] trait
-///   for child [`pyclass`][pyo3_pyclass]es.
+/// - It requires [`IntoPyObject`][pyo3_IntoPyObject] trait for fields.
 /// - recursively calls `str()` like a dataclass.
 ///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
+/// [pyo3_IntoPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPyObject.html
 /// [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// [__str__]: https://docs.python.org/reference/datamodel.html#object.__str__
 /// [str]: https://docs.python.org/library/functions.html#str
