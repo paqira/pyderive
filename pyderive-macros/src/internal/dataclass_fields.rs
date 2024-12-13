@@ -34,7 +34,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                     (
                         quote! { MISSING.as_unbound() },
                         quote! {
-                            ::pyo3::types::PyCFunction::new_closure_bound(
+                            ::pyo3::types::PyCFunction::new_closure(
                                 py,
                                 ::std::option::Option::Some(
                                     // make &'static CStr
@@ -139,7 +139,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 // For supporting __set_name__ protocol
                 let cls = py.get_type::<Self>();
 
-                let dataclasses = ::pyo3::types::PyModule::import_bound(py, "dataclasses")?;
+                let dataclasses = ::pyo3::types::PyModule::import(py, "dataclasses")?;
 
                 #[allow(non_snake_case)]
                 let Field = dataclasses.getattr("Field")?;

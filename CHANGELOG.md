@@ -3,11 +3,12 @@
 ## v0.8.3 - 20xx-xx-xx
 
 - use `.qualname()` instead of `.name()` (`PyStr` and `PyRepr`)
+- remove deprecated methods from `PyDataclassFields` (migration to PyO3 0.23.0)
  
 ## v0.8.2 - 2024-12-13
 
 - Remove module declaration from iterator impls of `PyIter` and `PyReversed`
-- Remove `ToPyObject` method from `PyIter` and `PyReversed` (migration to PyO3 0.23.0 is complete, maybe)
+- Remove `ToPyObject` method from `PyIter` and `PyReversed` (~~migration to PyO3 0.23.0 is complete, maybe~~)
 
 ## v0.8.1 - 2024-12-13
 
