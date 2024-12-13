@@ -9,7 +9,6 @@
 
 - Fix `PyEq` document
 
-
 ## v0.8.0 - 2024-12-13
 
 - Migrate to PyO3 0.23.0
