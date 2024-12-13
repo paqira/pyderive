@@ -30,7 +30,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pyo3(name="pyderive_iterator")]
         #[automatically_derived]
         struct #iter_name {
-            inner: ::std::array::IntoIter<::pyo3::PyObject, #length>,
+            inner: ::std::sync::Mutex<::std::array::IntoIter<::pyo3::PyObject, #length>>,
         }
 
         #[pymethods]
@@ -40,7 +40,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 slf
             }
             pub fn __next__(mut slf: ::pyo3::PyRefMut<'_, Self>) -> ::std::option::Option<::pyo3::PyObject> {
-                slf.inner.next()
+                slf.inner.lock().unwrap().next()
             }
         }
 
@@ -50,8 +50,11 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             pub fn __iter__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyResult<::pyo3::Py<#iter_name>> {
                 let py = slf.py();
                 let iter = #iter_name {
-                    inner: [ #(#args),* ].into_iter(),
+                    inner: ::std::sync::Mutex::from(
+                        [ #(#args),* ].into_iter()
+                    ),
                 };
+
                 ::pyo3::Py::new(py, iter)
             }
         }
