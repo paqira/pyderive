@@ -1,7 +1,7 @@
 use std::iter;
 
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
+use quote::quote;
 use syn::DeriveInput;
 
 use crate::common::{is_py, FieldData};
@@ -10,31 +10,18 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = &input.ident;
     let data = FieldData::try_from_input(&input)?;
 
-    // let ident = &this.ident;
-    let temp_vars = data
-        .iter()
-        .filter(|d| d.str())
-        .map(|d| {
-            let ident = d.field.ident.as_ref().unwrap();
-            let temp_name = format_ident!("_____pyderive_temp_name_{}", ident);
-
-            quote! { let #temp_name = &this.#ident; }
-        })
-        .collect::<Vec<_>>();
-
     // args of format!(..)
     let args = data
         .iter()
         .filter(|d| d.str())
         .map(|d| {
             let ident = d.field.ident.as_ref().unwrap();
-            let temp_name = format_ident!("_____pyderive_temp_name_{}", ident);
             let name = &d.pyname;
 
             if is_py(&d.field.ty) {
-                quote! { #name, #temp_name.bind(py).repr()? }
+                quote! { #name, (&this.#ident).bind(py).repr()? }
             } else {
-                quote! { #name, #temp_name.into_pyobject(py)?.repr()? }
+                quote! { #name, (&this.#ident).into_pyobject(py)?.repr()? }
             }
         })
         .collect::<Vec<_>>();
@@ -56,8 +43,6 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
                 let this = slf.borrow();
                 let py = slf.py();
-
-                #(#temp_vars)*
 
                 let s = format!(#fmt, name, #(#args),*);
                 ::pyo3::PyResult::Ok(s)

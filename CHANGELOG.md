@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.2 - 20xx-xx-xx
+## v0.8.2 - 2024-12-13
 
 - Remove module declaration from iterator impls of `PyIter` and `PyReversed` 
 - Remove `ToPyObject` method from `PyIter` and `PyReversed` (migration to PyO3 0.23.0 is complete, maybe)
