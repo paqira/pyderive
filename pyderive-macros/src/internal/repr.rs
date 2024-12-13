@@ -39,12 +39,12 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         impl #struct_name {
             pub fn __repr__(slf: &::pyo3::Bound<'_, Self>) -> ::pyo3::PyResult<::std::string::String> {
                 let t = slf.get_type();
-                let name = t.name()?;
+                let qualname = t.qualname()?;
 
                 let py = slf.py();
                 let this = slf.borrow();
 
-                let s = format!(#fmt, name, #(#args),*);
+                let s = format!(#fmt, qualname, #(#args),*);
                 ::pyo3::PyResult::Ok(s)
             }
         }
