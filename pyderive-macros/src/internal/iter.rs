@@ -29,7 +29,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[pyclass]
         #[pyo3(name="pyderive_iterator")]
         #[automatically_derived]
-        struct #iter_name {
+        pub struct #iter_name {
             inner: ::std::sync::Mutex<::std::array::IntoIter<::pyo3::PyObject, #length>>,
         }
 
