@@ -86,7 +86,7 @@ The methods implemented by `PyRepr` and `PyStr` are recursively calls `repr()` o
 
 ### `PyEq` and `PyOrd`
 
-The implementation of `PyEq` and `PyOrd` does not use `__richcmp__()`. It is faster than using `__richcmp__()`.
+The implementation of `PyEq` and `PyOrd` does not use `__richcmp__()`.
 
 ## License
 

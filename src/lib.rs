@@ -87,7 +87,7 @@
 //! | [`PyNumeric`]   | Numeric op traits (`__add__()` etc.)                                                               |
 //! | [`PyBitwise`]   | Bitwise op traits (`__and__()` etc.)                                                               |
 //!
-//! Notes, implementation of [`PyEq`] and [`PyOrd`] does not use `__richcmp__()`. It is faster than using `__richcmp__()`.
+//! Notes, implementation of [`PyEq`] and [`PyOrd`] does not use `__richcmp__()`.
 //!
 //! Module [`pyderive::ops`](mod@ops) and [`pyderive::convert`](mod@convert) provides
 //! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
