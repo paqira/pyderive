@@ -23,7 +23,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let expanded = quote! {
         #[pyclass]
-        #[pyo3(name="pyclass_reverseiterator", module="pyderive")]
+        #[pyo3(name="pyderive_reverseiterator")]
         #[automatically_derived]
         struct #iter_name {
             inner: ::std::iter::Rev<::std::array::IntoIter<::pyo3::PyObject, #length>>,
