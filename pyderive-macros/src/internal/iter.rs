@@ -8,7 +8,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let struct_name = &input.ident;
     let data = FieldData::try_from_input(&input)?;
 
-    let iter_name = format_ident!("PyderiveInternalIteratorFor{}", struct_name);
+    let iter_name = format_ident!("_____pyderive_InternalIteratorFor{}", struct_name);
 
     let args = data
         .iter()
@@ -28,6 +28,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let expanded = quote! {
         #[pyclass]
         #[pyo3(name="pyderive_iterator")]
+        #[allow(non_camel_case_types)]
         #[automatically_derived]
         pub struct #iter_name {
             inner: ::std::sync::Mutex<::std::array::IntoIter<::pyo3::PyObject, #length>>,
