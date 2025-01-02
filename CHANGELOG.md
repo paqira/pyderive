@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.3 - 20xx-xx-xx
+## v0.8.3 - 2025-01-02
 
 - use `.qualname()` instead of `.name()` (`PyStr` and `PyRepr`)
 - remove deprecated methods from `PyDataclassFields` (migration to PyO3 0.23.0)

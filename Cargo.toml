@@ -1,6 +1,6 @@
 [package]
 name = "pyderive"
-version = "0.8.2"
+version = "0.8.3"
 edition = "2021"
 # MSRV of inventory v0.3
 rust-version = "1.63"
@@ -21,7 +21,7 @@ members = [
 ]
 
 [dependencies]
-pyderive-macros = { path = "pyderive-macros", version = "= 0.8.2" }
+pyderive-macros = { path = "pyderive-macros", version = "= 0.8.3" }
 
 [dev-dependencies]
 pyo3 = { version = "0.23", features = [
