@@ -155,7 +155,7 @@ impl FieldData<'_> {
                     dataclass_field: pyderive_field_opt.dataclass_field,
                     default: pyderive_field_opt.default,
                     default_factory: pyderive_field_opt.default_factory,
-                    annotation: pyderive_field_opt.annotation.map(Cow::from),
+                    annotation: pyderive_field_opt.annotation,
                 })
             })
             .collect::<Result<Vec<_>>>()
