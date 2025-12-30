@@ -20,7 +20,7 @@ path = "test/test.rs"
 
 [dependencies]
 heck = { version = "0.5" }
-proc-macro2 = { version = "1" }
+proc-macro2 = { version = "1.0.103" }
 quote = { version = "1" }
 syn = { version = "2", features = ["extra-traits", "derive", "full"] }
 num-complex = { version = ">= 0.2", optional = true }
