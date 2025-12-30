@@ -5,6 +5,7 @@
 - Remove `ToPyObject`
 - Remove `PyHash` (use `#[pyclass(hash)]`)
 - Migrate to PyO3 0.27
+- Bump MSRV to 1.68
 
 ## v0.8.3 - 2025-01-02
 
