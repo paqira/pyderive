@@ -12,7 +12,7 @@ fn test_no_get_set() {
         fd_name_b: f64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert len(data) == 0")
     });
@@ -30,7 +30,7 @@ fn test_get_set() {
         fd_name_b: f64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert len(data) == 1")
     });
@@ -46,7 +46,7 @@ fn test_get_all() {
         fd_name_b: f64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert len(data) == 2")
     });
@@ -63,7 +63,7 @@ fn test_set_all() {
         fd_name_b: f64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert len(data) == 1")
     });
@@ -80,7 +80,7 @@ fn test_name_rename_all() {
         fd_name_b: f64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert len(data) == 2")
     });
@@ -97,7 +97,7 @@ fn test_pyderive_true() {
         field: i64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert len(data) == 1")
     });
@@ -113,7 +113,7 @@ fn test_pyderive_false() {
         field: i64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert len(data) == 0")
     });
@@ -151,7 +151,7 @@ fn test_nest_pyclass() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
         py_run!(

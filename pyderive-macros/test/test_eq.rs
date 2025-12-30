@@ -11,7 +11,7 @@ fn test_eq() {
         fd_name_b: String,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
         py_run!(py, data, "assert data == data");
         py_run!(py, data, "assert data != 1");
@@ -27,7 +27,7 @@ fn test_partial_ord() {
         f: f64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data1 = Py::new(py, PyClass::default()).unwrap();
         let data2 = Py::new(py, PyClass::default()).unwrap();
         let data3 = Py::new(py, PyClass { f: f64::NAN }).unwrap();
@@ -70,7 +70,7 @@ fn test_nest_pyclass() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
         py_run!(

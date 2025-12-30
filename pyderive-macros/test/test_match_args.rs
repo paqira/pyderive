@@ -22,7 +22,7 @@ fn test_no_get_set() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
 
@@ -62,7 +62,7 @@ fn test_get_set() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
 
@@ -107,7 +107,7 @@ fn test_name_rename_all() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("renamedClass", py_class.name().unwrap().to_string());
 
@@ -162,7 +162,7 @@ fn test_pyderive_true() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
 
@@ -204,7 +204,7 @@ fn test_pyderive_false_empty() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
 
@@ -235,7 +235,7 @@ fn test_pyderive_false() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
 
@@ -277,7 +277,7 @@ fn test_nest_pyclass() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
         pyo3::py_run!(

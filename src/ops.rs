@@ -53,7 +53,7 @@
 /// assert actual.field == 3
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -112,7 +112,7 @@ pub use pyderive_macros::PyAdd;
 /// assert actual.field == 3
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -173,7 +173,7 @@ pub use pyderive_macros::PyAddAssign;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -232,7 +232,7 @@ pub use pyderive_macros::PyAnd;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -309,7 +309,7 @@ pub use pyderive_macros::PyAndAssign;
 /// assert actual[1].field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -370,7 +370,7 @@ pub use pyderive_macros::PyDivMod;
 /// assert actual.field == 3
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -429,7 +429,7 @@ pub use pyderive_macros::PyFloorDiv;
 /// assert actual.field == 3
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -490,7 +490,7 @@ pub use pyderive_macros::PyFloorDivAssign;
 /// assert actual.field == -2
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -551,7 +551,7 @@ pub use pyderive_macros::PyInvert;
 /// assert actual.field == 4
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -610,7 +610,7 @@ pub use pyderive_macros::PyLeftShift;
 /// assert actual.field == 4
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -671,7 +671,7 @@ pub use pyderive_macros::PyLeftShiftAssign;
 /// assert actual.field == 6
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -730,7 +730,7 @@ pub use pyderive_macros::PyMatMul;
 /// assert actual.field == 6
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -791,7 +791,7 @@ pub use pyderive_macros::PyMatMulAssign;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -850,7 +850,7 @@ pub use pyderive_macros::PyMod;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -911,7 +911,7 @@ pub use pyderive_macros::PyModAssign;
 /// assert actual.field == 6
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -970,7 +970,7 @@ pub use pyderive_macros::PyMul;
 /// assert actual.field == 6
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1031,7 +1031,7 @@ pub use pyderive_macros::PyMulAssign;
 /// assert actual.field == -1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     if py.version_info() >= (3, 10) {
 ///         let PyClass = py.get_type::<PyClass>();
 ///
@@ -1095,7 +1095,7 @@ pub use pyderive_macros::PyNeg;
 /// assert actual.field == 7
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1154,7 +1154,7 @@ pub use pyderive_macros::PyOr;
 /// assert actual.field == 7
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1200,7 +1200,7 @@ pub use pyderive_macros::PyOrAssign;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1261,7 +1261,7 @@ pub use pyderive_macros::PyPos;
 /// assert actual.field == 8
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1322,7 +1322,7 @@ pub use pyderive_macros::PyReflectedAdd;
 /// assert actual.field == 3
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1399,7 +1399,7 @@ pub use pyderive_macros::PyReflectedAnd;
 /// assert actual[1].field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1460,7 +1460,7 @@ pub use pyderive_macros::PyReflectedDivMod;
 /// assert actual.field == 2
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1521,7 +1521,7 @@ pub use pyderive_macros::PyReflectedFloorDiv;
 /// assert actual.field == 4
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1582,7 +1582,7 @@ pub use pyderive_macros::PyReflectedLeftShift;
 /// assert actual.field == 6
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1643,7 +1643,7 @@ pub use pyderive_macros::PyReflectedMatMul;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1704,7 +1704,7 @@ pub use pyderive_macros::PyReflectedMod;
 /// assert actual.field == 6
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1765,7 +1765,7 @@ pub use pyderive_macros::PyReflectedMul;
 /// assert actual.field == 7
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1826,7 +1826,7 @@ pub use pyderive_macros::PyReflectedOr;
 /// assert actual.field == 2
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1887,7 +1887,7 @@ pub use pyderive_macros::PyReflectedRightShift;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -1948,7 +1948,7 @@ pub use pyderive_macros::PyReflectedSub;
 /// assert actual.field == 2
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -2035,7 +2035,7 @@ pub use pyderive_macros::PyReflectedXor;
 /// assert actual.field == 2
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -2094,7 +2094,7 @@ pub use pyderive_macros::PyRightShift;
 /// assert actual.field == 2
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -2155,7 +2155,7 @@ pub use pyderive_macros::PyRightShiftAssign;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -2214,7 +2214,7 @@ pub use pyderive_macros::PySub;
 /// assert actual.field == 1
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -2275,7 +2275,7 @@ pub use pyderive_macros::PySubAssign;
 /// assert actual.field == 3
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -2334,7 +2334,7 @@ pub use pyderive_macros::PyTrueDiv;
 /// assert actual.field == 3
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -2395,7 +2395,7 @@ pub use pyderive_macros::PyTrueDivAssign;
 /// assert actual.field == 4
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -2453,7 +2453,7 @@ pub use pyderive_macros::PyXor;
 /// assert actual.field == 4
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });

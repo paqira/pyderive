@@ -47,7 +47,7 @@
 /// assert actual is True
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -109,7 +109,7 @@ pub use pyderive_macros::PyBool;
 /// assert actual == b'\x01\x02\x03'
 /// "#;
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -167,7 +167,7 @@ pub use pyderive_macros::PyBytes;
 /// assert actual == 2.0 + 4.0j
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -224,7 +224,7 @@ pub use pyderive_macros::PyComplex;
 /// assert actual == 2.0
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -279,7 +279,7 @@ pub use pyderive_macros::PyFloat;
 /// assert actual == 2
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });
@@ -335,7 +335,7 @@ pub use pyderive_macros::PyIndex;
 /// assert actual == 2
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///     py_run!(py, PyClass, test)
 /// });

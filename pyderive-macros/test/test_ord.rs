@@ -11,7 +11,7 @@ fn test_ord() {
         fb: String,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data1 = Py::new(py, PyClass::default()).unwrap();
         let data2 = Py::new(
             py,
@@ -41,7 +41,7 @@ fn test_partial_ord() {
         f: f64,
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let data1 = Py::new(py, PyClass::default()).unwrap();
         let data2 = Py::new(py, PyClass { f: f64::NAN }).unwrap();
         py_run!(py, data1 data2,  "assert not data1 < data2");
@@ -86,7 +86,7 @@ fn test_nest_pyclass() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
         py_run!(
@@ -136,7 +136,7 @@ fn test_nest_pyclass_py_rich_cmp() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
         py_run!(

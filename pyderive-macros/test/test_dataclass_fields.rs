@@ -23,7 +23,7 @@ fn test_rename() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
@@ -59,7 +59,7 @@ fn test_on_class() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
@@ -235,7 +235,7 @@ fn test_variation() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
         pyo3::py_run!(
@@ -323,7 +323,7 @@ fn test_options() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         assert_eq!("PyClass", py_class.name().unwrap().to_string());
         pyo3::py_run!(
@@ -425,7 +425,7 @@ fn test_nest_pyclass() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
         pyo3::py_run!(
@@ -475,7 +475,7 @@ fn test_set_name() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class_a = py.get_type::<PyClassA>();
         let py_class_b = py.get_type::<PyClassB>();
         pyo3::py_run!(
@@ -509,7 +509,7 @@ fn test_annotation() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
@@ -545,7 +545,7 @@ fn test_default_factory() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,

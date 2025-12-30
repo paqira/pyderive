@@ -34,7 +34,7 @@ fn r#bool() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
@@ -73,7 +73,7 @@ fn bytes() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
@@ -103,7 +103,7 @@ fn int() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
@@ -134,7 +134,7 @@ fn index() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
@@ -165,7 +165,7 @@ fn float() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,
@@ -205,7 +205,7 @@ fn complex() {
         }
     }
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,

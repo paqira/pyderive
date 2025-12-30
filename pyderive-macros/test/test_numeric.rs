@@ -75,7 +75,7 @@ fn test() {
     impl_binary_assign!(PyClass, DivAssign::div_assign);
     impl_binary_assign!(PyClass, RemAssign::rem_assign);
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();
         pyo3::py_run!(
             py,

@@ -327,7 +327,7 @@ pub mod ops;
 ///     excluded: String,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
@@ -449,7 +449,7 @@ pub use pyderive_macros::PyDataclassFields;
 ///     field: f64,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass { field: 0.0 })?;
 ///     let b = Py::new(py, PyClass { field: 1.0 })?;
 ///     let c = Py::new(py, PyClass { field: f64::NAN })?;
@@ -500,7 +500,7 @@ pub use pyderive_macros::PyEq;
 ///     excluded: String,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
@@ -546,7 +546,7 @@ pub use pyderive_macros::PyIter;
 ///     excluded: String,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
@@ -606,7 +606,7 @@ pub use pyderive_macros::PyLen;
 ///         raise AssertionError
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     if py.version_info() >= (3, 10) {
 ///         let PyClass = py.get_type::<PyClass>();
 ///
@@ -659,7 +659,7 @@ pub use pyderive_macros::PyMatchArgs;
 /// assert a.excluded == ''
 /// ";
 ///
-/// Python::with_gil(|py| {
+/// Python::attach(|py| {
 ///     let PyClass = py.get_type::<PyClass>();
 ///
 ///     py_run!(py, PyClass, test)
@@ -717,7 +717,7 @@ pub use pyderive_macros::PyNew;
 ///     field: f64,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass { field: 0.0 })?;
 ///     let b = Py::new(py, PyClass { field: 1.0 })?;
 ///     let c = Py::new(py, PyClass { field: f64::NAN })?;
@@ -779,7 +779,7 @@ pub use pyderive_macros::PyOrd;
 ///     excluded: String,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
@@ -833,7 +833,7 @@ pub use pyderive_macros::PyRepr;
 ///     excluded: String,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
@@ -902,7 +902,7 @@ pub use pyderive_macros::PyReversed;
 ///     field: f64,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass { field: 0.0 })?;
 ///     let b = Py::new(py, PyClass { field: 1.0 })?;
 ///     let c = Py::new(py, PyClass { field: f64::NAN })?;
@@ -966,7 +966,7 @@ pub use pyderive_macros::PyRichCmp;
 ///     excluded: String,
 /// }
 ///
-/// Python::with_gil(|py| -> PyResult<()> {
+/// Python::attach(|py| -> PyResult<()> {
 ///     let a = Py::new(py, PyClass {
 ///         string: "s".to_string(),
 ///         integer: 1,
