@@ -1043,67 +1043,6 @@ pub use pyderive_macros::PyRichCmp;
 /// });
 /// ```
 pub use pyderive_macros::PyStr;
-/// Derive macro generating an impl of the trait [`ToPyObject`][pyo3_ToPyObject] by trait [`IntoPy<PyObject>`][pyo3_IntoPy].
-///
-/// - It requires [`Clone`] trait.
-///
-/// [pyo3_ToPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.ToPyObject.html
-/// [pyo3_IntoPy]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPy.html
-///
-/// # Expansion
-///
-/// This implements, for example;
-///
-/// ```
-/// # use pyo3::prelude::*;
-/// # #[pyclass]
-/// # #[derive(Clone)]
-/// # struct PyClass {}
-/// impl ToPyObject for PyClass {
-///     fn to_object(&self, py: Python<'_>) -> PyObject {
-///         self.clone().into_py(py)
-///     }
-/// }
-/// ```
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// #[derive(PyNew, PyRepr)]
-/// #[pyclass(get_all)]
-/// struct PyClass {
-///     child: Py<Child>,
-/// }
-///
-/// // PyRepr requires ToPyObject trait for child pyclass
-/// #[derive(PyNew, PyRepr, ToPyObject)]
-/// #[pyclass(get_all)]
-/// #[derive(Clone)]
-/// struct Child {
-///     field: i64,
-/// }
-///
-/// let test = r#"
-/// a = PyClass(Child(10))
-///
-/// assert repr(a) == "PyClass(child=Child(field=10))"
-/// "#;
-///
-/// Python::with_gil(|py| {
-///     let PyClass = py.get_type::<PyClass>();
-///     let Child = py.get_type::<Child>();
-///
-///     py_run!(py, PyClass Child, test)
-/// });
-/// ```
-#[deprecated(
-    since = "0.8.0",
-    note = "`ToPyObject` is deprecated since PyO3 0.23.0, see PyO3 documentation"
-)]
-pub use pyderive_macros::ToPyObject;
 
 /// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
 ///

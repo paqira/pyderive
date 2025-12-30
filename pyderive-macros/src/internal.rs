@@ -10,4 +10,3 @@ pub mod repr;
 pub mod reversed;
 pub mod richcmp;
 pub mod str;
-pub mod to_py_object;

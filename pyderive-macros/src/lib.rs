@@ -112,15 +112,6 @@ pub fn py_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-#[proc_macro_derive(ToPyObject)]
-pub fn py_to_py_object(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::to_py_object::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
 // ops
 
 macro_rules! impl_unary {

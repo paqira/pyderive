@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.9.0
+
+- Remove `ToPyObject`
+
 ## v0.8.3 - 2025-01-02
 
 - use `.qualname()` instead of `.name()` (`PyStr` and `PyRepr`)
