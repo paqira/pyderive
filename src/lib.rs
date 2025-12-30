@@ -124,46 +124,46 @@
 //!
 //! - `#[pyderive(repr=<bool>)]`
 //!
-//!    If `repr=true`,
-//!    the field is included in the string that the `__repr__()` method returns;
-//!    if `repr=false`, it isn't.
+//!   If `repr=true`,
+//!   the field is included in the string that the `__repr__()` method returns;
+//!   if `repr=false`, it isn't.
 //!
-//!    The derive macro [`PyDataclassFields`] reads this attribute also,
-//!    see [`PyDataclassFields`] for detail.
+//!   The derive macro [`PyDataclassFields`] reads this attribute also,
+//!   see [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(str=<bool>)]`
 //!
-//!    If `str=true`,
-//!    the field is included in the string that the `__str__()` method returns;
-//!    if `str=false`, it isn't.
+//!   If `str=true`,
+//!   the field is included in the string that the `__str__()` method returns;
+//!   if `str=false`, it isn't.
 //!
 //! - `#[pyderive(new=<bool>)]`
 //!
-//!    If `new=false`,
-//!    the field is excluded from the arguments of the `__new__()` method.
-//!    Notes, `new=true` has no effect.
+//!   If `new=false`,
+//!   the field is excluded from the arguments of the `__new__()` method.
+//!   Notes, `new=true` has no effect.
 //!
-//!    The derive macro [`PyDataclassFields`] reads this attribute also,
-//!    see [`PyDataclassFields`] for detail.
+//!   The derive macro [`PyDataclassFields`] reads this attribute also,
+//!   see [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(default=<expr>)]`
 //!
-//!    This is used to customize default value for the `__new__()` method.
-//!    It supports any rust expression which PyO3 supports, e.g.,
+//!   This is used to customize default value for the `__new__()` method.
+//!   It supports any rust expression which PyO3 supports, e.g.,
 //!
-//!    ```
-//!    # use pyderive::*;
-//!    # use pyo3::prelude::*;
-//!    #
-//!    #[derive(PyNew)]
-//!    #[pyclass]
-//!    struct PyClass {
-//!        #[pyderive(default = Some("str".to_string()))]
-//!        field: Option<String>,
-//!    }
-//!    ```
+//!   ```
+//!   # use pyderive::*;
+//!   # use pyo3::prelude::*;
+//!   #
+//!   #[derive(PyNew)]
+//!   #[pyclass]
+//!   struct PyClass {
+//!     #[pyderive(default = Some("str".to_string()))]
+//!     field: Option<String>,
+//!   }
+//!   ```
 //!
-//!    We note that this internally produces `#[pyo3(signature = ..)]` attribute.
+//!   We note that this internally produces `#[pyo3(signature = ..)]` attribute.
 //!
 //!     1. No `#[pyderive(..)]` (for example, just `field: i64`)
 //!
@@ -222,61 +222,61 @@
 //!
 //! - `#[pyderive(default_factory=true)]`
 //!
-//!    If `default_factory=true`,
-//!    let the `default_factory` attribute of `Field`obj be `lambda: <expr>`,
-//!    and let the `default` attribute be [`dataclasses.MISSING`][MISSING],
-//!    where `<expr>` is given by `#[pyderive(default=<expr>)]`.
-//!    Notes, `default_factory=false` has no effect,
-//!    If the field is not marked by `#[pyderive(default=<expr>)]`, this ignores.
+//!   If `default_factory=true`,
+//!   let the `default_factory` attribute of `Field`obj be `lambda: <expr>`,
+//!   and let the `default` attribute be [`dataclasses.MISSING`][MISSING],
+//!   where `<expr>` is given by `#[pyderive(default=<expr>)]`.
+//!   Notes, `default_factory=false` has no effect,
+//!   If the field is not marked by `#[pyderive(default=<expr>)]`, this ignores.
 //!    
-//!    See [`PyDataclassFields`] for detail.
+//!   See [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(kw_only=true)]`
 //!
-//!    If `kw_only=true`,
-//!    the following fields are keyword only arguments in the `__new__()` method,
-//!    like [`*`][keyword-only-arguments] and [`dataclasses.KW_ONLY`][KW_ONLY].
-//!    Note, `kw_only=false` has no effect.
+//!   If `kw_only=true`,
+//!   the following fields are keyword only arguments in the `__new__()` method,
+//!   like [`*`][keyword-only-arguments] and [`dataclasses.KW_ONLY`][KW_ONLY].
+//!   Note, `kw_only=false` has no effect.
 //!
-//!    The derive macro [`PyDataclassFields`] reads this attribute also,
-//!    see [`PyDataclassFields`] for detail.
+//!   The derive macro [`PyDataclassFields`] reads this attribute also,
+//!   see [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(match_args=<bool>)]`
 //!
-//!    If `match_args=true`,
-//!    the field is included in the `__match_args__` class attribute;
-//!    if `match_args=false`, it isn't.
+//!   If `match_args=true`,
+//!   the field is included in the `__match_args__` class attribute;
+//!   if `match_args=false`, it isn't.
 //!
-//!    We note that, as far as I know,
-//!    the field must be accessible on the pattern matching.
-//!    For example,
-//!    pattern matching does *not* work with *not `get` field without a getter*
-//!    (even if `match_args=true`), but it does work if the field has a getter.
+//!   We note that, as far as I know,
+//!   the field must be accessible on the pattern matching.
+//!   For example,
+//!   pattern matching does *not* work with *not `get` field without a getter*
+//!   (even if `match_args=true`), but it does work if the field has a getter.
 //!
 //! - `#[pyderive(iter=<bool>)]`
 //!
-//!    If `iter=true`,
-//!    the field is included in the iterator that `__iter__()` and `__reversed__()` return;
-//!    if `iter=false`, it isn't.
+//!   If `iter=true`,
+//!   the field is included in the iterator that `__iter__()` and `__reversed__()` return;
+//!   if `iter=false`, it isn't.
 //!
 //! - `#[pyderive(len=<bool>)]`
 //!
-//!    If `len=true`,
-//!    the field is counted by the `__len__()`;
-//!    if `len=false`, it isn't.
+//!   If `len=true`,
+//!   the field is counted by the `__len__()`;
+//!   if `len=false`, it isn't.
 //!
 //! - `#[pyderive(dataclass_field=false)]`
 //!
-//!    If `dataclass_field=false`,
-//!    the field is excluded from the `__dataclass_fields__` dict.
-//!    Notes, `dataclass_field=true` has no effect.
+//!   If `dataclass_field=false`,
+//!   the field is excluded from the `__dataclass_fields__` dict.
+//!   Notes, `dataclass_field=true` has no effect.
 //!
-//!    See [`PyDataclassFields`] for detail.
+//!   See [`PyDataclassFields`] for detail.
 //!
 //! - `#[pyderive(annotation=<str>)]`
 //!
-//!    The derive macro [`PyDataclassFields`] reads this attribute,
-//!    see [`PyDataclassFields`] for detail.
+//!   The derive macro [`PyDataclassFields`] reads this attribute,
+//!   see [`PyDataclassFields`] for detail.
 //!
 //! [keyword-only-arguments]: https://docs.python.org/3/tutorial/controlflow.html#keyword-only-arguments
 //! [KW_ONLY]: https://docs.python.org/3/library/dataclasses.html#dataclasses.KW_ONLY
