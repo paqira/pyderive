@@ -2,7 +2,6 @@ mod test_bitwise;
 mod test_convert;
 mod test_dataclass_fields;
 mod test_eq;
-mod test_hash;
 mod test_iter;
 mod test_len;
 mod test_match_args;

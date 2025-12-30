@@ -3,6 +3,7 @@
 ## v0.9.0
 
 - Remove `ToPyObject`
+- Remove `PyHash` (use `#[pyclass(hash)]`)
 
 ## v0.8.3 - 2025-01-02
 

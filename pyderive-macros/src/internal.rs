@@ -1,6 +1,5 @@
 pub mod dataclass_fields;
 pub mod eq;
-pub mod hash;
 pub mod iter;
 pub mod len;
 pub mod match_args;

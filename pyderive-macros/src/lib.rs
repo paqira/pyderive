@@ -85,15 +85,6 @@ pub fn py_richcmp(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-#[proc_macro_derive(PyHash)]
-pub fn py_hash(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-    match internal::hash::implementation(input) {
-        Ok(r) => r,
-        Err(e) => e.into_compile_error().into(),
-    }
-}
-
 #[proc_macro_derive(PyMatchArgs, attributes(pyderive))]
 pub fn py_match_args(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

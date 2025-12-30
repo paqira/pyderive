@@ -463,68 +463,7 @@ pub use pyderive_macros::PyDataclassFields;
 /// });
 /// ```
 pub use pyderive_macros::PyEq;
-/// Derive macro generating a [`__hash__()`][__hash__] fn/Python method.
-///
-/// The implementation requires [`Hash`] impl.
-///
-/// <section class="warning">
-/// PyO3 supports <code>#[pyclass(hash)]</code> since 0.22, it is recommended to use it.
-/// </section>
-///
-/// # Expansion
-///
-/// This implements, for example;
-///
-/// ```
-/// # use pyo3::prelude::*;
-/// # #[pyclass]
-/// # #[derive(Hash)]
-/// # struct PyClass {}
-/// #[pymethods]
-/// impl PyClass {
-///     pub fn __hash__(&self) -> u64 {
-///         use std::collections::hash_map::DefaultHasher;
-///         use std::hash::{Hash, Hasher};
-///
-///         let mut s = DefaultHasher::new();
-///         self.hash(&mut s);
-///         s.finish()
-///     }
-/// }
-/// ```
-///
-/// [__hash__]: https://docs.python.org/reference/datamodel.html#object.__hash__
-///
-/// # Example
-///
-/// ```
-/// use pyo3::{prelude::*, py_run};
-/// use pyderive::*;
-///
-/// #[derive(PyHash)]
-/// #[pyclass]
-/// #[derive(Hash)]
-/// struct PyClass {
-///     string: String,
-///     integer: i64,
-/// }
-///
-/// Python::with_gil(|py| -> PyResult<()> {
-///     let a = Py::new(py, PyClass {
-///         string: "s".to_string(),
-///         integer: 1,
-///     })?;
-///
-///     py_run!(py, a, "assert hash(a) == -1989231435886966707");
-///
-///     Ok(())
-/// });
-/// ```
-#[deprecated(
-    since = "0.8.0",
-    note = "PyO3 provides the equivalent feature `#[pyclass(hash)]` since PyO3 0.23.0."
-)]
-pub use pyderive_macros::PyHash;
+
 /// Derive macro generating a [`__iter__()`][__iter__] fn/Python method.
 ///
 /// It returns an iterator of `get` fields as default,
