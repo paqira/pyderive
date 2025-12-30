@@ -2,8 +2,8 @@
 name = "pyderive-macros"
 version = "0.8.3"
 edition = "2021"
-# MSRV of inventory v0.3
-rust-version = "1.63"
+# MSRV of proc-macro2 and quote
+rust-version = "1.68"
 authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/paqira/pyderive"
@@ -20,9 +20,9 @@ path = "test/test.rs"
 
 [dependencies]
 heck = { version = "0.5" }
-proc-macro2 = { version = "1.0.103" }
-quote = { version = "1.0.41" }
-syn = { version = "2.0.106", features = ["extra-traits", "derive", "full"] }
+proc-macro2 = { version = "1" }
+quote = { version = "1" }
+syn = { version = "2", features = ["extra-traits", "derive", "full"] }
 num-complex = { version = ">= 0.2", optional = true }
 
 [dev-dependencies]
