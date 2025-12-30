@@ -337,7 +337,7 @@ pub(crate) mod pyo3_struct {
         syn::custom_keyword!(rename_all);
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Default, Debug, Clone)]
     pub(crate) enum RenamingRule {
         CamelCase,
         KebabCase,
@@ -347,6 +347,7 @@ pub(crate) mod pyo3_struct {
         ScreamingSnakeCase,
         SnakeCase,
         Uppercase,
+        #[default]
         Other,
     }
 
@@ -365,12 +366,6 @@ pub(crate) mod pyo3_struct {
                 Self::Uppercase => name.to_uppercase(),
                 Self::Other => name.to_string(),
             }
-        }
-    }
-
-    impl Default for RenamingRule {
-        fn default() -> Self {
-            Self::Other
         }
     }
 
