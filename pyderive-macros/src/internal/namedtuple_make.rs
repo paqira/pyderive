@@ -33,7 +33,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         impl #struct_name {
             #[classmethod]
             pub fn _make(
-                _: &pyo3::prelude::Bound<'_, pyo3::prelude::PyAny>,
+                _: &pyo3::prelude::Bound<'_, pyo3::types::PyType>,
                 iterable: &pyo3::prelude::Bound<'_, pyo3::prelude::PyAny>
             ) -> pyo3::prelude::PyResult<Self> {
                 let iter: pyo3::prelude::Bound<'_, pyo3::prelude::PyAny> = iterable.call_method0("__iter__")?.extract()?;
