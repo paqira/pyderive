@@ -3,6 +3,7 @@ pub mod eq;
 pub mod iter;
 pub mod len;
 pub mod match_args;
+pub mod namedtuple_make;
 pub mod new;
 pub mod ord;
 pub mod repr;

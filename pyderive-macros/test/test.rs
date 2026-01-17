@@ -5,6 +5,7 @@ mod test_eq;
 mod test_iter;
 mod test_len;
 mod test_match_args;
+mod test_namedtuple_make;
 mod test_new;
 mod test_numeric;
 mod test_ops;
