@@ -983,6 +983,7 @@ pub use pyderive_macros::PyRichCmp;
 /// ```
 pub use pyderive_macros::PyStr;
 
+pub use pyderive_macros::PyNamedTupleFields;
 pub use pyderive_macros::PyNamedTupleMake;
 
 /// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
