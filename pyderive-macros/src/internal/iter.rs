@@ -31,7 +31,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[allow(non_camel_case_types)]
         #[automatically_derived]
         pub struct #iter_name {
-            inner: ::std::sync::Mutex<::std::array::IntoIter<::pyo3::PyObject, #length>>,
+            inner: ::std::sync::Mutex<::std::array::IntoIter<::pyo3::Py<::pyo3::PyAny>, #length>>,
         }
 
         #[pymethods]
@@ -40,7 +40,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             pub fn __iter__(slf: ::pyo3::PyRef<'_, Self>) -> ::pyo3::PyRef<'_, Self> {
                 slf
             }
-            pub fn __next__(mut slf: ::pyo3::PyRefMut<'_, Self>) -> ::pyo3::PyResult<::std::option::Option<::pyo3::PyObject>> {
+            pub fn __next__(mut slf: ::pyo3::PyRefMut<'_, Self>) -> ::pyo3::PyResult<::std::option::Option<::pyo3::Py<::pyo3::PyAny>>> {
                 match slf.inner.lock() {
                     Ok(mut r) => Ok(r.next()),
                     Err(e) => Err(::pyo3::exceptions::PyRuntimeError::new_err(e.to_string())),
