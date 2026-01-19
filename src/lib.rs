@@ -983,6 +983,7 @@ pub use pyderive_macros::PyRichCmp;
 /// ```
 pub use pyderive_macros::PyStr;
 
+pub use pyderive_macros::PyNamedTupleFieldDefaults;
 pub use pyderive_macros::PyNamedTupleFields;
 pub use pyderive_macros::PyNamedTupleMake;
 

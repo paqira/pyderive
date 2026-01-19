@@ -121,6 +121,15 @@ pub fn py_namedtuple_fields(input: proc_macro::TokenStream) -> proc_macro::Token
     }
 }
 
+#[proc_macro_derive(PyNamedTupleFieldDefaults, attributes(pyderive))]
+pub fn py_namedtuple_field_defaults(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    match internal::namedtuple_field_defaults::implementation(input) {
+        Ok(r) => r,
+        Err(e) => e.into_compile_error().into(),
+    }
+}
+
 // ops
 
 macro_rules! impl_unary {

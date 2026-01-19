@@ -3,6 +3,7 @@ pub mod eq;
 pub mod iter;
 pub mod len;
 pub mod match_args;
+pub mod namedtuple_field_defaults;
 pub mod namedtuple_fields;
 pub mod namedtuple_make;
 pub mod new;
