@@ -71,7 +71,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             pub fn _replace<'py>(
                 &self,
                 py: ::pyo3::prelude::Python<'py>,
-                kwargs: Option<&::pyo3::prelude::Bound<'py, ::pyo3::types::PyDict>>,
+                kwargs: ::std::option::Option<&::pyo3::prelude::Bound<'py, ::pyo3::types::PyDict>>,
             ) -> ::pyo3::prelude::PyResult<Self> {
                 match kwargs {
                     None => {
@@ -80,10 +80,10 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                         }
                     }
                     Some(kwargs) => {
-                        let mut unknown_keys = Vec::new();
+                        let mut unknown_keys = ::std::vec::Vec::new();
 
                         for key in kwargs.keys() {
-                            let str_key = key.extract::<String>()?;
+                            let str_key = key.extract::<::std::String>()?;
                             if ![ #(#names),* ].contains(&str_key) {
                                 unknown_keys.push(str_key);
                             }
@@ -93,7 +93,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                             let py_unknown_keys = unknown_keys.into_pyobject(py)?;
                             let py_unknown_keys_repr = py_unknown_keys.repr()?;
                             let names = py_unknown_keys_repr.to_str()?;
-                            let msg = format!("Got unexpected field names: {}", names);
+                            let msg = ::std::format!("Got unexpected field names: {}", names);
                             return Err(::pyo3::exceptions::PyTypeError::new_err(msg));
                         }
 

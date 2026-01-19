@@ -38,9 +38,9 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         impl #struct_name {
             #[classattr]
             pub fn _field_defaults<'py>(
-                py: pyo3::prelude::Python<'py>
-            ) -> pyo3::prelude::PyResult<pyo3::prelude::Bound<'py, pyo3::types::PyDict>> {
-                let dict = PyDict::new(py);
+                py: ::pyo3::prelude::Python<'py>
+            ) -> ::pyo3::prelude::PyResult<::pyo3::prelude::Bound<'py, ::pyo3::types::PyDict>> {
+                let dict = ::pyo3::types::PyDict::new(py);
 
                 #(#assignments)*
 

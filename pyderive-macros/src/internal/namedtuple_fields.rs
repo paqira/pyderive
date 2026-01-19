@@ -31,9 +31,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         #[automatically_derived]
         impl #struct_name {
             #[classattr]
-            pub fn _fields<'py>(
-                py: ::pyo3::prelude::Python<'py>
-            ) -> ( #(#return_type),* ) {
+            pub fn _fields() -> ( #(#return_type),* ) {
                 ( #(#names),* )
             }
         }

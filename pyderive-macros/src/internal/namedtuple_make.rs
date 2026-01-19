@@ -23,7 +23,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 let #ident = match iter.next() {
                     Some(r) => r?.extract()?,
                     None => {
-                        let msg = format!("Expected {} arguments, got {}", #field_length, #idx);
+                        let msg = ::std::format!("Expected {} arguments, got {}", #field_length, #idx);
 
                         return Err(::pyo3::exceptions::PyTypeError::new_err(msg));
                     }
@@ -46,9 +46,9 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         impl #struct_name {
             #[classmethod]
             pub fn _make(
-                _: &pyo3::prelude::Bound<'_, pyo3::types::PyType>,
-                iterable: &pyo3::prelude::Bound<'_, pyo3::prelude::PyAny>
-            ) -> pyo3::prelude::PyResult<Self> {
+                _: &::pyo3::prelude::Bound<'_, ::pyo3::types::PyType>,
+                iterable: &::pyo3::prelude::Bound<'_, ::pyo3::prelude::PyAny>
+            ) -> ::pyo3::prelude::PyResult<Self> {
                 let mut iter = iterable.try_iter()?;
 
                 #(#assignments)*
@@ -59,7 +59,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 }
 
                 if #field_length < length {
-                    let msg = format!("Expected {} arguments, got {}", #field_length, length);
+                    let msg = ::std::format!("Expected {} arguments, got {}", #field_length, length);
                     return Err(::pyo3::exceptions::PyTypeError::new_err(msg));
                 }
 
