@@ -50,7 +50,7 @@ fn test_get_all() {
 
     Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(reversed(data)) == (0, 0.0, '')")
+        py_run!(py, data, "assert tuple(reversed(data)) == ('', 0, 0.0)")
     });
 }
 
@@ -85,7 +85,7 @@ fn test_name_rename_all() {
 
     Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(reversed(data)) == (0.0, 0, '')")
+        py_run!(py, data, "assert tuple(reversed(data)) == ('', 0.0, 0, )")
     });
 }
 
