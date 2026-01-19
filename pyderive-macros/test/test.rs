@@ -9,6 +9,7 @@ mod test_namedtuple_asdict;
 mod test_namedtuple_field_defaults;
 mod test_namedtuple_fields;
 mod test_namedtuple_make;
+mod test_namedtuple_replace;
 mod test_new;
 mod test_numeric;
 mod test_ops;

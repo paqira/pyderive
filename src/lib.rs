@@ -987,6 +987,7 @@ pub use pyderive_macros::PyNamedTupleAsdict;
 pub use pyderive_macros::PyNamedTupleFieldDefaults;
 pub use pyderive_macros::PyNamedTupleFields;
 pub use pyderive_macros::PyNamedTupleMake;
+pub use pyderive_macros::PyNamedTupleReplace;
 
 /// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
 ///

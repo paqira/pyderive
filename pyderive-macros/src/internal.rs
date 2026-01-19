@@ -7,6 +7,7 @@ pub mod namedtuple_asdict;
 pub mod namedtuple_field_defaults;
 pub mod namedtuple_fields;
 pub mod namedtuple_make;
+pub mod namedtuple_replace;
 pub mod new;
 pub mod ord;
 pub mod repr;

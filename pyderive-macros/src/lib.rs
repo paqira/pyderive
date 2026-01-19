@@ -130,6 +130,14 @@ pub fn py_namedtuple_asdict(input: proc_macro::TokenStream) -> proc_macro::Token
     }
 }
 
+#[proc_macro_derive(PyNamedTupleReplace, attributes(pyderive))]
+pub fn py_namedtuple_replace(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    match internal::namedtuple_replace::implementation(input) {
+        Ok(r) => r,
+        Err(e) => e.into_compile_error().into(),
+    }
+}
 
 #[proc_macro_derive(PyNamedTupleFieldDefaults, attributes(pyderive))]
 pub fn py_namedtuple_field_defaults(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
