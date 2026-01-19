@@ -10,15 +10,28 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let fields = data.iter().filter(|d| d.get).collect::<Vec<_>>();
 
-    let defs = fields
+    let field_length = fields.len();
+
+    let assignments = fields
         .iter()
         .filter(|d| d.get)
-        .map(|d| {
+        .enumerate()
+        .map(|(idx, d)| {
             let ident = &d.field.ident;
 
-            quote! { let #ident = iter.call_method0("__next__")?.extract()?; }
+            quote! {
+                let #ident = match iter.next() {
+                    Some(r) => r?.extract()?,
+                    None => {
+                        let msg = format!("Expected {} arguments, got {}", #field_length, #idx);
+
+                        return Err(::pyo3::exceptions::PyTypeError::new_err(msg));
+                    }
+                };
+            }
         })
         .collect::<Vec<_>>();
+
     let args = fields
         .iter()
         .map(|d| {
@@ -36,9 +49,19 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                 _: &pyo3::prelude::Bound<'_, pyo3::types::PyType>,
                 iterable: &pyo3::prelude::Bound<'_, pyo3::prelude::PyAny>
             ) -> pyo3::prelude::PyResult<Self> {
-                let iter: pyo3::prelude::Bound<'_, pyo3::prelude::PyAny> = iterable.call_method0("__iter__")?.extract()?;
+                let mut iter = iterable.try_iter()?;
 
-                #(#defs)*
+                #(#assignments)*
+
+                let mut length = #field_length;
+                while iter.next().is_some() {
+                    length += 1;
+                }
+
+                if #field_length < length {
+                    let msg = format!("Expected {} arguments, got {}", #field_length, length);
+                    return Err(::pyo3::exceptions::PyTypeError::new_err(msg));
+                }
 
                 Ok(Self{ #(#args),* })
             }
