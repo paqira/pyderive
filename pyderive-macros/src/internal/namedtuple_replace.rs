@@ -83,7 +83,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                         let mut unknown_keys = ::std::vec::Vec::new();
 
                         for key in kwargs.keys() {
-                            let str_key = key.extract::<::std::String>()?;
+                            let str_key = key.extract::<::std::string::String>()?;
                             if ![ #(#names),* ].contains(&str_key) {
                                 unknown_keys.push(str_key);
                             }
