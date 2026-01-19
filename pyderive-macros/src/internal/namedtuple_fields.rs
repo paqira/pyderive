@@ -10,7 +10,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
     let fields = data.iter().filter(|d| d.get).collect::<Vec<_>>();
 
-    let args = fields
+    let names = fields
         .iter()
         .map(|d| {
             let ident = &d.field.ident.clone().unwrap().to_string();
@@ -19,15 +19,25 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         })
         .collect::<Vec<_>>();
 
+    let return_type = fields.iter().map(|_| {
+        quote!{ &'static str }
+    }).collect::<Vec<_>>();
+
+    // let tuple = if fields.len()==0{
+    //     quote! { ::pyo3::types::PyTuple::new(py, Vec::new<bool>()) }
+    // } else {
+    //     quote! { ::pyo3::types::PyTuple::new(py, [ #(#args),* ]) }
+    // };
+
     let expanded = quote! {
         #[pymethods]
         #[automatically_derived]
         impl #struct_name {
             #[classattr]
             pub fn _fields<'py>(
-                py: pyo3::prelude::Python<'py>
-            ) -> pyo3::prelude::PyResult<pyo3::prelude::Bound<'py, pyo3::types::PyTuple>> {
-                pyo3::types::PyTuple::new(py, [ #(#args),* ])
+                py: ::pyo3::prelude::Python<'py>
+            ) -> ( #(#return_type),* ) {
+                ( #(#names),* )
             }
         }
     };
