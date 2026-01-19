@@ -25,14 +25,12 @@ fn test() {
     });
 }
 
-
 #[test]
 fn test_empty() {
     #[derive(PyNamedTupleFields)]
     #[pyclass(get_all)]
     #[allow(dead_code)]
-    struct PyClass {
-    }
+    struct PyClass {}
 
     Python::attach(|py| {
         let py_class = py.get_type::<PyClass>();

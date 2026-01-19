@@ -19,9 +19,12 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         })
         .collect::<Vec<_>>();
 
-    let return_type = fields.iter().map(|_| {
-        quote!{ &'static str }
-    }).collect::<Vec<_>>();
+    let return_type = fields
+        .iter()
+        .map(|_| {
+            quote! { &'static str }
+        })
+        .collect::<Vec<_>>();
 
     // let tuple = if fields.len()==0{
     //     quote! { ::pyo3::types::PyTuple::new(py, Vec::new<bool>()) }
