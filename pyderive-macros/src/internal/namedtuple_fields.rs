@@ -13,9 +13,9 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let names = fields
         .iter()
         .map(|d| {
-            let ident = &d.field.ident.clone().unwrap().to_string();
+            let pyname = &d.pyname;
 
-            quote! { #ident }
+            quote! { #pyname }
         })
         .collect::<Vec<_>>();
 

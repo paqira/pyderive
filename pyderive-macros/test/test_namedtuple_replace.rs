@@ -150,3 +150,81 @@ else:
         );
     });
 }
+
+#[test]
+fn test_rename() {
+    #[derive(PyNamedTupleReplace)]
+    #[pyclass(get_all, rename_all = "camelCase")]
+    #[allow(dead_code)]
+    struct PyClass {
+        #[pyo3(name = "renamed_field")]
+        #[pyderive(default = 0)]
+        a: i64,
+        #[pyderive(default="a".to_string())]
+        aaa_bbb_ccc: String,
+    }
+
+    #[pymethods]
+    impl PyClass {
+        #[new]
+        pub fn __new__(a: i64, aaa_bbb_ccc: String) -> Self {
+            Self { a, aaa_bbb_ccc }
+        }
+    }
+
+    Python::attach(|py| {
+        let py_class = py.get_type::<PyClass>();
+        assert_eq!("PyClass", py_class.name().unwrap().to_string());
+
+        pyo3::py_run!(
+            py,
+            py_class,
+            "a = py_class(0, 'a')
+b = a._replace(renamed_field=1, aaaBbbCcc='b')
+assert b.renamed_field == 1
+assert b.aaaBbbCcc == 'b'
+"
+        );
+    });
+}
+
+#[test]
+fn test_rename_old_name() {
+    #[derive(PyNamedTupleReplace)]
+    #[pyclass(get_all, rename_all = "camelCase")]
+    #[allow(dead_code)]
+    struct PyClass {
+        #[pyo3(name = "renamed_field")]
+        #[pyderive(default = 0)]
+        a: i64,
+        #[pyderive(default="a".to_string())]
+        aaa_bbb_ccc: String,
+    }
+
+    #[pymethods]
+    impl PyClass {
+        #[new]
+        pub fn __new__(a: i64, aaa_bbb_ccc: String) -> Self {
+            Self { a, aaa_bbb_ccc }
+        }
+    }
+
+    Python::attach(|py| {
+        let py_class = py.get_type::<PyClass>();
+        assert_eq!("PyClass", py_class.name().unwrap().to_string());
+
+        pyo3::py_run!(
+            py,
+            py_class,
+            "a = py_class(0, 'a')
+
+try:
+    a._replace(a=1, aaa_bbb_ccc='b')
+except TypeError as e:
+    assert str(e) == \"Got unexpected field names: ['a', 'aaa_bbb_ccc']\"
+else:
+    raise AssertionError
+"
+        );
+    });
+}

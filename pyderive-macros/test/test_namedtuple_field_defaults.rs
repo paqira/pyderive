@@ -102,3 +102,29 @@ fn test_new_false() {
         );
     });
 }
+
+#[test]
+fn test_rename() {
+    #[derive(PyNamedTupleFieldDefaults)]
+    #[pyclass(get_all, rename_all = "camelCase")]
+    #[allow(dead_code)]
+    struct PyClass {
+        #[pyo3(name = "renamed_field")]
+        #[pyderive(default = 0)]
+        a: i64,
+        #[pyderive(default="a".to_string())]
+        aaa_bbb_ccc: String,
+    }
+
+    Python::attach(|py| {
+        let py_class = py.get_type::<PyClass>();
+        assert_eq!("PyClass", py_class.name().unwrap().to_string());
+
+        pyo3::py_run!(
+            py,
+            py_class,
+            "assert py_class._field_defaults == {'renamed_field':0, 'aaaBbbCcc': 'a'}
+"
+        );
+    });
+}

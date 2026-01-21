@@ -19,15 +19,16 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             (false, Some(_)) => true,
         })
         .map(|d| {
-            let ident = &d.field.ident.clone().unwrap().to_string();
+            let pyname = &d.pyname.to_string();
+
             match (&d.new(), &d.default) {
                 (true, None) => unreachable!(),
-                (true, Some(default)) => quote! { dict.set_item(#ident, #default)?; },
+                (true, Some(default)) => quote! { dict.set_item(#pyname, #default)?; },
                 (false, None) => {
                     let ty = d.field.ty.to_owned();
-                    quote! { dict.set_item(#ident, #ty::default())?; }
+                    quote! { dict.set_item(#pyname, #ty::default())?; }
                 }
-                (false, Some(default)) => quote! { dict.set_item(#ident, #default)?; },
+                (false, Some(default)) => quote! { dict.set_item(#pyname, #default)?; },
             }
         })
         .collect::<Vec<_>>();

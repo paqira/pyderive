@@ -26,8 +26,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let names = fields
         .iter()
         .map(|d| {
-            let name = d.field.ident.clone().unwrap().to_string();
-            quote! { #name.to_string() }
+            let pyname = &d.pyname;
+            quote! { #pyname.to_string() }
         })
         .collect::<Vec<_>>();
 
@@ -35,18 +35,18 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .iter()
         .map(|d| {
             let ident = &d.field.ident.clone().unwrap();
-            let ident_str = ident.to_string();
+            let pyident = &d.pyident.to_string();
 
             if is_py(&d.field.ty) {
                 quote! {
-                   let #ident =  match ::pyo3::prelude::PyAnyMethods::get_item(kwargs_any, #ident_str) {
+                   let #ident =  match ::pyo3::prelude::PyAnyMethods::get_item(kwargs_any, #pyident) {
                        Ok(r) => r.extract()?,
                        Err(_) => self.#ident.clone_ref(py)
                    };
                 }
             } else {
                 quote! {
-                   let #ident =  match ::pyo3::prelude::PyAnyMethods::get_item(kwargs_any, #ident_str) {
+                   let #ident =  match ::pyo3::prelude::PyAnyMethods::get_item(kwargs_any, #pyident) {
                        Ok(r) => r.extract()?,
                        Err(_) => self.#ident.clone()
                    };

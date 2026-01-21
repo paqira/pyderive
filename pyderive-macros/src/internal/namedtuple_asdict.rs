@@ -14,12 +14,12 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .iter()
         .map(|d| {
             let ident = &d.field.ident.clone().unwrap();
-            let ident_str = ident.to_string();
+            let pyname = &d.pyname.to_string();
 
             if is_py(&d.field.ty) {
-                quote! { dict.set_item(#ident_str, self.#ident.clone_ref(py))?; }
+                quote! { dict.set_item(#pyname, self.#ident.clone_ref(py))?; }
             } else {
-                quote! { dict.set_item(#ident_str, (&self.#ident).into_pyobject(py)?)?; }
+                quote! { dict.set_item(#pyname, (&self.#ident).into_pyobject(py)?)?; }
             }
         })
         .collect::<Vec<_>>();
