@@ -142,8 +142,8 @@ fn test_more() {
             "instance = py_class(1, 'str', (1, 'a'))
 try:
     actual = instance._replace(b='x', a=0, c=tuple(), x=None, y=None)
-except PyTypeError as e:
-    assert str(e) == \"Got unexpected field names: ['x', 'y']\"
+except TypeError as e:
+    assert str(e) == \"Got unexpected field names: ['x', 'y']\", str(e)
 else:
     assert false, 'no error found'
 "
