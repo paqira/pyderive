@@ -80,7 +80,7 @@ fn test_empty() {
 except TypeError as e:
     assert str(e) == 'Expected 3 arguments, got 0'
 else:
-    assert fasle, 'no error found'
+    raise AssertionError('no error found')
 "
         );
     });
@@ -109,7 +109,7 @@ fn test_less() {
 except TypeError as e:
     assert str(e) == 'Expected 3 arguments, got 2'
 else:
-    assert fasle, 'no error found'
+    raise AssertionError('no error found')
 "
         );
     });
@@ -138,7 +138,7 @@ fn test_more() {
 except TypeError as e:
     assert str(e) == 'Expected 3 arguments, got 4'
 else:
-    assert fasle, 'no error found'
+    raise AssertionError('no error found')
 "
         );
     });

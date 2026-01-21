@@ -145,7 +145,7 @@ try:
 except TypeError as e:
     assert str(e) == \"Got unexpected field names: ['x', 'y']\", str(e)
 else:
-    assert false, 'no error found'
+    raise AssertionError('no error found')
 "
         );
     });
