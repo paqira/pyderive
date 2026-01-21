@@ -61,7 +61,7 @@ fn test_partial() {
         a: i64,
         #[pyderive(default = "a")]
         b: String,
-        #[pyderive(default = "(1, 2, 3)")]
+        #[pyderive(default = (1, 2, 3))]
         c: Py<PyTuple>,
     }
 
