@@ -134,7 +134,7 @@ fn test_more() {
             py,
             py_class,
             "try:
-    py_class._make([1, 'a', (1, 2), a])
+    py_class._make([1, 'a', (1, 2), 'a'])
 except TypeError as e:
     assert str(e) == 'Expected 3 arguments, got 4'
 else:
