@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.9.1
+
+- remove `PyObject` from `PyIter` and `PyReversed` impl
+
 ## v0.9.0
 
 - Remove `ToPyObject`
