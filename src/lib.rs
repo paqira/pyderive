@@ -94,10 +94,10 @@
 //! called by builtin functions (`__int__()` etc.).
 //!
 //! ## `PyNamedTuple` family
-//! 
+//!
 //! The `experimental-namedtuple` feature provides the experimental derive macors
 //! implement methods that the `namedtuple()` generates
-//! 
+//!
 //! | Derive Macro                  | Derives                       |
 //! | ----------------------------- | ----------------------------- |
 //! | [`PyNamedTupleAsdict`]        | `_asdit()` instance method    |
