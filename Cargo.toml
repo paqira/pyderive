@@ -34,5 +34,5 @@ num-complex = ["pyo3/num-complex", "pyderive-macros/num-complex"]
 experimental-namedtuple = []
 
 [package.metadata.docs.rs]
-features = ["num-complex"]
+features = ["num-complex", "experimental-namedtuple"]
 rustdoc-args = ["--cfg", "docsrs"]
