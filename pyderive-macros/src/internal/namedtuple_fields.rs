@@ -22,7 +22,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
     let return_type = fields
         .iter()
         .map(|_| {
-            quote! { &'static str }
+            quote! { &'static ::std::primitive::str }
         })
         .collect::<Vec<_>>();
 
