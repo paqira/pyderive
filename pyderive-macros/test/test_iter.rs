@@ -10,6 +10,7 @@ fn test_no_get_set() {
     struct PyClass {
         fd_name_a: i64,
         fd_name_b: f64,
+        fd_name_c: String,
     }
 
     Python::attach(|py| {
@@ -44,11 +45,12 @@ fn test_get_all() {
     struct PyClass {
         fd_name_a: i64,
         fd_name_b: f64,
+        fd_name_c: String,
     }
 
     Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == (0, 0.0)")
+        py_run!(py, data, "assert tuple(data) == (0, 0.0, '')")
     });
 }
 
@@ -78,11 +80,12 @@ fn test_name_rename_all() {
         #[pyo3(name = "new_name")]
         fd_name_a: i64,
         fd_name_b: f64,
+        fd_name_c: String,
     }
 
     Python::attach(|py| {
         let data = Py::new(py, PyClass::default()).unwrap();
-        py_run!(py, data, "assert tuple(data) == (0, 0.0)")
+        py_run!(py, data, "assert tuple(data) == (0, 0.0, '')")
     });
 }
 
