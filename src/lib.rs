@@ -93,6 +93,24 @@
 //! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
 //! called by builtin functions (`__int__()` etc.).
 //!
+//! ## `PyNamedTuple` family
+//! 
+//! The `experimental-namedtuple` feature provides the experimental derive macors
+//! implement methods that the `namedtuple()` generates
+//! 
+//! | Derive Macro                  | Derives                       |
+//! | ----------------------------- | ----------------------------- |
+//! | [`PyNamedTupleAsdict`]        | `_asdit()` instance method    |
+//! | [`PyNamedTupleFieldDefaults`] | `_field_defaults` class attr. |
+//! | [`PyNamedTupleFields`]        | `_fields` class attr.         |
+//! | [`PyNamedTupleMake`]          | `_make()` class method        |
+//! | [`PyNamedTupleReplace`]       | `_replace()` instance method  |
+//!
+//! It is designed to mimic `namedtuple()`.
+//! Thus, It may case unexpected behavior when you use the macros with non-`namedtuple()`-lish structs.
+//! For example, all fields should be in the constructor, the struct should be `get-all`,
+//! and once a field is decorated by `#[pyderive(default=...)]`, all subsequent fields should be too.
+//!
 //! [pyo3_IntoPy]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPy.html
 //! [pyo3_pyclass]: https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 //!
@@ -143,8 +161,8 @@
 //!   the field is excluded from the arguments of the `__new__()` method.
 //!   Notes, `new=true` has no effect.
 //!
-//!   The derive macro [`PyDataclassFields`] reads this attribute also,
-//!   see [`PyDataclassFields`] for detail.
+//!   The derive macro [`PyDataclassFields`] and [`PyNamedTupleFieldDefaults`] read this attribute also,
+//!   see [`PyDataclassFields`] and [`PyNamedTupleFieldDefaults`] for detail.
 //!
 //! - `#[pyderive(default=<expr>)]`
 //!
@@ -219,6 +237,9 @@
 //!             self.field = <expr>
 //!             return self
 //!        ```
+//!
+//!   The derive macro [`PyDataclassFields`] and [`PyNamedTupleFieldDefaults`] read this attribute also,
+//!   see [`PyDataclassFields`] and [`PyNamedTupleFieldDefaults`] for detail.
 //!
 //! - `#[pyderive(default_factory=true)]`
 //!
@@ -983,18 +1004,218 @@ pub use pyderive_macros::PyRichCmp;
 /// ```
 pub use pyderive_macros::PyStr;
 
+/// Derive macro generating a [`_asdict()`][_asdict] fn/Python method.
+///
+/// It assumes all fields are `get` (e.g. `get_all`).
+///
+/// - It should place `#[derive(PyNamedTupleAsdict)]` before `#[pyclass]`.
+/// - It requires [`IntoPyObject`][pyo3_IntoPyObject] trait for fields.
+///
+/// [pyo3_IntoPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPyObject.html
+/// [_asdict]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._asdict
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyNamedTupleAsdict)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+///     option: Option<String>,
+/// }
+///
+/// Python::attach(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///         option: None,
+///     })?;
+///
+///     py_run!(py, a, r#"assert a._asdict() == {'string': 's', 'integer': 1, 'float': 1.0, 'tuple': ('s', 1, 1.0), 'option': None}"#);
+///
+///     Ok(())
+/// });
+/// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
 #[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleAsdict;
+
+/// Derive macro generating a [`_field_defaults`][_field_defaults] fn/Python class attribute.
+///
+/// It assumes all fields are `get` (e.g. `get_all`).
+///
+/// It contains `get` fields with default values, and:
+///
+/// 1. `#[pyderive(defualt=xxx)]` field with value `xxx`
+/// 2. `#[pyderive(new=false)]` field with value `Default::default()`
+/// 3. `#[pyderive(new=false, defualt=xxx)]` field with value `xxx`
+///
+/// - It should place `#[derive(PyNamedTupleFieldDefaults)]` before `#[pyclass]`.
+///
+/// [_field_defaults]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._field_defaults
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyNamedTupleFieldDefaults)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     a: i64,
+///     #[pyderive(default=1)]
+///     b: i64,
+///     #[pyderive(new=false)]
+///     c: i64,
+///     #[pyderive(new=false, default=2)]
+///     d: i64,
+/// }
+///
+/// Python::attach(|py| -> PyResult<()> {
+///     let Class = py.get_type::<PyClass>();
+///
+///     py_run!(py, Class, r#"assert Class._field_defaults == {'b': 1, 'c': 0, 'd': 2}"#);
+///
+///     Ok(())
+/// });
+/// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
 #[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleFieldDefaults;
+
+/// Derive macro generating a [`_fields`][_fields] fn/Python class attribute.
+///
+/// It assumes all fields are `get` (e.g. `get_all`).
+///
+/// - It should place `#[derive(PyNamedTupleFields)]` before `#[pyclass]`.
+///
+/// [_fields]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._fields
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyNamedTupleFields)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+/// }
+///
+/// Python::attach(|py| -> PyResult<()> {
+///     let Class = py.get_type::<PyClass>();
+///
+///     py_run!(py, Class, r#"assert Class._fields == ('string', 'integer', 'float', 'tuple')"#);
+///
+///     Ok(())
+/// });
+/// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
 #[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleFields;
+
+/// Derive macro generating a [`_make`][_make] fn/Python class method.
+///
+/// It constructs `Self` from the argument `iterable`, doesn't use any other value.
+///
+/// - It should place `#[derive(PyNamedTupleMake)]` before `#[pyclass]`.
+///
+/// [_make]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._make
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyNamedTupleMake)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+/// }
+///
+/// Python::attach(|py| -> PyResult<()> {
+///     let Class = py.get_type::<PyClass>();
+///
+///     py_run!(py, Class, r#"
+/// a =  Class._make(['a', 1, 2.0, ('a', 1, 2.0)])
+///
+/// assert a.string == 'a'
+/// assert a.integer == 1
+/// assert a.float == 2.0
+/// assert a.tuple == ('a', 1, 2.0)
+/// "#);
+///
+///     Ok(())
+/// });
+/// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
 #[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleMake;
+
+/// Derive macro generating a [`_replace`][_replace] fn/Python method.
+///
+/// It assumes all fields are `get` (e.g. `get_all`).
+///
+/// - It should place `#[derive(PyNamedTupleMake)]` before `#[pyclass]`.
+/// - It requires [`Clone`] for non-`Py` field
+///
+/// [_replace]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._replace
+///
+/// # Example
+///
+/// ```
+/// use pyo3::{prelude::*, py_run};
+/// use pyderive::*;
+///
+/// // Place before `#[pyclass]`
+/// #[derive(PyNamedTupleReplace)]
+/// #[pyclass(get_all)]
+/// struct PyClass {
+///     string: String,
+///     integer: i64,
+///     float: f64,
+///     tuple: (String, i64, f64),
+/// }
+///
+/// Python::attach(|py| -> PyResult<()> {
+///     let a = Py::new(py, PyClass {
+///         string: "s".to_string(),
+///         integer: 1,
+///         float: 1.0,
+///         tuple: ("s".to_string(), 1, 1.0),
+///     })?;
+///
+///     py_run!(py, a, r#"b = a._replace(integer=2, tuple=("", 0, 0.0))
+/// assert b.string == "s"
+/// assert b.integer == 2
+/// assert b.float == 1.0
+/// assert b.tuple == ("", 0, 0.0)
+/// "#);
+///
+///     Ok(())
+/// });
+/// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
 #[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleReplace;
