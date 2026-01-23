@@ -95,7 +95,7 @@
 //!
 //! ## `PyNamedTuple` family
 //!
-//! The `experimental-namedtuple` feature provides the experimental derive macors
+//! The `experimental-namedtuple` feature experimentally provides the derive macors
 //! implement methods that the `namedtuple()` generates
 //!
 //! | Derive Macro                  | Derives                       |
