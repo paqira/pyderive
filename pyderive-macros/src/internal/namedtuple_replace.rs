@@ -39,14 +39,14 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
 
             if is_py(&d.field.ty) {
                 quote! {
-                   let #ident =  match ::pyo3::prelude::PyAnyMethods::get_item(kwargs_any, #pyident) {
+                   let #ident =  match ::pyo3::prelude::PyAnyMethods::get_item(kwargs_any, ::pyo3::intern!(py, #pyident)) {
                        Ok(r) => r.extract()?,
                        Err(_) => self.#ident.clone_ref(py)
                    };
                 }
             } else {
                 quote! {
-                   let #ident =  match ::pyo3::prelude::PyAnyMethods::get_item(kwargs_any, #pyident) {
+                   let #ident =  match ::pyo3::prelude::PyAnyMethods::get_item(kwargs_any, ::pyo3::intern!(py, #pyident)) {
                        Ok(r) => r.extract()?,
                        Err(_) => self.#ident.clone()
                    };

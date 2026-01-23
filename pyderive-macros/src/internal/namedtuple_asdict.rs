@@ -17,9 +17,9 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
             let pyname = &d.pyname.to_string();
 
             if is_py(&d.field.ty) {
-                quote! { dict.set_item(#pyname, self.#ident.clone_ref(py))?; }
+                quote! { dict.set_item(::pyo3::intern!(py, #pyname), self.#ident.clone_ref(py))?; }
             } else {
-                quote! { dict.set_item(#pyname, (&self.#ident).into_pyobject(py)?)?; }
+                quote! { dict.set_item(::pyo3::intern!(py, #pyname), (&self.#ident).into_pyobject(py)?)?; }
             }
         })
         .collect::<Vec<_>>();
