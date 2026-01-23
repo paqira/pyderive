@@ -27,7 +27,7 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
         .iter()
         .map(|d| {
             let pyname = &d.pyname;
-            quote! { #pyname.to_string() }
+            quote! { #pyname }
         })
         .collect::<Vec<_>>();
 
@@ -83,8 +83,8 @@ pub fn implementation(input: DeriveInput) -> syn::Result<TokenStream> {
                         let mut unknown_keys = ::std::vec::Vec::new();
 
                         for key in kwargs.keys() {
-                            let str_key = key.extract::<::std::string::String>()?;
-                            if ![ #(#names),* ].contains(&str_key) {
+                            let str_key = key.cast_into()?;
+                            if #( str_key != #names )&& * {
                                 unknown_keys.push(str_key);
                             }
                         }
