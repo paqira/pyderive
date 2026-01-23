@@ -31,6 +31,7 @@ num-complex = { version = ">= 0.2" } # for doctest
 
 [features]
 num-complex = ["pyo3/num-complex", "pyderive-macros/num-complex"]
+experimental-namedtuple = []
 
 [package.metadata.docs.rs]
 features = ["num-complex"]

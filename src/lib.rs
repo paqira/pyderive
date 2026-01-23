@@ -983,10 +983,20 @@ pub use pyderive_macros::PyRichCmp;
 /// ```
 pub use pyderive_macros::PyStr;
 
+#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
+#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleAsdict;
+#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
+#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleFieldDefaults;
+#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
+#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleFields;
+#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
+#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleMake;
+#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
+#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleReplace;
 
 /// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
