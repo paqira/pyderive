@@ -1045,8 +1045,6 @@ pub use pyderive_macros::PyStr;
 ///     Ok(())
 /// });
 /// ```
-#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
-#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleAsdict;
 
 /// Derive macro generating a [`_field_defaults`][_field_defaults] fn/Python class attribute.
@@ -1090,8 +1088,6 @@ pub use pyderive_macros::PyNamedTupleAsdict;
 ///     Ok(())
 /// });
 /// ```
-#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
-#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleFieldDefaults;
 
 /// Derive macro generating a [`_fields`][_fields] fn/Python class attribute.
@@ -1126,8 +1122,6 @@ pub use pyderive_macros::PyNamedTupleFieldDefaults;
 ///     Ok(())
 /// });
 /// ```
-#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
-#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleFields;
 
 /// Derive macro generating a [`_make`][_make] fn/Python class method.
@@ -1169,8 +1163,6 @@ pub use pyderive_macros::PyNamedTupleFields;
 ///     Ok(())
 /// });
 /// ```
-#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
-#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleMake;
 
 /// Derive macro generating a [`_replace`][_replace] fn/Python method.
@@ -1216,8 +1208,6 @@ pub use pyderive_macros::PyNamedTupleMake;
 ///     Ok(())
 /// });
 /// ```
-#[cfg_attr(docsrs, doc(cfg(feature = "experimental-namedtuple")))]
-#[cfg(feature = "experimental-namedtuple")]
 pub use pyderive_macros::PyNamedTupleReplace;
 
 /// Derive macro generating an impl of bitwise op methods/fns base on [std::ops] traits.
