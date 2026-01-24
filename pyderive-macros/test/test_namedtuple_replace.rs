@@ -30,6 +30,8 @@ fn test_empty() {
             "instance = py_class(1, 'str', (1, 'a'))
 actual = instance._replace()
 
+assert instance is not actual
+
 assert actual.a == 1
 assert actual.b == 'str'
 assert actual.c == (1, 'a')
@@ -68,6 +70,8 @@ fn test_less() {
             "instance = py_class(1, 'str', (1, 'a'))
 actual = instance._replace(b='x')
 
+assert instance is not actual
+
 assert actual.a == 1
 assert actual.b == 'x'
 assert actual.c == (1, 'a')
@@ -104,6 +108,8 @@ fn test_match() {
             py_class,
             "instance = py_class(1, 'str', (1, 'a'))
 actual = instance._replace(b='x', a=0, c=tuple())
+
+assert instance is not actual
 
 assert actual.a == 0
 assert actual.b == 'x'
