@@ -52,7 +52,7 @@ assert m == MyClass("a", 1, None)
 This provides deriving following special methods and attributes;
 
 | Derive Macro        | Python Method/Attribute                                |
-|---------------------|--------------------------------------------------------|
+| ------------------- | ------------------------------------------------------ |
 | `PyNew`             | `__new__()`                                            |
 | `PyMatchArgs`       | `__match_args__`                                       |
 | `PyRepr`            | `__repr__()`                                           |
@@ -77,6 +77,16 @@ derive macros that implement individual method that enumerating numeric type (`_
 called by builtin functions (`__int__()` etc.).
 
 It requires to enable `multiple-pymethods` feature of PyO3 because this may produce multiple `#[pymethods]`.
+
+It experimentally provides the derive macors implement methods that the `namedtuple()` generates
+
+| Derive Macro                | Python Method/Attribute |
+| --------------------------- | ----------------------- |
+| `PyNamedTupleAsdict`        | `_asdict()`             |
+| `PyNamedTupleFieldDefaults` | `_field_defaults`       |
+| `PyNamedTupleFields`        | `_fields`               |
+| `PyNamedTupleMake`          | `_make()`               |
+| `PyNamedTupleReplace`       | `_replace()`            |
 
 ## Feature
 

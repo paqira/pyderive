@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.9.x
+
+- add `PyNamedTupleAsdict`, `PyNamedTupleFieldDefaults`, `PyNamedTupleFields`, `PyNamedTupleMake` and `PyNamedTupleReplace` (experimental)
+
 ## v0.9.1
 
 - remove `PyObject` from `PyIter` and `PyReversed` impl
