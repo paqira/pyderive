@@ -78,17 +78,15 @@ called by builtin functions (`__int__()` etc.).
 
 It requires to enable `multiple-pymethods` feature of PyO3 because this may produce multiple `#[pymethods]`.
 
-## Cargo features
+It experimentally provides the derive macors implement methods that the `namedtuple()` generates
 
-- `experimental-namedtuple` experimentally provides the derive macors implement methods that the `namedtuple()` generates
-
-    | Derive Macro                | Python Method/Attribute |
-    | --------------------------- | ----------------------- |
-    | `PyNamedTupleAsdict`        | `_asdict()`             |
-    | `PyNamedTupleFieldDefaults` | `_field_defaults`       |
-    | `PyNamedTupleFields`        | `_fields`               |
-    | `PyNamedTupleMake`          | `_make()`               |
-    | `PyNamedTupleReplace`       | `_replace()`            |
+| Derive Macro                | Python Method/Attribute |
+| --------------------------- | ----------------------- |
+| `PyNamedTupleAsdict`        | `_asdict()`             |
+| `PyNamedTupleFieldDefaults` | `_field_defaults`       |
+| `PyNamedTupleFields`        | `_fields`               |
+| `PyNamedTupleMake`          | `_make()`               |
+| `PyNamedTupleReplace`       | `_replace()`            |
 
 ## Feature
 

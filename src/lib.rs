@@ -93,9 +93,9 @@
 //! derive macros that implement individual method that enumerating numeric type (`__add__()` etc.) and
 //! called by builtin functions (`__int__()` etc.).
 //!
-//! ## `PyNamedTuple` family
+//! # Notes on `PyNamedTuple` family
 //!
-//! The `experimental-namedtuple` feature experimentally provides the derive macors
+//! It experimentally provides the derive macors
 //! implement methods that the `namedtuple()` generates
 //!
 //! | Derive Macro                  | Derives                       |
@@ -1014,6 +1014,10 @@ pub use pyderive_macros::PyStr;
 /// [pyo3_IntoPyObject]: https://docs.rs/pyo3/latest/pyo3/conversion/trait.IntoPyObject.html
 /// [_asdict]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._asdict
 ///
+/// # Implementation Note
+///
+/// This is experimental. Behavior may change in future releases.
+///
 /// # Example
 ///
 /// ```
@@ -1061,6 +1065,10 @@ pub use pyderive_macros::PyNamedTupleAsdict;
 ///
 /// [_field_defaults]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._field_defaults
 ///
+/// # Implementation Note
+///
+/// This is experimental. Behavior may change in future releases.
+///
 /// # Example
 ///
 /// ```
@@ -1098,6 +1106,10 @@ pub use pyderive_macros::PyNamedTupleFieldDefaults;
 ///
 /// [_fields]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._fields
 ///
+/// # Implementation Note
+///
+/// This is experimental. Behavior may change in future releases.
+///
 /// # Example
 ///
 /// ```
@@ -1131,6 +1143,10 @@ pub use pyderive_macros::PyNamedTupleFields;
 /// - It should place `#[derive(PyNamedTupleMake)]` before `#[pyclass]`.
 ///
 /// [_make]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._make
+///
+/// # Implementation Note
+///
+/// This is experimental. Behavior may change in future releases.
 ///
 /// # Example
 ///
@@ -1173,6 +1189,10 @@ pub use pyderive_macros::PyNamedTupleMake;
 /// - It requires [`Clone`] for non-`Py` field
 ///
 /// [_replace]: https://docs.python.org/3/library/collections.html#collections.somenamedtuple._replace
+///
+/// # Implementation Note
+///
+/// This is experimental. Behavior may change in future releases.
 ///
 /// # Example
 ///
