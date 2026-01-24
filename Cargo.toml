@@ -1,6 +1,6 @@
 [package]
 name = "pyderive"
-version = "0.9.1"
+version = "0.9.2"
 edition = "2021"
 rust-version = "1.74"
 authors = ["Kentaro Tatsumi <paqira.2019@gmail.com>"]
@@ -20,7 +20,7 @@ members = [
 ]
 
 [dependencies]
-pyderive-macros = { path = "pyderive-macros", version = "= 0.9.1" }
+pyderive-macros = { path = "pyderive-macros", version = "= 0.9.2" }
 
 [dev-dependencies]
 pyo3 = { version = "0.27", features = [

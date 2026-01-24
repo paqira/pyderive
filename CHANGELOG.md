@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.9.x
+## v0.9.2
 
 - add `PyNamedTupleAsdict`, `PyNamedTupleFieldDefaults`, `PyNamedTupleFields`, `PyNamedTupleMake` and `PyNamedTupleReplace` (experimental)
 
